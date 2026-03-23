@@ -1,0 +1,44 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace EcommerceSecondHand.Models
+{
+    public class EditProfileViewModel
+    {
+        [Required(ErrorMessage = "Tên là b?t bu?c")]
+        [Display(Name = "Tên")]
+        public string FirstName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "H? là b?t bu?c")]
+        [Display(Name = "H?")]
+        public string LastName { get; set; } = string.Empty;
+
+        [EmailAddress(ErrorMessage = "Email không h?p l?")]
+        [Display(Name = "Email")]
+        public string? Email { get; set; }
+
+        [Phone(ErrorMessage = "S? ?i?n tho?i không h?p l?")]
+        [Display(Name = "S? ?i?n tho?i")]
+        public string? PhoneNumber { get; set; }
+
+        [Display(Name = "??a ch?")]
+        public string? Address { get; set; }
+
+        [Display(Name = "Thành ph?")]
+        public string? City { get; set; }
+
+        [Display(Name = "Qu?c gia")]
+        public string? Country { get; set; }
+
+        [Display(Name = "Mã b?u ?i?n")]
+        public string? PostalCode { get; set; }
+
+        [Display(Name = "Gi?i thi?u")]
+        public string? Bio { get; set; }
+
+        [Display(Name = "?nh ??i di?n hi?n t?i")]
+        public string? ProfilePicture { get; set; }
+
+        [Display(Name = "T?i lên ?nh ??i di?n m?i")]
+        public IFormFile? ProfilePictureFile { get; set; }
+    }
+}

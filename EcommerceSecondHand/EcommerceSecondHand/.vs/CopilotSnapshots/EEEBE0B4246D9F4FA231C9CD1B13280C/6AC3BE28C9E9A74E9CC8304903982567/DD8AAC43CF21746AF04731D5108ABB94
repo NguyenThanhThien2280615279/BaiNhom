@@ -1,0 +1,339 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Models.ViewModels;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Authorize(Roles = "Vendor")]
+    public class VendorController : Controller
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IProductRepository _productRepository;
+        private readonly IOrderRepository _orderRepository;
+        private readonly IReviewRepository _reviewRepository;
+        private readonly IPaymentTransactionRepository _transactionRepository;
+        private readonly IUserStatisticsRepository _userStatisticsRepository;
+
+        public VendorController(
+            UserManager<ApplicationUser> userManager,
+            IProductRepository productRepository,
+            IOrderRepository orderRepository,
+            IReviewRepository reviewRepository,
+            IPaymentTransactionRepository transactionRepository,
+            IUserStatisticsRepository userStatisticsRepository)
+        {
+            _userManager = userManager;
+            _productRepository = productRepository;
+            _orderRepository = orderRepository;
+            _reviewRepository = reviewRepository;
+            _transactionRepository = transactionRepository;
+            _userStatisticsRepository = userStatisticsRepository;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var statistics = await _userStatisticsRepository.GetByUserIdAsync(user.Id);
+            
+            // L?y danh sách s?n ph?m g?n ?ày c?a ng??i bán
+            var recentProducts = await _productRepository.GetRecentProductsBySellerAsync(user.Id, 5);
+            
+            // L?y danh sách ??n hàng g?n ?ày c?a ng??i bán
+            var recentOrders = await _orderRepository.GetRecentOrdersByVendorAsync(user.Id, 5);
+            
+            // L?y danh sách ?ánh giá g?n ?ày cho s?n ph?m c?a ng??i bán
+            var recentReviews = await _reviewRepository.GetRecentReviewsBySellerAsync(user.Id, 5);
+            
+            // L?y danh sách giao d?ch g?n ?ày c?a ng??i bán
+            var recentTransactions = await _transactionRepository.GetRecentTransactionsByUserAsync(user.Id, 5);
+            
+            // ??m s? l??ng s?n ph?m
+            var totalProducts = await _productRepository.CountProductsBySellerAsync(user.Id);
+            
+            // ??m s? l??ng ??n hàng ?ã bán
+            var totalSales = await _orderRepository.CountOrdersByVendorAsync(user.Id);
+            
+            // Tính t?ng doanh thu
+            var totalRevenue = await _orderRepository.GetTotalRevenueByVendorAsync(user.Id);
+            
+            // Tính ?i?m ?ánh giá trung bình
+            var averageRating = await _reviewRepository.GetAverageRatingBySellerAsync(user.Id);
+            
+            // ??m s? l??ng ??n hàng ?ang ch? x? lý
+            var pendingOrders = await _orderRepository.CountPendingOrdersByVendorAsync(user.Id);
+
+            var model = new VendorDashboardViewModel
+            {
+                User = user,
+                Statistics = statistics,
+                RecentProducts = recentProducts,
+                RecentOrders = recentOrders,
+                RecentReviews = recentReviews,
+                RecentTransactions = recentTransactions,
+                TotalProducts = totalProducts,
+                TotalSales = totalSales,
+                TotalRevenue = totalRevenue,
+                AverageRating = (decimal)averageRating,
+                PendingOrders = pendingOrders
+            };
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> Products(string sortOrder = "newest", int page = 1)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            const int pageSize = 10;
+            
+            // L?y danh sách s?n ph?m c?a ng??i bán có phân trang và s?p x?p
+            var products = await _productRepository.GetProductsBySellerAsync(user.Id, sortOrder, page, pageSize);
+            
+            // ??m t?ng s? s?n ph?m c?a ng??i bán
+            var totalCount = await _productRepository.CountProductsBySellerAsync(user.Id);
+
+            var model = new ProductListViewModel
+            {
+                Products = products,
+                SortOrder = sortOrder,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> Orders(OrderStatus? status = null, string sortOrder = "newest", int page = 1)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            const int pageSize = 10;
+            
+            // L?y danh sách ??n hàng c?a ng??i bán có phân trang, l?c và s?p x?p
+            var orders = await _orderRepository.GetOrdersByVendorAsync(user.Id, status, sortOrder, page, pageSize);
+            
+            // ??m t?ng s? ??n hàng c?a ng??i bán th?a mãn ?i?u ki?n l?c
+            var totalCount = await _orderRepository.CountOrdersByVendorAsync(user.Id, status);
+
+            var model = new OrderListViewModel
+            {
+                Orders = orders,
+                Status = status,
+                SortOrder = sortOrder,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> Reviews(int page = 1)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            const int pageSize = 10;
+            
+            // L?y danh sách ?ánh giá cho s?n ph?m c?a ng??i bán có phân trang
+            var reviews = await _reviewRepository.GetReviewsBySellerAsync(user.Id, page, pageSize);
+            
+            // ??m t?ng s? ?ánh giá cho s?n ph?m c?a ng??i bán
+            var totalCount = await _reviewRepository.CountReviewsBySellerAsync(user.Id);
+
+            var model = new ReviewListViewModel
+            {
+                Reviews = reviews,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
+
+            return View(model);
+        }
+
+        public IActionResult AddProduct()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddProduct(AddProductViewModel model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            // X? lý hình ?nh s?n ph?m
+            string imageUrl = null;
+            if (model.ImageFile != null && model.ImageFile.Length > 0)
+            {
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(model.ImageFile.FileName)}";
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "products", fileName);
+                
+                // ??m b?o th? m?c t?n t?i
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath) ?? string.Empty);
+                
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.ImageFile.CopyToAsync(stream);
+                }
+                
+                imageUrl = $"/uploads/products/{fileName}";
+            }
+
+            // T?o s?n ph?m m?i
+            var product = new Product
+            {
+                Name = model.Name,
+                Description = model.Description,
+                Price = model.Price,
+                CategoryId = model.CategoryId,
+                Condition = model.Condition,
+                SellerId = user.Id,
+                ImageUrl = imageUrl,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                IsAvailable = true
+            };
+
+            await _productRepository.AddAsync(product);
+            await _productRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = "S?n ph?m ?ã ???c thêm thành công.";
+            return RedirectToAction(nameof(Products));
+        }
+
+        public async Task<IActionResult> EditProduct(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _productRepository.GetByIdAsync(id);
+            if (product == null || product.SellerId != user.Id)
+            {
+                return NotFound();
+            }
+
+            var model = new EditProductViewModel
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                CategoryId = product.CategoryId,
+                Condition = product.Condition,
+                IsAvailable = product.IsAvailable,
+                CurrentImageUrl = product.ImageUrl
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditProduct(EditProductViewModel model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _productRepository.GetByIdAsync(model.Id);
+            if (product == null || product.SellerId != user.Id)
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                model.CurrentImageUrl = product.ImageUrl;
+                return View(model);
+            }
+
+            // X? lý hình ?nh s?n ph?m
+            if (model.ImageFile != null && model.ImageFile.Length > 0)
+            {
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(model.ImageFile.FileName)}";
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "products", fileName);
+                
+                // ??m b?o th? m?c t?n t?i
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath) ?? string.Empty);
+                
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.ImageFile.CopyToAsync(stream);
+                }
+                
+                product.ImageUrl = $"/uploads/products/{fileName}";
+            }
+
+            // C?p nh?t thông tin s?n ph?m
+            product.Name = model.Name;
+            product.Description = model.Description;
+            product.Price = model.Price;
+            product.CategoryId = model.CategoryId;
+            product.Condition = model.Condition;
+            product.IsAvailable = model.IsAvailable;
+            product.UpdatedAt = DateTime.UtcNow;
+
+            await _productRepository.UpdateAsync(product);
+            await _productRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = "S?n ph?m ?ã ???c c?p nh?t thành công.";
+            return RedirectToAction(nameof(Products));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteProduct(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _productRepository.GetByIdAsync(id);
+            if (product == null || product.SellerId != user.Id)
+            {
+                return NotFound();
+            }
+
+            await _productRepository.DeleteAsync(id);
+            await _productRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = "S?n ph?m ?ã ???c xóa thành công.";
+            return RedirectToAction(nameof(Products));
+        }
+    }
+}

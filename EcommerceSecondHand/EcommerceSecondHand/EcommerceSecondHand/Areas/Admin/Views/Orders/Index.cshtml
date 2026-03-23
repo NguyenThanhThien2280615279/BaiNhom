@@ -1,0 +1,117 @@
+@model IEnumerable<Order>
+@{
+    ViewData["Title"] = "Đơn hàng";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">Đơn hàng</h2>
+    <div class="d-flex gap-2">
+        <form method="get" class="d-flex align-items-center gap-2">
+            <input class="form-control" type="text" name="search" value="@ViewBag.Search"
+                placeholder="Tìm theo mã đơn hàng, email..." style="min-width: 300px;" />
+            <select class="form-select" name="status">
+                <option value="">Tất cả</option>
+                @foreach (var s in Enum.GetValues<OrderStatus>())
+                {
+                    var statusText = s switch
+                    {
+                        OrderStatus.Pending => "Chờ xử lý",
+                        OrderStatus.Accepted => "Đã chấp nhận",
+                        OrderStatus.Canceled => "Đã hủy",
+                        OrderStatus.Refunded => "Đã hoàn tiền",
+                        _ => s.ToString()
+                    };
+                    <option value="@s" selected="@(ViewBag.Status != null && (OrderStatus)ViewBag.Status == s)">@statusText
+                    </option>
+                }
+            </select>
+            <select class="form-select" name="pageSize" onchange="this.form.submit()" style="min-width: 120px;">
+                @{
+                    int ps = ViewBag.PageSize ?? 20;
+                }
+                <option value="10" selected="@(ps == 10)">10 / trang</option>
+                <option value="20" selected="@(ps == 20)">20 / trang</option>
+                <option value="50" selected="@(ps == 50)">50 / trang</option>
+            </select>
+            <input type="hidden" name="page" value="1" />
+            <button class="btn btn-outline-primary" type="submit">Tìm</button>
+        </form>
+    </div>
+</div>
+
+<div class="card shp-soft admin-table">
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Mã đơn hàng</th>
+                    <th>Khách hàng</th>
+                    <th>Người bán</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày đặt</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var o in Model)
+                {
+                    <tr>
+                        <td>@o.OrderNumber</td>
+                        <td>@(o.User?.Email ?? "N/A")</td>
+                        <td>@(o.Seller?.Email ?? "N/A")</td>
+                        <td>@o.TotalAmount.ToString("N0") đ</td>
+                        <td>
+                            @{
+                                var statusText = o.Status switch
+                                {
+                                    OrderStatus.Pending => "Chờ xử lý",
+                                    OrderStatus.Accepted => "Đã chấp nhận",
+                                    OrderStatus.Canceled => "Đã hủy",
+                                    OrderStatus.Refunded => "Đã hoàn tiền",
+                                    _ => o.Status.ToString()
+                                };
+                                var statusClass = o.Status switch
+                                {
+                                    OrderStatus.Pending => "warning",
+                                    OrderStatus.Accepted => "success",
+                                    OrderStatus.Canceled => "danger",
+                                    OrderStatus.Refunded => "secondary",
+                                    _ => "secondary"
+                                };
+                            }
+                            <span class="badge bg-@statusClass">@statusText</span>
+                        </td>
+                        <td>@o.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@o.Id">Chi tiết</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@{
+    int page = ViewBag.Page ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    var search = (string)(ViewBag.Search ?? string.Empty);
+    var status = ViewBag.Status;
+    int pageSize = ViewBag.PageSize ?? 20;
+}
+
+@if (totalPages > 1)
+{
+    <nav class="mt-3">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(page <= 1 ? "disabled" : null)">
+                <a class="page-link" href="?page=@(page - 1)&search=@search&status=@status&pageSize=@pageSize">Trước</a>
+            </li>
+            <li class="page-item disabled"><span class="page-link">Trang @(page) / @(totalPages)</span></li>
+            <li class="page-item @(page >= totalPages ? "disabled" : null)">
+                <a class="page-link" href="?page=@(page + 1)&search=@search&status=@status&pageSize=@pageSize">Sau</a>
+            </li>
+        </ul>
+    </nav>
+}

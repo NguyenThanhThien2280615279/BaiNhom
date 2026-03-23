@@ -1,0 +1,344 @@
+@model WalletManagementViewModel
+@using System.Globalization
+@using EcommerceSecondHand.Models
+
+@{
+    ViewData["Title"] = "Quản lý ví";
+    var vi = new CultureInfo("vi-VN");
+    var refundableMap = ViewBag.RefundableMap as Dictionary<int, bool> ?? new();
+}
+
+<div class="container mt-3">
+    <h2 class="mb-4 fw-bold">Quản lý ví</h2>
+
+    <form asp-area="Admin" asp-controller="Admin" asp-action="NormalizeSystemWallet" method="post" class="mb-3">
+        @Html.AntiForgeryToken()
+        <!-- Nếu muốn chỉ trừ hoa hồng đến một ngày, bật input này:
+        <input type="date" name="until" class="form-control d-inline-block" style="width:220px" />
+        -->
+        <button type="submit" class="btn btn-outline-danger"
+                onclick="return confirm('Chuẩn hoá ví hệ thống: trừ phần hoa hồng đã lỡ cộng?')">
+            Chuẩn hoá ví hệ thống (loại hoa hồng đã lỡ cộng)
+        </button>
+    </form>
+
+
+    <!-- Bộ lọc -->
+    @{
+        var typeItems = new (string val, string label)[] {
+    ("", "-- Tất cả --"),
+    ("Deposit", "Nạp tiền"),
+    ("Withdraw", "Rút tiền"),
+    ("Withdrawal", "Rút tiền (alias)"),
+    ("Purchase", "Mua hàng"),
+    ("Sale", "Bán hàng"),
+    ("Refund", "Hoàn tiền"),
+    ("AdminAdjustment", "Tạm giữ / Hoa hồng")
+    };
+        var statusItems = new (string val, string label)[] {
+    ("", "-- Tất cả --"),
+    ("Pending", "Đang chờ"),
+    ("Completed", "Hoàn tất"),
+    ("Failed", "Thất bại"),
+    ("Cancelled", "Đã huỷ"),
+    ("Rejected", "Từ chối")
+    };
+    }
+    <form asp-area="Admin" asp-controller="Admin" asp-action="WalletManagement" method="get" class="card mb-3">
+        <div class="card-body row g-3 align-items-end">
+            <div class="col-12 col-md-3">
+                <label class="form-label">Loại giao dịch</label>
+                <select name="filterType" class="form-select">
+                    @foreach (var item in typeItems)
+                    {
+                        if (string.Equals(Model.FilterType, item.val, StringComparison.OrdinalIgnoreCase))
+                        {
+                            <option value="@item.val" selected>@item.label</option>
+                        }
+                        else
+                        {
+                            <option value="@item.val">@item.label</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-12 col-md-3">
+                <label class="form-label">Trạng thái</label>
+                <select name="filterStatus" class="form-select">
+                    @foreach (var item in statusItems)
+                    {
+                        if (string.Equals(Model.FilterStatus, item.val, StringComparison.OrdinalIgnoreCase))
+                        {
+                            <option value="@item.val" selected>@item.label</option>
+                        }
+                        else
+                        {
+                            <option value="@item.val">@item.label</option>
+                        }
+                    }
+                </select>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <label class="form-label">Từ ngày</label>
+                <input type="date" name="startDate" class="form-control"
+                       value="@(Model.StartDate?.ToString("yyyy-MM-dd"))" />
+            </div>
+
+            <div class="col-6 col-md-2">
+                <label class="form-label">Đến ngày</label>
+                <input type="date" name="endDate" class="form-control"
+                       value="@(Model.EndDate?.ToString("yyyy-MM-dd"))" />
+            </div>
+
+            <div class="col-12 col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-funnel"></i> Lọc
+                </button>
+                <a class="btn btn-outline-secondary"
+                   asp-area="Admin" asp-controller="Admin" asp-action="WalletManagement">
+                    Xoá lọc
+                </a>
+            </div>
+        </div>
+    </form>
+
+    @if (TempData["SuccessMessage"] is string ok && !string.IsNullOrWhiteSpace(ok))
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-1"></i>@ok
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] is string err && !string.IsNullOrWhiteSpace(err))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-1"></i>@err
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-3">
+            <div class="card shp-soft h-100">
+                <div class="card-body text-center">
+                    <div class="text-muted small">Tổng tiền tạm giữ (Escrow)</div>
+                    <div class="fs-4 fw-bold text-primary">@Model.TotalPendingDeposits.ToString("N0", vi) đ</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-3">
+            <div class="card shp-soft h-100">
+                <div class="card-body text-center">
+                    <div class="text-muted small">Đang chờ chi trả người bán</div>
+                    <div class="fs-4 fw-bold text-warning">@Model.TotalPendingWithdrawals.ToString("N0", vi) đ</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-3">
+            <div class="card shp-soft h-100">
+                <div class="card-body text-center">
+                    <div class="text-muted small">Số dư hệ thống (ví Admin)</div>
+                    <div class="fs-4 fw-bold text-success">@Model.TotalSystemBalance.ToString("N0", vi) đ</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-3">
+            <div class="card shp-soft h-100">
+                <div class="card-body text-center">
+                    <div class="text-muted small">Tổng hoa hồng admin <span class="text-secondary">(mọi thời gian)</span></div>
+                    <div class="fs-4 fw-bold text-danger">@Model.TotalCommissionEarned.ToString("N0", vi) đ</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shp-soft">
+        <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+            <span>Giao dịch gần đây</span>
+            <small class="text-muted">Hiển thị các giao dịch theo bộ lọc</small>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width:70px">ID</th>
+                        <th style="min-width:220px">Người dùng</th>
+                        <th style="min-width:140px">Loại</th>
+                        <th style="min-width:300px">Mô tả</th>
+                        <th class="text-end" style="width:140px">Số tiền</th>
+                        <th class="text-end" style="width:160px">Ngày</th>
+                        <th class="text-center" style="width:100px">Chi tiết</th>
+                        <th class="text-center" style="width:160px">Hành động</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (!Model.RecentTransactions.Any())
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox me-1"></i> Chưa có giao dịch nào
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var t in Model.RecentTransactions)
+                        {
+                            var typeText = t.Type switch
+                            {
+                                TransactionType.Deposit => "Nạp tiền",
+                                TransactionType.Withdraw or TransactionType.Withdrawal => "Rút tiền",
+                                TransactionType.Purchase => "Mua hàng",
+                                TransactionType.Sale => "Bán hàng",
+                                TransactionType.Refund => "Hoàn tiền",
+                                TransactionType.AdminAdjustment => "Tạm giữ",
+                                _ => t.Type.ToString()
+                            };
+
+                            <tr>
+                                <td class="text-muted">@t.Id</td>
+                                <td>
+                                    <div class="fw-semibold">@t.User?.UserName</div>
+                                    <small class="text-muted">@t.User?.Email</small>
+                                </td>
+                                <td>@typeText</td>
+                                <td class="text-truncate" style="max-width:420px" title="@t.Description">@t.Description</td>
+                                <td class="text-end fw-semibold">@t.Amount.ToString("N0", vi) đ</td>
+                                <td class="text-end">@t.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                            onclick="viewDetails(@t.Id)">
+                                        <i class="bi bi-eye"></i> Xem
+                                    </button>
+                                </td>
+
+                                <td class="text-center">
+                                    @{
+                                        bool showRefundBtn = refundableMap.TryGetValue(t.Id, out var allow) && allow;
+                                    }
+                                    @if (showRefundBtn)
+                                    {
+                                        <form asp-area="Admin" asp-controller="Admin" asp-action="RefundEscrow"
+                                              method="post" class="d-inline prevent-double-submit">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="transactionId" value="@t.Id" />
+                                            <input type="hidden" name="orderId" value="@t.OrderId" />
+
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="bi bi-arrow-counterclockwise"></i> Hoàn tiền
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">—</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <div class="card-footer bg-white">
+                <nav aria-label="pagination">
+                    <ul class="pagination justify-content-end mb-0">
+                        @{
+                            var prev = Model.CurrentPage > 1 ? Model.CurrentPage - 1 : 1;
+                            var next = Model.CurrentPage < Model.TotalPages ? Model.CurrentPage + 1 : Model.TotalPages;
+                        }
+                        <li class="page-item @(Model.CurrentPage == 1 ? "disabled":"")">
+                            <a class="page-link"
+                               asp-area="Admin" asp-controller="Admin" asp-action="WalletManagement"
+                               asp-route-page="@prev"
+                               asp-route-filterType="@Model.FilterType"
+                               asp-route-filterStatus="@Model.FilterStatus"
+                               asp-route-startDate="@(Model.StartDate?.ToString("yyyy-MM-dd"))"
+                               asp-route-endDate="@(Model.EndDate?.ToString("yyyy-MM-dd"))">Trước</a>
+                        </li>
+
+                        <li class="page-item disabled">
+                            <span class="page-link">Trang @Model.CurrentPage / @Model.TotalPages</span>
+                        </li>
+
+                        <li class="page-item @(Model.CurrentPage == Model.TotalPages ? "disabled":"")">
+                            <a class="page-link"
+                               asp-area="Admin" asp-controller="Admin" asp-action="WalletManagement"
+                               asp-route-page="@next"
+                               asp-route-filterType="@Model.FilterType"
+                               asp-route-filterStatus="@Model.FilterStatus"
+                               asp-route-startDate="@(Model.StartDate?.ToString("yyyy-MM-dd"))"
+                               asp-route-endDate="@(Model.EndDate?.ToString("yyyy-MM-dd"))">Sau</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="modalDetails" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Chi tiết giao dịch</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="detailContent">Đang tải...</div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function viewDetails(id) {
+            fetch(`/Admin/Admin/GetTransactionDetails?id=${id}`)
+                .then(res => res.json())
+                .then(d => {
+                    document.getElementById('detailContent').innerHTML = `
+                        <div class="row g-2">
+                            <div class="col-md-6"><strong>ID:</strong> ${d.id}</div>
+                            <div class="col-md-6"><strong>Ngày tạo:</strong> ${d.createdAt}</div>
+                            <div class="col-12"><strong>Người dùng:</strong> ${d.userName} (${d.email})</div>
+                            <div class="col-md-6"><strong>Loại:</strong> ${d.type}</div>
+                            <div class="col-md-6"><strong>Số tiền:</strong> ${d.amount} đ</div>
+                            ${d.orderId ? `<div class="col-md-6"><strong>Đơn hàng:</strong> #${d.orderId}</div>` : ""}
+                            <div class="col-12"><strong>Mô tả:</strong> ${d.description}</div>
+                        </div>`;
+                    new bootstrap.Modal(document.getElementById("modalDetails")).show();
+                });
+        }
+
+        // chống bấm trùng submit
+        document.addEventListener('submit', function (e) {
+            const form = e.target.closest('.prevent-double-submit');
+            if (!form) return;
+            const btn = form.querySelector('button[type="submit"]');
+            if (btn && btn.dataset.submitted === '1') {
+                e.preventDefault();
+                return false;
+            }
+            if (btn) {
+                btn.dataset.submitted = '1';
+                btn.disabled = true;
+            }
+        });
+    </script>
+}
+
+<style>
+    .table td, .table th {
+        vertical-align: middle;
+    }
+
+    .text-truncate {
+        max-width: 100%;
+    }
+</style>

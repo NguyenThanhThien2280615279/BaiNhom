@@ -1,0 +1,204 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Authorize]
+    public class CheckoutController : Controller
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ICartRepository _cartRepository;
+        private readonly IOrderRepository _orderRepository;
+        private readonly IPaymentTransactionRepository _paymentRepository;
+        private readonly INotificationRepository _notificationRepository;
+
+        public CheckoutController(
+            UserManager<ApplicationUser> userManager,
+            ICartRepository cartRepository,
+            IOrderRepository orderRepository,
+            IPaymentTransactionRepository paymentRepository,
+            INotificationRepository notificationRepository)
+        {
+            _userManager = userManager;
+            _cartRepository = cartRepository;
+            _orderRepository = orderRepository;
+            _paymentRepository = paymentRepository;
+            _notificationRepository = notificationRepository;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var cartItems = await _cartRepository.GetCartItemsAsync(user.Id);
+            if (!cartItems.Any())
+            {
+                TempData["ErrorMessage"] = "Giỏ hàng của bạn đang trống. Vui lòng thêm sản phẩm trước khi thanh toán.";
+                return RedirectToAction("Index", "WebCart");
+            }
+
+            var model = new CheckoutViewModel
+            {
+                CartItems = cartItems,
+                SubTotal = cartItems.Sum(item => item.Product?.Price * item.Quantity ?? 0),
+                WalletBalance = user.WalletBalance,
+                ShippingAddress = user.Address ?? string.Empty,
+                PaymentMethod = PaymentMethod.Wallet
+            };
+
+            model.Total = model.SubTotal;
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PlaceOrder(CheckoutViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("Index", model);
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var cartItems = await _cartRepository.GetCartItemsAsync(user.Id);
+            if (!cartItems.Any())
+            {
+                TempData["ErrorMessage"] = "Giỏ hàng của bạn đang trống. Vui lòng thêm sản phẩm trước khi thanh toán.";
+                return RedirectToAction("Index", "WebCart");
+            }
+
+            decimal totalAmount = cartItems.Sum(item => item.Product?.Price * item.Quantity ?? 0);
+
+            // Kiểm tra số dư ví nếu phương thức thanh toán là Wallet
+            if (model.PaymentMethod == PaymentMethod.Wallet && user.WalletBalance < totalAmount)
+            {
+                TempData["ErrorMessage"] = "Số dư ví không đủ để thanh toán. Vui lòng nạp thêm tiền hoặc chọn phương thức thanh toán khác.";
+                model.CartItems = cartItems;
+                model.SubTotal = totalAmount;
+                model.Total = totalAmount;
+                model.WalletBalance = user.WalletBalance;
+                return View("Index", model);
+            }
+
+            // Tạo đơn hàng mới
+            var order = new Order
+            {
+                UserId = user.Id,
+                TotalAmount = totalAmount,
+                OrderDate = DateTime.UtcNow,
+                Status = OrderStatus.Pending,
+                ShippingAddress = model.ShippingAddress,
+                OrderItems = cartItems.Select(item => new OrderItem
+                {
+                    ProductId = item.ProductId,
+                    Quantity = item.Quantity,
+                    Price = item.Product?.Price ?? 0
+                }).ToList()
+            };
+
+            // Lưu đơn hàng
+            await _orderRepository.AddAsync(order);
+            await _orderRepository.SaveAsync();
+
+            // Xử lý thanh toán
+            var transactionReference = $"ORD-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
+            var transaction = new PaymentTransaction
+            {
+                UserId = user.Id,
+                OrderId = order.Id,
+                Amount = totalAmount,
+                Type = TransactionType.Purchase,
+                Status = model.PaymentMethod == PaymentMethod.CashOnDelivery ? TransactionStatus.Pending : TransactionStatus.Completed,
+                TransactionReference = transactionReference,
+                Description = $"Thanh toán đơn hàng #{order.Id}",
+                CreatedAt = DateTime.UtcNow,
+                CompletedAt = model.PaymentMethod == PaymentMethod.CashOnDelivery ? null : DateTime.UtcNow
+            };
+
+            await _paymentRepository.AddAsync(transaction);
+            await _paymentRepository.SaveAsync();
+
+            // Cập nhật số dư ví nếu thanh toán bằng ví
+            if (model.PaymentMethod == PaymentMethod.Wallet)
+            {
+                user.WalletBalance -= totalAmount;
+                await _userManager.UpdateAsync(user);
+            }
+
+            // Tạo thông báo
+            var notification = new Notification
+            {
+                UserId = user.Id,
+                Title = "Đặt hàng thành công",
+                Message = $"Đơn hàng #{order.Id} của bạn đã được đặt thành công và đang chờ xử lý.",
+                Type = NotificationType.Order,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+                RelatedEntityId = order.Id.ToString(),
+                ActionUrl = "/Orders/Details?id=" + order.Id
+            };
+
+            await _notificationRepository.AddAsync(notification);
+            await _notificationRepository.SaveAsync();
+
+            // Gửi thông báo cho người bán
+            foreach (var item in cartItems)
+            {
+                if (item.Product?.SellerId != null)
+                {
+                    var sellerNotification = new Notification
+                    {
+                        UserId = item.Product.SellerId,
+                        Title = "Đơn hàng mới",
+                        Message = $"Bạn có đơn hàng mới #{order.Id} cho sản phẩm {item.Product.Name}.",
+                        Type = NotificationType.Order,
+                        IsRead = false,
+                        CreatedAt = DateTime.UtcNow,
+                        RelatedEntityId = order.Id.ToString(),
+                        ActionUrl = "/Vendor/OrderDetails?id=" + order.Id
+                    };
+
+                    await _notificationRepository.AddAsync(sellerNotification);
+                }
+            }
+
+            await _notificationRepository.SaveAsync();
+
+            // Xóa giỏ hàng
+            await _cartRepository.ClearCartAsync(user.Id);
+
+            // Chuyển đến trang xác nhận đơn hàng
+            return RedirectToAction(nameof(Confirmation), new { id = order.Id });
+        }
+
+        public async Task<IActionResult> Confirmation(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var order = await _orderRepository.GetOrderWithDetailsAsync(id);
+            if (order == null || order.UserId != user.Id)
+            {
+                return NotFound();
+            }
+
+            return View(order);
+        }
+    }
+}

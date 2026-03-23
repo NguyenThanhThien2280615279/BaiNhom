@@ -1,0 +1,142 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Models.ViewModels;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Authorize]
+    public class WalletController : Controller
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IPaymentTransactionRepository _transactionRepository;
+
+        public WalletController(
+            UserManager<ApplicationUser> userManager,
+            IPaymentTransactionRepository transactionRepository)
+        {
+            _userManager = userManager;
+            _transactionRepository = transactionRepository;
+        }
+
+        public async Task<IActionResult> Index(string? filterType = null, DateTime? startDate = null, DateTime? endDate = null, int page = 1)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            const int pageSize = 10;
+            
+            // Lấy danh sách giao dịch của người dùng có phân trang và lọc
+            var transactions = await _transactionRepository.GetTransactionsByUserAsync(
+                user.Id, filterType, startDate, endDate, page, pageSize);
+            
+            // Đếm tổng số giao dịch thỏa mãn điều kiện lọc
+            var totalCount = await _transactionRepository.CountTransactionsByUserAsync(
+                user.Id, filterType, startDate, endDate);
+
+            var model = new WalletViewModel
+            {
+                Balance = user.WalletBalance,
+                Transactions = transactions,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize),
+                FilterType = filterType,
+                StartDate = startDate,
+                EndDate = endDate
+            };
+
+            return View(model);
+        }
+
+        public IActionResult Deposit()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Deposit(DepositViewModel model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            // Tạo giao dịch nạp tiền mới
+            var transaction = new PaymentTransaction
+            {
+                UserId = user.Id,
+                Amount = model.Amount,
+                Type = TransactionType.Deposit,
+                Status = TransactionStatus.Pending,
+                PaymentMethod = model.PaymentMethod,
+                Description = model.Note ?? $"Nạp tiền vào ví - {model.PaymentMethod}",
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _transactionRepository.AddAsync(transaction);
+            await _transactionRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = "Yêu cầu nạp tiền đã được gửi thành công. Vui lòng chờ admin phê duyệt.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        public IActionResult Withdraw()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Withdraw(WithdrawViewModel model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            // Kiểm tra số dư
+            if (user.WalletBalance < model.Amount)
+            {
+                ModelState.AddModelError("Amount", "Số dư trong ví không đủ để thực hiện giao dịch này.");
+                return View(model);
+            }
+
+            // Tạo giao dịch rút tiền mới
+            var transaction = new PaymentTransaction
+            {
+                UserId = user.Id,
+                Amount = model.Amount,
+                Type = TransactionType.Withdraw,
+                Status = TransactionStatus.Pending,
+                PaymentMethod = model.WithdrawalMethod,
+                Description = model.Note ?? $"Rút tiền từ ví - {model.WithdrawalMethod} - {model.AccountInfo}",
+                Reference = model.AccountInfo,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _transactionRepository.AddAsync(transaction);
+            await _transactionRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = "Yêu cầu rút tiền đã được gửi thành công. Vui lòng chờ admin phê duyệt.";
+            return RedirectToAction(nameof(Index));
+        }
+    }
+}

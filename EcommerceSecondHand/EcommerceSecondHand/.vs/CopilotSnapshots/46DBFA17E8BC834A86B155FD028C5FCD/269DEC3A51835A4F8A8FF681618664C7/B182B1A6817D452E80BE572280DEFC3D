@@ -1,0 +1,191 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Models.ViewModels;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Authorize(Roles = "Admin")]
+    public class AdminController : Controller
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ISystemStatisticsRepository _statisticsRepository;
+        private readonly IProductRepository _productRepository;
+        private readonly IOrderRepository _orderRepository;
+        private readonly IPaymentTransactionRepository _transactionRepository;
+
+        public AdminController(
+            UserManager<ApplicationUser> userManager,
+            ISystemStatisticsRepository statisticsRepository,
+            IProductRepository productRepository,
+            IOrderRepository orderRepository,
+            IPaymentTransactionRepository transactionRepository)
+        {
+            _userManager = userManager;
+            _statisticsRepository = statisticsRepository;
+            _productRepository = productRepository;
+            _orderRepository = orderRepository;
+            _transactionRepository = transactionRepository;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var statistics = await _statisticsRepository.GetStatisticsAsync();
+            
+            // Lấy danh sách người dùng mới nhất
+            var recentUsers = await _userManager.Users
+                .OrderByDescending(u => u.CreatedAt)
+                .Take(5)
+                .ToListAsync();
+            
+            // Lấy danh sách sản phẩm mới nhất
+            var recentProducts = await _productRepository.GetRecentProductsAsync(5);
+            
+            // Lấy danh sách đơn hàng mới nhất
+            var recentOrders = await _orderRepository.GetRecentOrdersAsync(5);
+            
+            // Lấy danh sách giao dịch mới nhất
+            var recentTransactions = await _transactionRepository.GetRecentTransactionsAsync(5);
+            
+            // Đếm số lượng người dùng
+            var totalUsers = await _userManager.Users.CountAsync();
+            
+            // Đếm số lượng sản phẩm
+            var totalProducts = await _productRepository.CountProductsAsync();
+            
+            // Đếm số lượng đơn hàng
+            var totalOrders = await _orderRepository.CountOrdersAsync();
+            
+            // Tính tổng doanh thu
+            var totalRevenue = await _orderRepository.GetTotalRevenueAsync();
+            
+            // Đếm số lượng xác minh đang chờ xử lý
+            var pendingVerifications = await _userManager.Users.CountAsync(u => !u.EmailConfirmed);
+            
+            // Đếm số lượng báo cáo
+            var reportedItems = await _productRepository.CountReportedProductsAsync();
+
+            var model = new AdminDashboardViewModel
+            {
+                Statistics = statistics,
+                RecentUsers = recentUsers,
+                RecentProducts = recentProducts,
+                RecentOrders = recentOrders,
+                RecentTransactions = recentTransactions,
+                TotalUsers = totalUsers,
+                TotalProducts = totalProducts,
+                TotalOrders = totalOrders,
+                TotalRevenue = totalRevenue,
+                PendingVerifications = pendingVerifications,
+                ReportedItems = reportedItems
+            };
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> WalletManagement(string? filterType = null, string? filterStatus = null, DateTime? startDate = null, DateTime? endDate = null, int page = 1)
+        {
+            const int pageSize = 20;
+            
+            // Lấy danh sách giao dịch đang chờ xử lý
+            var pendingTransactions = await _transactionRepository.GetPendingTransactionsAsync();
+            
+            // Lấy danh sách giao dịch gần đây có phân trang và lọc
+            var recentTransactions = await _transactionRepository.GetFilteredTransactionsAsync(
+                filterType, filterStatus, startDate, endDate, page, pageSize);
+            
+            // Đếm tổng số giao dịch thỏa mãn điều kiện lọc
+            var totalCount = await _transactionRepository.CountFilteredTransactionsAsync(
+                filterType, filterStatus, startDate, endDate);
+            
+            // Tính tổng tiền đang chờ nạp
+            var totalPendingDeposits = pendingTransactions
+                .Where(t => t.Type == TransactionType.Deposit)
+                .Sum(t => t.Amount);
+            
+            // Tính tổng tiền đang chờ rút
+            var totalPendingWithdrawals = pendingTransactions
+                .Where(t => t.Type == TransactionType.Withdraw)
+                .Sum(t => t.Amount);
+            
+            // Tính tổng số dư trong hệ thống
+            var totalSystemBalance = await _transactionRepository.GetTotalSystemBalanceAsync();
+
+            var model = new WalletManagementViewModel
+            {
+                PendingTransactions = pendingTransactions,
+                RecentTransactions = recentTransactions,
+                TotalPendingDeposits = totalPendingDeposits,
+                TotalPendingWithdrawals = totalPendingWithdrawals,
+                TotalSystemBalance = totalSystemBalance,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize),
+                FilterType = filterType,
+                FilterStatus = filterStatus,
+                StartDate = startDate,
+                EndDate = endDate
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApproveTransaction(int id)
+        {
+            var transaction = await _transactionRepository.GetByIdAsync(id);
+            if (transaction == null)
+            {
+                return NotFound();
+            }
+
+            // Cập nhật trạng thái giao dịch
+            transaction.Status = TransactionStatus.Completed;
+            transaction.ProcessedAt = DateTime.UtcNow;
+            await _transactionRepository.UpdateAsync(transaction);
+            await _transactionRepository.SaveAsync();
+            
+            // Cập nhật số dư ví người dùng
+            var user = await _userManager.FindByIdAsync(transaction.UserId);
+            if (user != null)
+            {
+                if (transaction.Type == TransactionType.Deposit)
+                {
+                    user.WalletBalance += transaction.Amount;
+                }
+                else if (transaction.Type == TransactionType.Withdraw)
+                {
+                    user.WalletBalance -= transaction.Amount;
+                }
+                
+                await _userManager.UpdateAsync(user);
+            }
+
+            TempData["SuccessMessage"] = "Giao dịch đã được phê duyệt thành công.";
+            return RedirectToAction(nameof(WalletManagement));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RejectTransaction(int id)
+        {
+            var transaction = await _transactionRepository.GetByIdAsync(id);
+            if (transaction == null)
+            {
+                return NotFound();
+            }
+
+            // Cập nhật trạng thái giao dịch
+            transaction.Status = TransactionStatus.Rejected;
+            transaction.ProcessedAt = DateTime.UtcNow;
+            await _transactionRepository.UpdateAsync(transaction);
+            await _transactionRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = "Giao dịch đã bị từ chối.";
+            return RedirectToAction(nameof(WalletManagement));
+        }
+    }
+}

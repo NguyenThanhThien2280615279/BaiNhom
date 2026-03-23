@@ -1,0 +1,182 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Authorize]
+    public class WalletController : Controller
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IPaymentTransactionRepository _transactionRepository;
+        private readonly INotificationRepository _notificationRepository;
+
+        public WalletController(
+            UserManager<ApplicationUser> userManager,
+            IPaymentTransactionRepository transactionRepository,
+            INotificationRepository notificationRepository)
+        {
+            _userManager = userManager;
+            _transactionRepository = transactionRepository;
+            _notificationRepository = notificationRepository;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var model = new WalletViewModel
+            {
+                CurrentBalance = user.WalletBalance,
+                TotalDeposits = await _transactionRepository.GetTotalDepositsAsync(user.Id),
+                TotalWithdrawals = await _transactionRepository.GetTotalWithdrawalsAsync(user.Id),
+                TotalPurchases = await _transactionRepository.GetTotalPurchasesAsync(user.Id),
+                TotalSales = await _transactionRepository.GetTotalSalesAsync(user.Id),
+                Transactions = await _transactionRepository.GetUserTransactionsAsync(user.Id, 20)
+            };
+
+            return View(model);
+        }
+
+        public IActionResult Deposit()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Deposit(DepositViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Tạo mã giao dịch
+            string transactionReference = $"DEP-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
+
+            // Trong thực tế, bạn sẽ tích hợp với một cổng thanh toán ở đây
+            // Hiện tại, chúng ta sẽ giả lập một khoản tiền gửi thành công
+
+            // Tạo bản ghi giao dịch
+            var transaction = new PaymentTransaction
+            {
+                UserId = user.Id,
+                Amount = model.Amount,
+                Type = TransactionType.Deposit,
+                Status = TransactionStatus.Completed, // Trong thực tế, trạng thái ban đầu sẽ là Pending
+                TransactionReference = transactionReference,
+                Description = $"Nạp tiền vào ví: {model.Amount:C}",
+                CreatedAt = DateTime.UtcNow,
+                CompletedAt = DateTime.UtcNow // Trong thực tế, sẽ được đặt khi thanh toán hoàn thành
+            };
+
+            await _transactionRepository.AddAsync(transaction);
+            await _transactionRepository.SaveAsync();
+
+            // Cập nhật số dư ví của người dùng
+            user.WalletBalance += model.Amount;
+            await _userManager.UpdateAsync(user);
+
+            // Tạo thông báo
+            var notification = new Notification
+            {
+                UserId = user.Id,
+                Title = "Nạp tiền thành công",
+                Message = $"Bạn đã nạp thành công {model.Amount:C} vào ví. Mã giao dịch: {transactionReference}",
+                Type = NotificationType.Payment,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+                RelatedEntityId = transaction.Id.ToString(),
+                ActionUrl = "/Wallet"
+            };
+
+            await _notificationRepository.AddAsync(notification);
+            await _notificationRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = $"Bạn đã nạp thành công {model.Amount:C} vào ví.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        public IActionResult Withdraw()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Withdraw(WithdrawViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Kiểm tra số dư
+            if (user.WalletBalance < model.Amount)
+            {
+                ModelState.AddModelError("Amount", "Số dư ví không đủ để thực hiện rút tiền.");
+                return View(model);
+            }
+
+            // Tạo mã giao dịch
+            string transactionReference = $"WIT-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
+
+            // Tạo bản ghi giao dịch
+            var transaction = new PaymentTransaction
+            {
+                UserId = user.Id,
+                Amount = model.Amount,
+                Type = TransactionType.Withdrawal,
+                Status = TransactionStatus.Pending, // Rút tiền thường cần phê duyệt
+                TransactionReference = transactionReference,
+                Description = $"Rút tiền từ ví: {model.Amount:C}",
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _transactionRepository.AddAsync(transaction);
+            await _transactionRepository.SaveAsync();
+
+            // Giữ số dư cho đến khi rút tiền được xử lý (trong thực tế)
+            user.WalletBalance -= model.Amount;
+            await _userManager.UpdateAsync(user);
+
+            // Tạo thông báo
+            var notification = new Notification
+            {
+                UserId = user.Id,
+                Title = "Yêu cầu rút tiền đã được ghi nhận",
+                Message = $"Yêu cầu rút {model.Amount:C} của bạn đã được ghi nhận và đang chờ xử lý. Mã giao dịch: {transactionReference}",
+                Type = NotificationType.Payment,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+                RelatedEntityId = transaction.Id.ToString(),
+                ActionUrl = "/Wallet"
+            };
+
+            await _notificationRepository.AddAsync(notification);
+            await _notificationRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = $"Yêu cầu rút {model.Amount:C} của bạn đã được ghi nhận và đang chờ xử lý.";
+            return RedirectToAction(nameof(Index));
+        }
+    }
+}

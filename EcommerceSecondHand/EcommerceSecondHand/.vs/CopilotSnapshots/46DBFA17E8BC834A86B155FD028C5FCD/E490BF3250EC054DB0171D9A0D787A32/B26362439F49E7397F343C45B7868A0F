@@ -1,0 +1,18 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Models.ViewModels
+{
+    public class SearchResultViewModel
+    {
+        public string Query { get; set; } = string.Empty;
+        public string CategoryId { get; set; } = string.Empty;
+        public decimal? MinPrice { get; set; }
+        public decimal? MaxPrice { get; set; }
+        public ProductCondition? Condition { get; set; }
+        public string SortOrder { get; set; } = "newest";
+        public int CurrentPage { get; set; } = 1;
+        public int TotalPages { get; set; }
+        public IEnumerable<Product> Products { get; set; } = new List<Product>();
+        public IEnumerable<Category> Categories { get; set; } = new List<Category>();
+    }
+}

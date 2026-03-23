@@ -1,0 +1,190 @@
+﻿@model DepositViewModel
+@{
+    ViewData["Title"] = "N?p ti?n";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h1 class="h5 mb-0">N?p ti?n vào ví</h1>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-controller="Wallet" asp-action="Deposit">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <div class="mb-4">
+                            <label asp-for="Amount" class="form-label">S? ti?n n?p</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="Amount" class="form-control" placeholder="Nh?p s? ti?n" />
+                            </div>
+                            <span asp-validation-for="Amount" class="text-danger"></span>
+                            <div class="form-text">S? ti?n t?i thi?u là $10.00</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label asp-for="PaymentMethod" class="form-label">Ph??ng th?c thanh toán</label>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-check card p-3 mb-2">
+                                        <input class="form-check-input" type="radio" asp-for="PaymentMethod" id="creditCard" value="CreditCard" checked>
+                                        <label class="form-check-label w-100" for="creditCard">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-credit-card text-primary me-2" style="font-size: 1.5rem;"></i>
+                                                <div>
+                                                    <span class="d-block">Th? tín d?ng</span>
+                                                    <small class="text-muted">VISA/MasterCard/JCB</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check card p-3 mb-2">
+                                        <input class="form-check-input" type="radio" asp-for="PaymentMethod" id="bankTransfer" value="BankTransfer">
+                                        <label class="form-check-label w-100" for="bankTransfer">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-bank text-primary me-2" style="font-size: 1.5rem;"></i>
+                                                <div>
+                                                    <span class="d-block">Chuy?n kho?n</span>
+                                                    <small class="text-muted">Ngân hàng n?i ??a</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check card p-3 mb-2">
+                                        <input class="form-check-input" type="radio" asp-for="PaymentMethod" id="eWallet" value="EWallet">
+                                        <label class="form-check-label w-100" for="eWallet">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-wallet2 text-primary me-2" style="font-size: 1.5rem;"></i>
+                                                <div>
+                                                    <span class="d-block">Ví ?i?n t?</span>
+                                                    <small class="text-muted">MoMo/ZaloPay/VNPay</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                        </div>
+                        
+                        <div id="creditCardForm" class="payment-form mb-4">
+                            <div class="card card-body bg-light mb-3">
+                                <div class="row">
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label">S? th?</label>
+                                        <input type="text" class="form-control" placeholder="1234 5678 9012 3456">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Ngày h?t h?n</label>
+                                        <input type="text" class="form-control" placeholder="MM/YY">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">CVV</label>
+                                        <input type="text" class="form-control" placeholder="123">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Tên ch? th?</label>
+                                        <input type="text" class="form-control" placeholder="NGUYEN VAN A">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="bankTransferForm" class="payment-form mb-4" style="display: none;">
+                            <div class="card card-body bg-light">
+                                <p class="mb-2">Vui lòng chuy?n kho?n ??n tài kho?n ngân hàng sau:</p>
+                                <ul class="list-unstyled">
+                                    <li><strong>Ngân hàng:</strong> Vietcombank</li>
+                                    <li><strong>S? tài kho?n:</strong> 1234567890</li>
+                                    <li><strong>Tên tài kho?n:</strong> ECOMMERCE SECOND HAND</li>
+                                    <li><strong>N?i dung:</strong> DEP [email c?a b?n]</li>
+                                </ul>
+                                <p class="mb-0">Sau khi chuy?n kho?n, vui lòng nh?n "Xác nh?n n?p ti?n" ?? h? th?ng ghi nh?n.</p>
+                            </div>
+                        </div>
+                        
+                        <div id="eWalletForm" class="payment-form mb-4" style="display: none;">
+                            <div class="card card-body bg-light">
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <div class="form-check card p-3">
+                                            <input class="form-check-input" type="radio" name="walletType" id="momo" checked>
+                                            <label class="form-check-label w-100" for="momo">
+                                                <div class="text-center">
+                                                    <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" style="height: 40px;">
+                                                    <span class="d-block mt-2">MoMo</span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check card p-3">
+                                            <input class="form-check-input" type="radio" name="walletType" id="zalopay">
+                                            <label class="form-check-label w-100" for="zalopay">
+                                                <div class="text-center">
+                                                    <img src="https://logosvector.net/wp-content/uploads/2022/03/zalopay-logo-vector.png" alt="ZaloPay" style="height: 40px;">
+                                                    <span class="d-block mt-2">ZaloPay</span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check card p-3">
+                                            <input class="form-check-input" type="radio" name="walletType" id="vnpay">
+                                            <label class="form-check-label w-100" for="vnpay">
+                                                <div class="text-center">
+                                                    <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-VNPAY-QR-1.png" alt="VNPay" style="height: 40px;">
+                                                    <span class="d-block mt-2">VNPay</span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <p>Vui lòng quét mã QR bên d??i b?ng ?ng d?ng ?ã ch?n:</p>
+                                    <img src="https://qr-generator.diginori.com/img/qr-code.png" alt="QR Code" class="img-fluid" style="max-width: 200px;">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a asp-controller="Wallet" asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i> Quay l?i
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check me-1"></i> Xác nh?n n?p ti?n
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            $('input[name="PaymentMethod"]').change(function() {
+                $('.payment-form').hide();
+                
+                var selectedMethod = $('input[name="PaymentMethod"]:checked').val();
+                
+                if (selectedMethod === 'CreditCard') {
+                    $('#creditCardForm').show();
+                } else if (selectedMethod === 'BankTransfer') {
+                    $('#bankTransferForm').show();
+                } else if (selectedMethod === 'EWallet') {
+                    $('#eWalletForm').show();
+                }
+            });
+        });
+    </script>
+}

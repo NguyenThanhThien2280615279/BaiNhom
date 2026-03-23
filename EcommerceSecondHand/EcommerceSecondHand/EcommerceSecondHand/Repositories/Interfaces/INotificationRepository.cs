@@ -1,0 +1,24 @@
+using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Repositories.Interfaces
+{
+    public interface INotificationRepository
+    {
+        Task<IEnumerable<Notification>> GetAllAsync();
+        Task<Notification?> GetByIdAsync(int id);
+        Task<IEnumerable<Notification>> GetUserNotificationsAsync(string userId);
+        Task<IEnumerable<Notification>> GetPaginatedNotificationsAsync(string userId, NotificationType? type, bool unreadOnly, int page, int pageSize);
+        Task<int> GetNotificationsCountAsync(string userId, NotificationType? type, bool unreadOnly);
+        Task<int> GetUnreadNotificationsCountAsync(string userId);
+        Task<IEnumerable<Notification>> GetRecentNotificationsAsync(string userId, int count);
+        Task MarkAllAsReadAsync(string userId);
+        Task DeleteAllAsync(string userId);
+        Task MarkAsReadAsync(int notificationId);
+        Task DeleteNotificationAsync(int notificationId);
+        Task DeleteNotificationAsync(int notificationId, string userId);
+        Task AddAsync(Notification notification);
+        Task UpdateAsync(Notification notification);
+        Task DeleteAsync(int id);
+        Task SaveAsync();
+    }
+}

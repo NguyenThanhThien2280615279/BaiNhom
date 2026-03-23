@@ -1,0 +1,32 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Repositories.Interfaces
+{
+    public interface IOrderRepository
+    {
+        Task<IEnumerable<Order>> GetAllAsync();
+        Task<Order?> GetByIdAsync(int id);
+        Task<Order?> GetOrderWithDetailsAsync(int id);
+        Task<IEnumerable<Order>> GetUserOrdersAsync(string userId);
+        Task<int> GetUserOrdersCountAsync(string userId);
+        Task<IEnumerable<Order>> GetVendorRecentOrdersAsync(string vendorId, int count);
+        Task<IEnumerable<Order>> GetOrdersWithProductAsync(int productId);
+        
+        // Add missing methods
+        Task<IEnumerable<Order>> GetRecentOrdersByUserAsync(string userId, int count);
+        Task<IEnumerable<Order>> GetRecentOrdersByVendorAsync(string vendorId, int count);
+        Task<int> CountPendingOrdersByUserAsync(string userId);
+        Task<int> CountOrdersByUserAndStatusAsync(string userId, OrderStatus status);
+        Task<decimal> GetTotalSpentByUserAsync(string userId);
+        Task<int> CountOrdersByVendorAsync(string vendorId);
+        Task<int> CountOrdersByVendorAsync(string vendorId, OrderStatus? status);
+        Task<decimal> GetTotalRevenueByVendorAsync(string vendorId);
+        Task<int> CountPendingOrdersByVendorAsync(string vendorId);
+        Task<IEnumerable<Order>> GetOrdersByVendorAsync(string vendorId, OrderStatus? status, string? sortOrder, int page, int pageSize);
+        
+        Task AddAsync(Order order);
+        Task UpdateAsync(Order order);
+        Task DeleteAsync(int id);
+        Task SaveAsync();
+    }
+}

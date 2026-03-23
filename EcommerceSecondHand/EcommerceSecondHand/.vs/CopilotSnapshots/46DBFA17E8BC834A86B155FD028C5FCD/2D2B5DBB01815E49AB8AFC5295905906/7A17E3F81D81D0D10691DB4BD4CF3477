@@ -1,0 +1,495 @@
+﻿@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Quản trị hệ thống";
+}
+
+<div class="container-fluid mt-4">
+    <h1>Quản trị hệ thống</h1>
+    
+    <div class="row mt-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Tổng số người dùng</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalUsers</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-people-fill fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Tổng doanh thu</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalRevenue.ToString("C")</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-currency-dollar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Tổng số sản phẩm</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalProducts</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-box-seam fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Tổng số đơn hàng</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalOrders</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-receipt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-white py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Tổng quan doanh thu</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-white py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Phân bố sản phẩm</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="productDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-white py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Người dùng mới nhất</h6>
+                    <a href="#" class="btn btn-sm btn-primary">Xem tất cả</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Tên</th>
+                                    <th>Email</th>
+                                    <th>Vai trò</th>
+                                    <th>Ngày tham gia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var user in Model.RecentUsers)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                @if (!string.IsNullOrEmpty(user.ProfilePicture))
+                                                {
+                                                    <img src="@user.ProfilePicture" class="rounded-circle me-2" alt="@user.FirstName" width="30" height="30" style="object-fit: cover;">
+                                                }
+                                                else
+                                                {
+                                                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;">
+                                                        <i class="bi bi-person-fill"></i>
+                                                    </div>
+                                                }
+                                                <span>@user.FirstName @user.LastName</span>
+                                            </div>
+                                        </td>
+                                        <td>@user.Email</td>
+                                        <td>@string.Join(", ", user.Roles)</td>
+                                        <td>@user.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-white py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Đơn hàng gần đây</h6>
+                    <a href="#" class="btn btn-sm btn-primary">Xem tất cả</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Mã đơn hàng</th>
+                                    <th>Khách hàng</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ngày đặt</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var order in Model.RecentOrders)
+                                {
+                                    <tr>
+                                        <td>
+                                            <a href="/Orders/Details/@order.Id">#@order.OrderNumber</a>
+                                        </td>
+                                        <td>@(order.User?.FirstName ?? "") @(order.User?.LastName ?? "")</td>
+                                        <td>@order.TotalAmount.ToString("C")</td>
+                                        <td>
+                                            <span class="badge @GetOrderStatusBadgeClass(order.Status)">
+                                                @GetOrderStatusText(order.Status)
+                                            </span>
+                                        </td>
+                                        <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-white py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Sản phẩm mới nhất</h6>
+                    <a href="#" class="btn btn-sm btn-primary">Xem tất cả</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th>Danh mục</th>
+                                    <th>Giá</th>
+                                    <th>Tình trạng</th>
+                                    <th>Ngày đăng</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var product in Model.RecentProducts)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                                {
+                                                    <img src="@product.ImageUrl" class="me-2" alt="@product.Name" width="40" height="40" style="object-fit: cover;">
+                                                }
+                                                else
+                                                {
+                                                    <div class="bg-light d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                                        <i class="bi bi-image text-muted"></i>
+                                                    </div>
+                                                }
+                                                <a href="/Products/Details/@product.Id">@product.Name</a>
+                                            </div>
+                                        </td>
+                                        <td>@product.Category?.Name</td>
+                                        <td>@product.Price.ToString("C")</td>
+                                        <td>
+                                            <span class="badge @GetProductConditionBadgeClass(product.Condition)">
+                                                @product.Condition.ToString()
+                                            </span>
+                                        </td>
+                                        <td>@product.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-white py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Giao dịch gần đây</h6>
+                    <a href="/Admin/WalletManagement" class="btn btn-sm btn-primary">Quản lý ví</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Người dùng</th>
+                                    <th>Loại</th>
+                                    <th>Số tiền</th>
+                                    <th>Trạng thái</th>
+                                    <th>Ngày tạo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var transaction in Model.RecentTransactions)
+                                {
+                                    <tr>
+                                        <td>@(transaction.User?.FirstName ?? "") @(transaction.User?.LastName ?? "")</td>
+                                        <td>
+                                            <span class="badge @GetTransactionTypeBadgeClass(transaction.Type)">
+                                                @GetTransactionTypeText(transaction.Type)
+                                            </span>
+                                        </td>
+                                        <td>@transaction.Amount.ToString("C")</td>
+                                        <td>
+                                            <span class="badge @GetTransactionStatusBadgeClass(transaction.Status)">
+                                                @GetTransactionStatusText(transaction.Status)
+                                            </span>
+                                        </td>
+                                        <td>@transaction.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Biểu đồ doanh thu
+        var ctx1 = document.getElementById('revenueChart').getContext('2d');
+        var revenueChart = new Chart(ctx1, {
+            type: 'line',
+            data: {
+                labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
+                datasets: [{
+                    label: 'Doanh thu',
+                    data: [
+                        @Model.Statistics?.MonthlyRevenue[0],
+                        @Model.Statistics?.MonthlyRevenue[1],
+                        @Model.Statistics?.MonthlyRevenue[2],
+                        @Model.Statistics?.MonthlyRevenue[3],
+                        @Model.Statistics?.MonthlyRevenue[4],
+                        @Model.Statistics?.MonthlyRevenue[5],
+                        @Model.Statistics?.MonthlyRevenue[6],
+                        @Model.Statistics?.MonthlyRevenue[7],
+                        @Model.Statistics?.MonthlyRevenue[8],
+                        @Model.Statistics?.MonthlyRevenue[9],
+                        @Model.Statistics?.MonthlyRevenue[10],
+                        @Model.Statistics?.MonthlyRevenue[11]
+                    ],
+                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                    borderColor: 'rgba(78, 115, 223, 1)',
+                    pointRadius: 3,
+                    pointBackgroundColor: 'rgba(78, 115, 223, 1)',
+                    pointBorderColor: 'rgba(78, 115, 223, 1)',
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: 'rgba(78, 115, 223, 1)',
+                    pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
+                    pointHitRadius: 10,
+                    pointBorderWidth: 2,
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        // Biểu đồ phân bố sản phẩm
+        var ctx2 = document.getElementById('productDistributionChart').getContext('2d');
+        var productDistributionChart = new Chart(ctx2, {
+            type: 'doughnut',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.Statistics?.CategoryNames)),
+                datasets: [{
+                    data: @Html.Raw(Json.Serialize(Model.Statistics?.ProductsPerCategory)),
+                    backgroundColor: [
+                        '#4e73df',
+                        '#1cc88a',
+                        '#36b9cc',
+                        '#f6c23e',
+                        '#e74a3b',
+                        '#5a5c69',
+                        '#6f42c1',
+                        '#fd7e14',
+                        '#20c997',
+                        '#6c757d'
+                    ],
+                    hoverBackgroundColor: [
+                        '#2e59d9',
+                        '#17a673',
+                        '#2c9faf',
+                        '#dda20a',
+                        '#be2617',
+                        '#3a3b45',
+                        '#5d36a5',
+                        '#e66901',
+                        '#13795b',
+                        '#5a6268'
+                    ],
+                    hoverBorderColor: "rgba(234, 236, 244, 1)",
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        align: 'start'
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+    </script>
+}
+
+@functions {
+    public string GetOrderStatusBadgeClass(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "bg-warning text-dark",
+            OrderStatus.Processing => "bg-info text-dark",
+            OrderStatus.Shipped => "bg-primary",
+            OrderStatus.Delivered => "bg-success",
+            OrderStatus.Cancelled => "bg-danger",
+            OrderStatus.Refunded => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+    
+    public string GetOrderStatusText(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "Chờ xử lý",
+            OrderStatus.Processing => "Đang xử lý",
+            OrderStatus.Shipped => "Đang vận chuyển",
+            OrderStatus.Delivered => "Đã giao hàng",
+            OrderStatus.Cancelled => "Đã hủy",
+            OrderStatus.Refunded => "Đã hoàn tiền",
+            _ => status.ToString()
+        };
+    }
+    
+    public string GetProductConditionBadgeClass(ProductCondition condition)
+    {
+        return condition switch
+        {
+            ProductCondition.New => "bg-success",
+            ProductCondition.LikeNew => "bg-info",
+            ProductCondition.Good => "bg-primary",
+            ProductCondition.Fair => "bg-warning text-dark",
+            _ => "bg-secondary"
+        };
+    }
+    
+    public string GetTransactionTypeBadgeClass(TransactionType type)
+    {
+        return type switch
+        {
+            TransactionType.Deposit => "bg-success",
+            TransactionType.Withdraw => "bg-danger",
+            TransactionType.Purchase => "bg-primary",
+            TransactionType.Sale => "bg-info",
+            TransactionType.Refund => "bg-warning text-dark",
+            _ => "bg-secondary"
+        };
+    }
+    
+    public string GetTransactionTypeText(TransactionType type)
+    {
+        return type switch
+        {
+            TransactionType.Deposit => "Nạp tiền",
+            TransactionType.Withdraw => "Rút tiền",
+            TransactionType.Purchase => "Mua hàng",
+            TransactionType.Sale => "Bán hàng",
+            TransactionType.Refund => "Hoàn tiền",
+            _ => type.ToString()
+        };
+    }
+    
+    public string GetTransactionStatusBadgeClass(TransactionStatus status)
+    {
+        return status switch
+        {
+            TransactionStatus.Pending => "bg-warning text-dark",
+            TransactionStatus.Completed => "bg-success",
+            TransactionStatus.Failed => "bg-danger",
+            TransactionStatus.Rejected => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+    
+    public string GetTransactionStatusText(TransactionStatus status)
+    {
+        return status switch
+        {
+            TransactionStatus.Pending => "Chờ xử lý",
+            TransactionStatus.Completed => "Hoàn thành",
+            TransactionStatus.Failed => "Thất bại",
+            TransactionStatus.Rejected => "Từ chối",
+            _ => status.ToString()
+        };
+    }
+}

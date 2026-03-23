@@ -1,0 +1,13 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Models.ViewModels
+{
+    public class OrderListViewModel
+    {
+        public IEnumerable<Order> Orders { get; set; } = new List<Order>();
+        public OrderStatus? Status { get; set; }
+        public string? SortOrder { get; set; } = "newest";
+        public int CurrentPage { get; set; } = 1;
+        public int TotalPages { get; set; }
+    }
+}

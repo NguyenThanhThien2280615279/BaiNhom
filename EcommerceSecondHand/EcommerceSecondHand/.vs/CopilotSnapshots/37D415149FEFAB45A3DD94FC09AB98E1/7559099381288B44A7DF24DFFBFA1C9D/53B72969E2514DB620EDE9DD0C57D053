@@ -1,0 +1,214 @@
+﻿@model NotificationsViewModel
+@{
+    ViewData["Title"] = "Thông báo";
+}
+
+<div class="container mt-4">
+    <h1>Thông báo</h1>
+    
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">B? l?c</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="unreadOnlySwitch" @(Model.UnreadOnly ? "checked" : "")>
+                            <label class="form-check-label" for="unreadOnlySwitch">Ch? hi?n ch?a ??c</label>
+                        </div>
+                    </div>
+                    
+                    <div class="list-group">
+                        <a href="javascript:void(0);" onclick="filterNotifications(null, @(Model.UnreadOnly.ToString().ToLower()))" 
+                           class="list-group-item list-group-item-action @(Model.SelectedType == null ? "active" : "")">
+                            <i class="bi bi-bell me-2"></i> T?t c?
+                            <span class="badge bg-primary rounded-pill float-end">@Model.UnreadCount</span>
+                        </a>
+                        <a href="javascript:void(0);" onclick="filterNotifications('Information', @(Model.UnreadOnly.ToString().ToLower()))" 
+                           class="list-group-item list-group-item-action @(Model.SelectedType == NotificationType.Information ? "active" : "")">
+                            <i class="bi bi-info-circle me-2"></i> Thông tin
+                        </a>
+                        <a href="javascript:void(0);" onclick="filterNotifications('Order', @(Model.UnreadOnly.ToString().ToLower()))" 
+                           class="list-group-item list-group-item-action @(Model.SelectedType == NotificationType.Order ? "active" : "")">
+                            <i class="bi bi-box me-2"></i> ??n hàng
+                        </a>
+                        <a href="javascript:void(0);" onclick="filterNotifications('Payment', @(Model.UnreadOnly.ToString().ToLower()))" 
+                           class="list-group-item list-group-item-action @(Model.SelectedType == NotificationType.Payment ? "active" : "")">
+                            <i class="bi bi-credit-card me-2"></i> Thanh toán
+                        </a>
+                        <a href="javascript:void(0);" onclick="filterNotifications('Message', @(Model.UnreadOnly.ToString().ToLower()))" 
+                           class="list-group-item list-group-item-action @(Model.SelectedType == NotificationType.Message ? "active" : "")">
+                            <i class="bi bi-chat-dots me-2"></i> Tin nh?n
+                        </a>
+                        <a href="javascript:void(0);" onclick="filterNotifications('Promotion', @(Model.UnreadOnly.ToString().ToLower()))" 
+                           class="list-group-item list-group-item-action @(Model.SelectedType == NotificationType.Promotion ? "active" : "")">
+                            <i class="bi bi-tag me-2"></i> Khuy?n mãi
+                        </a>
+                        <a href="javascript:void(0);" onclick="filterNotifications('Review', @(Model.UnreadOnly.ToString().ToLower()))" 
+                           class="list-group-item list-group-item-action @(Model.SelectedType == NotificationType.Review ? "active" : "")">
+                            <i class="bi bi-star me-2"></i> ?ánh giá
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            @if (Model.SelectedType != null)
+                            {
+                                <span>@Model.SelectedType</span>
+                            }
+                            else
+                            {
+                                <span>T?t c? thông báo</span>
+                            }
+                        </h5>
+                        
+                        <div>
+                            <form method="post" asp-controller="WebNotifications" asp-action="MarkAllAsRead" class="d-inline">
+                                <button type="submit" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-check-all me-1"></i> ?ánh d?u t?t c? ?ã ??c
+                                </button>
+                            </form>
+                            <form method="post" asp-controller="WebNotifications" asp-action="DeleteAll" class="d-inline" onsubmit="return confirm('B?n có ch?c ch?n mu?n xóa t?t c? thông báo?');">
+                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                    <i class="bi bi-trash me-1"></i> Xóa t?t c?
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model.Notifications.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var notification in Model.Notifications)
+                            {
+                                <div class="list-group-item list-group-item-action py-3 @(!notification.IsRead ? "bg-light" : "")">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">
+                                            <i class="@GetNotificationIconClass(notification.Type) me-2"></i>
+                                            @notification.Title
+                                            @if (!notification.IsRead)
+                                            {
+                                                <span class="badge rounded-pill bg-primary ms-2">M?i</span>
+                                            }
+                                        </h6>
+                                        <small>@notification.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                                    </div>
+                                    <p class="mb-1">@notification.Message</p>
+                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                        <div>
+                                            @if (!string.IsNullOrEmpty(notification.ActionUrl))
+                                            {
+                                                <a href="@notification.ActionUrl" class="btn btn-sm btn-outline-primary me-2">
+                                                    Xem chi ti?t
+                                                </a>
+                                            }
+                                            
+                                            @if (!notification.IsRead)
+                                            {
+                                                <form method="post" asp-controller="WebNotifications" asp-action="MarkAsRead" class="d-inline">
+                                                    <input type="hidden" name="id" value="@notification.Id" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary me-2">
+                                                        ?ánh d?u ?ã ??c
+                                                    </button>
+                                                </form>
+                                            }
+                                        </div>
+                                        
+                                        <form method="post" asp-controller="WebNotifications" asp-action="Delete" class="d-inline">
+                                            <input type="hidden" name="id" value="@notification.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        
+                        @if (Model.TotalPages > 1)
+                        {
+                            <div class="d-flex justify-content-center mt-4">
+                                <nav>
+                                    <ul class="pagination">
+                                        @for (int i = 1; i <= Model.TotalPages; i++)
+                                        {
+                                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                                <a class="page-link" href="javascript:void(0);" 
+                                                   onclick="filterNotifications('@(Model.SelectedType)', @(Model.UnreadOnly.ToString().ToLower()), @i)">
+                                                    @i
+                                                </a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </nav>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <div class="mb-4">
+                                <i class="bi bi-bell-slash text-muted" style="font-size: 4rem;"></i>
+                            </div>
+                            <h3>Không có thông báo nào</h3>
+                            <p class="text-muted">B?n s? nh?n ???c thông báo khi có ho?t ??ng m?i.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // X? lý l?c thông báo
+        function filterNotifications(type, unreadOnly, page = 1) {
+            let url = '/WebNotifications?';
+            
+            if (type) {
+                url += `type=${type}&`;
+            }
+            
+            if (unreadOnly) {
+                url += 'unreadOnly=true&';
+            }
+            
+            if (page > 1) {
+                url += `page=${page}`;
+            }
+            
+            window.location.href = url;
+        }
+        
+        // X? lý khi thay ??i tr?ng thái ch? hi?n th? ch?a ??c
+        document.getElementById('unreadOnlySwitch').addEventListener('change', function() {
+            filterNotifications('@Model.SelectedType', this.checked);
+        });
+    </script>
+}
+
+@functions {
+    public string GetNotificationIconClass(NotificationType type)
+    {
+        return type switch
+        {
+            NotificationType.Information => "bi bi-info-circle",
+            NotificationType.Order => "bi bi-box",
+            NotificationType.Payment => "bi bi-credit-card",
+            NotificationType.Message => "bi bi-chat-dots",
+            NotificationType.Promotion => "bi bi-tag",
+            NotificationType.Review => "bi bi-star",
+            _ => "bi bi-bell"
+        };
+    }
+}

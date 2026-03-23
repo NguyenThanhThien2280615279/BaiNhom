@@ -1,0 +1,10 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Models
+{
+    public class CartViewModel
+    {
+        public IEnumerable<CartItem> CartItems { get; set; } = new List<CartItem>();
+        public decimal TotalAmount { get; set; }
+    }
+}

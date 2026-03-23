@@ -1,0 +1,454 @@
+﻿@model CustomerDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard khách hàng";
+}
+
+<div class="container-fluid mt-4">
+    <h1>Dashboard khách hàng</h1>
+    
+    <div class="row mt-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                ??n hàng ?ang ch?</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.PendingOrders</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-hourglass-split fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                ??n hàng ?ã giao</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.DeliveredOrders</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                T?ng ti?n ?ã chi</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalSpent.ToString("C")</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-currency-dollar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Thông báo ch?a ??c</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                @Model.UnreadNotifications
+                                @if (Model.UnreadNotifications > 0)
+                                {
+                                    <a href="/Notifications" class="btn btn-sm btn-warning ms-2">Xem</a>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-bell fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-white py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Chi tiêu theo tháng</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="spendingChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-white py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin tài kho?n</h6>
+                    <a href="/Account/Edit" class="btn btn-sm btn-primary">Ch?nh s?a</a>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-column align-items-center text-center mb-4">
+                        @if (!string.IsNullOrEmpty(Model.User?.ProfilePicture))
+                        {
+                            <img src="@Model.User.ProfilePicture" alt="@Model.User.FirstName" class="rounded-circle img-thumbnail" width="150" height="150" style="object-fit: cover;">
+                        }
+                        else
+                        {
+                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
+                                <i class="bi bi-person-fill" style="font-size: 5rem;"></i>
+                            </div>
+                        }
+                        <h4 class="mt-3">@Model.User?.FirstName @Model.User?.LastName</h4>
+                        <p class="text-muted">Khách hàng</p>
+                    </div>
+                    
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-envelope me-2"></i> Email</span>
+                            <span>@Model.User?.Email</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-telephone me-2"></i> S? ?i?n tho?i</span>
+                            <span>@(Model.User?.PhoneNumber ?? "Ch?a c?p nh?t")</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-geo-alt me-2"></i> ??a ch?</span>
+                            <span>@(Model.User?.Address ?? "Ch?a c?p nh?t")</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-wallet2 me-2"></i> S? d? ví</span>
+                            <span>
+                                @Model.User?.WalletBalance.ToString("C")
+                                <a href="/Wallet" class="btn btn-sm btn-outline-primary ms-2">Xem ví</a>
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-calendar-check me-2"></i> Ngày tham gia</span>
+                            <span>@Model.User?.CreatedAt.ToString("dd/MM/yyyy")</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-white py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">??n hàng g?n ?ây</h6>
+                    <a href="/Orders" class="btn btn-sm btn-primary">Xem t?t c?</a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Mã ??n hàng</th>
+                                    <th>Ng??i bán</th>
+                                    <th>T?ng ti?n</th>
+                                    <th>Ph??ng th?c thanh toán</th>
+                                    <th>Tr?ng thái</th>
+                                    <th>Ngày ??t</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.RecentOrders.Any())
+                                {
+                                    foreach (var order in Model.RecentOrders)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a href="/Orders/Details/@order.Id">#@order.OrderNumber</a>
+                                            </td>
+                                            <td>@(order.Seller?.FirstName ?? "") @(order.Seller?.LastName ?? "")</td>
+                                            <td>@order.TotalAmount.ToString("C")</td>
+                                            <td>@GetPaymentMethodText(order.PaymentMethod)</td>
+                                            <td>
+                                                <span class="badge @GetOrderStatusBadgeClass(order.Status)">
+                                                    @GetOrderStatusText(order.Status)
+                                                </span>
+                                            </td>
+                                            <td>@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="/Orders/Details/@order.Id" class="btn btn-sm btn-primary">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    @if (order.Status == OrderStatus.Pending)
+                                                    {
+                                                        <form method="post" asp-controller="Orders" asp-action="Cancel" asp-route-id="@order.Id" class="d-inline">
+                                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('B?n có ch?c ch?n mu?n h?y ??n hàng này?');">
+                                                                <i class="bi bi-x-lg"></i>
+                                                            </button>
+                                                        </form>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="7" class="text-center">B?n ch?a có ??n hàng nào.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-white py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">S?n ph?m ?ã xem g?n ?ây</h6>
+                    <a href="/Customer/History" class="btn btn-sm btn-primary">Xem t?t c?</a>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @if (Model.RecentlyViewedProducts.Any())
+                        {
+                            foreach (var product in Model.RecentlyViewedProducts)
+                            {
+                                <div class="col-md-4 mb-4">
+                                    <div class="card h-100">
+                                        @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                        {
+                                            <img src="@product.ImageUrl" class="card-img-top" alt="@product.Name" style="height: 180px; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                                                <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                                            </div>
+                                        }
+                                        <div class="card-body">
+                                            <h5 class="card-title text-truncate">@product.Name</h5>
+                                            <p class="card-text text-primary fw-bold">@product.Price.ToString("C")</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge @GetProductConditionBadgeClass(product.Condition)">
+                                                    @GetProductConditionText(product.Condition)
+                                                </span>
+                                                <small class="text-muted">@product.CreatedAt.ToString("dd/MM/yyyy")</small>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer bg-transparent">
+                                            <a href="/Products/Details/@product.Id" class="btn btn-sm btn-primary w-100">Xem chi ti?t</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="col-12 text-center py-4">
+                                <p class="text-muted">B?n ch?a xem s?n ph?m nào.</p>
+                                <a href="/Products" class="btn btn-primary">Xem s?n ph?m ngay</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-white py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">?ánh giá g?n ?ây c?a b?n</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>S?n ph?m</th>
+                                    <th>?ánh giá</th>
+                                    <th>Nh?n xét</th>
+                                    <th>Ngày ?ánh giá</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.RecentReviews.Any())
+                                {
+                                    foreach (var review in Model.RecentReviews)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a href="/Products/Details/@review.ProductId">@review.Product?.Name</a>
+                                            </td>
+                                            <td>
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    if (i <= review.Rating)
+                                                    {
+                                                        <i class="bi bi-star-fill text-warning"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="bi bi-star text-warning"></i>
+                                                    }
+                                                }
+                                            </td>
+                                            <td>@review.Comment</td>
+                                            <td>@review.CreatedAt.ToString("dd/MM/yyyy")</td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center">B?n ch?a ?ánh giá s?n ph?m nào.</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Bi?u ?? chi tiêu
+        var ctx = document.getElementById('spendingChart').getContext('2d');
+        var spendingChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
+                datasets: [{
+                    label: 'Chi tiêu',
+                    data: [
+                        @Model.Statistics?.MonthlySpending[0],
+                        @Model.Statistics?.MonthlySpending[1],
+                        @Model.Statistics?.MonthlySpending[2],
+                        @Model.Statistics?.MonthlySpending[3],
+                        @Model.Statistics?.MonthlySpending[4],
+                        @Model.Statistics?.MonthlySpending[5],
+                        @Model.Statistics?.MonthlySpending[6],
+                        @Model.Statistics?.MonthlySpending[7],
+                        @Model.Statistics?.MonthlySpending[8],
+                        @Model.Statistics?.MonthlySpending[9],
+                        @Model.Statistics?.MonthlySpending[10],
+                        @Model.Statistics?.MonthlySpending[11]
+                    ],
+                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                    borderColor: 'rgba(78, 115, 223, 1)',
+                    pointRadius: 3,
+                    pointBackgroundColor: 'rgba(78, 115, 223, 1)',
+                    pointBorderColor: 'rgba(78, 115, 223, 1)',
+                    pointHoverRadius: 5,
+                    pointHoverBackgroundColor: 'rgba(78, 115, 223, 1)',
+                    pointHoverBorderColor: 'rgba(78, 115, 223, 1)',
+                    pointHitRadius: 10,
+                    pointBorderWidth: 2,
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+}
+
+@functions {
+    public string GetProductConditionBadgeClass(ProductCondition condition)
+    {
+        return condition switch
+        {
+            ProductCondition.New => "bg-success",
+            ProductCondition.LikeNew => "bg-info",
+            ProductCondition.Good => "bg-primary",
+            ProductCondition.Fair => "bg-warning text-dark",
+            _ => "bg-secondary"
+        };
+    }
+    
+    public string GetProductConditionText(ProductCondition condition)
+    {
+        return condition switch
+        {
+            ProductCondition.New => "M?i",
+            ProductCondition.LikeNew => "Nh? m?i",
+            ProductCondition.Good => "T?t",
+            ProductCondition.Fair => "Khá",
+            _ => condition.ToString()
+        };
+    }
+    
+    public string GetOrderStatusBadgeClass(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "bg-warning text-dark",
+            OrderStatus.Processing => "bg-info text-dark",
+            OrderStatus.Shipped => "bg-primary",
+            OrderStatus.Delivered => "bg-success",
+            OrderStatus.Cancelled => "bg-danger",
+            OrderStatus.Refunded => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+    
+    public string GetOrderStatusText(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "Ch? x? lý",
+            OrderStatus.Processing => "?ang x? lý",
+            OrderStatus.Shipped => "?ang v?n chuy?n",
+            OrderStatus.Delivered => "?ã giao hàng",
+            OrderStatus.Cancelled => "?ã h?y",
+            OrderStatus.Refunded => "?ã hoàn ti?n",
+            _ => status.ToString()
+        };
+    }
+    
+    public string GetPaymentMethodText(string paymentMethod)
+    {
+        return paymentMethod switch
+        {
+            "Wallet" => "Ví ?i?n t?",
+            "COD" => "Thanh toán khi nh?n hàng",
+            "BankTransfer" => "Chuy?n kho?n ngân hàng",
+            _ => paymentMethod
+        };
+    }
+}

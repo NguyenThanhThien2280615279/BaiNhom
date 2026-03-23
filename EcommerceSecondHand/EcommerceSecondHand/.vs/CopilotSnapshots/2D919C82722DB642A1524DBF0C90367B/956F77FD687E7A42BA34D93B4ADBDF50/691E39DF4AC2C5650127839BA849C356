@@ -1,0 +1,294 @@
+﻿@model ProductDetailsViewModel
+@{
+    ViewData["Title"] = Model.Product?.Name ?? "Chi ti?t s?n ph?m";
+}
+
+<div class="container mt-4">
+    @if (Model.Product != null)
+    {
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang ch?</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Products" asp-action="Index">S?n ph?m</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Products" asp-action="Index" asp-route-categoryId="@Model.Product.CategoryId">@Model.Product.Category?.Name</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.Product.Name</li>
+            </ol>
+        </nav>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        @if (!string.IsNullOrEmpty(Model.Product.ImageUrl))
+                        {
+                            <img src="@Model.Product.ImageUrl" class="img-fluid" alt="@Model.Product.Name">
+                        }
+                        else
+                        {
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 400px;">
+                                <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h1 class="card-title">@Model.Product.Name</h1>
+                        <div class="mb-3">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="bi bi-star@(i <= Model.AverageRating ? "-fill" : "") text-warning"></i>
+                            }
+                            <span class="ms-2">@Model.AverageRating.ToString("0.0") (@Model.Reviews.Count() ?ánh giá)</span>
+                        </div>
+                        <h3 class="text-primary mb-3">@Model.Product.Price.ToString("C")</h3>
+                        <p class="mb-1"><strong>Tình tr?ng:</strong> @GetConditionText(Model.Product.Condition)</p>
+                        <p class="mb-1"><strong>Danh m?c:</strong> <a asp-controller="Products" asp-action="Index" asp-route-categoryId="@Model.Product.CategoryId">@Model.Product.Category?.Name</a></p>
+                        <p class="mb-1"><strong>Ng??i bán:</strong> @Model.Product.Seller?.FirstName @Model.Product.Seller?.LastName</p>
+                        <p class="mb-1"><strong>S? l??ng còn l?i:</strong> @Model.Product.Quantity</p>
+                        <p class="mb-3"><strong>Ngày ??ng:</strong> @Model.Product.DateListed.ToString("dd/MM/yyyy")</p>
+                        
+                        <hr class="my-3">
+                        
+                        <div class="mb-3">
+                            <h5>Mô t?</h5>
+                            <p>@Model.Product.Description</p>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <form method="post" asp-controller="Cart" asp-action="AddToCart">
+                                <input type="hidden" name="productId" value="@Model.Product.Id" />
+                                <div class="input-group mb-3">
+                                    <label class="input-group-text" for="quantity">S? l??ng</label>
+                                    <input type="number" class="form-control" id="quantity" name="quantity" value="1" min="1" max="@Model.Product.Quantity">
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 mb-2" @(Model.Product.Quantity <= 0 ? "disabled" : "")>
+                                    <i class="bi bi-cart-plus me-1"></i> Thêm vào gi? hàng
+                                </button>
+                            </form>
+                            
+                            <a href="#" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#messageModal">
+                                <i class="bi bi-chat-dots me-1"></i> Nh?n tin cho ng??i bán
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Ph?n ?ánh giá -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">?ánh giá s?n ph?m</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (User.Identity?.IsAuthenticated == true && !Model.HasUserReviewed)
+                        {
+                            <div class="mb-4">
+                                <h6>Vi?t ?ánh giá c?a b?n</h6>
+                                <form method="post" asp-controller="Products" asp-action="AddReview">
+                                    <input type="hidden" name="ProductId" value="@Model.Product.Id" />
+                                    <div class="mb-3">
+                                        <label class="form-label">?ánh giá</label>
+                                        <div>
+                                            <div class="rating">
+                                                <input type="radio" id="star5" name="Rating" value="5" /><label for="star5" title="5 sao"></label>
+                                                <input type="radio" id="star4" name="Rating" value="4" /><label for="star4" title="4 sao"></label>
+                                                <input type="radio" id="star3" name="Rating" value="3" /><label for="star3" title="3 sao"></label>
+                                                <input type="radio" id="star2" name="Rating" value="2" /><label for="star2" title="2 sao"></label>
+                                                <input type="radio" id="star1" name="Rating" value="1" /><label for="star1" title="1 sao"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Nh?n xét</label>
+                                        <textarea name="Comment" class="form-control" rows="3" placeholder="Nh?p nh?n xét c?a b?n..."></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">G?i ?ánh giá</button>
+                                </form>
+                            </div>
+                        }
+                        
+                        <h6>T?t c? ?ánh giá (@Model.Reviews.Count())</h6>
+                        @if (Model.Reviews.Any())
+                        {
+                            <div class="list-group">
+                                @foreach (var review in Model.Reviews)
+                                {
+                                    <div class="list-group-item list-group-item-action">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">@review.User?.FirstName @review.User?.LastName</h6>
+                                            <small>@review.DateCreated.ToString("dd/MM/yyyy")</small>
+                                        </div>
+                                        <div class="mb-2">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <i class="bi bi-star@(i <= review.Rating ? "-fill" : "") text-warning"></i>
+                                            }
+                                        </div>
+                                        <p class="mb-1">@review.Comment</p>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <p class="text-muted">Ch?a có ?ánh giá nào. Hãy tr? thành ng??i ??u tiên ?ánh giá s?n ph?m này!</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- S?n ph?m liên quan -->
+        @if (Model.RelatedProducts.Any())
+        {
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">S?n ph?m liên quan</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+                                @foreach (var relatedProduct in Model.RelatedProducts)
+                                {
+                                    <div class="col">
+                                        <div class="card h-100 product-card">
+                                            <a asp-controller="Products" asp-action="Details" asp-route-id="@relatedProduct.Id" class="text-decoration-none">
+                                                @if (!string.IsNullOrEmpty(relatedProduct.ImageUrl))
+                                                {
+                                                    <img src="@relatedProduct.ImageUrl" class="card-img-top" alt="@relatedProduct.Name" style="height: 150px; object-fit: cover;">
+                                                }
+                                                else
+                                                {
+                                                    <div class="bg-light d-flex align-items-center justify-content-center" style="height: 150px;">
+                                                        <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                                                    </div>
+                                                }
+                                            </a>
+                                            <div class="card-body">
+                                                <h6 class="card-title">
+                                                    <a asp-controller="Products" asp-action="Details" asp-route-id="@relatedProduct.Id" class="text-decoration-none text-dark">
+                                                        @relatedProduct.Name
+                                                    </a>
+                                                </h6>
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span class="text-primary fw-bold">@relatedProduct.Price.ToString("C")</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        
+        <!-- Modal nh?n tin cho ng??i bán -->
+        <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="messageModalLabel">Nh?n tin cho ng??i bán</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <form method="post" asp-controller="Messages" asp-action="SendMessage">
+                                <input type="hidden" name="receiverId" value="@Model.Product.SellerId" />
+                                <div class="mb-3">
+                                    <label class="form-label">N?i dung</label>
+                                    <textarea name="content" class="form-control" rows="4" required placeholder="Nh?p tin nh?n c?a b?n..."></textarea>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">G?i tin nh?n</button>
+                                </div>
+                            </form>
+                        }
+                        else
+                        {
+                            <div class="text-center py-3">
+                                <p>B?n c?n ??ng nh?p ?? g?i tin nh?n cho ng??i bán.</p>
+                                <a asp-area="Identity" asp-controller="Account" asp-action="Login" class="btn btn-primary">??ng nh?p</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger" role="alert">
+            Không tìm th?y s?n ph?m.
+        </div>
+    }
+</div>
+
+@section Styles {
+    <style>
+        .rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+        
+        .rating:not(:checked) > input {
+            position: absolute;
+            appearance: none;
+        }
+        
+        .rating:not(:checked) > label {
+            float: right;
+            cursor: pointer;
+            font-size: 30px;
+            color: #ccc;
+        }
+        
+        .rating:not(:checked) > label:before {
+            content: '?';
+        }
+        
+        .rating > input:checked ~ label {
+            color: #ffc700;
+        }
+        
+        .rating:not(:checked) > label:hover,
+        .rating:not(:checked) > label:hover ~ label {
+            color: #ffc700;
+        }
+        
+        .rating > input:checked + label:hover,
+        .rating > input:checked + label:hover ~ label,
+        .rating > input:checked ~ label:hover,
+        .rating > input:checked ~ label:hover ~ label,
+        .rating > label:hover ~ input:checked ~ label {
+            color: #ffc700;
+        }
+    </style>
+}
+
+@functions {
+    public string GetConditionText(ProductCondition condition)
+    {
+        return condition switch
+        {
+            ProductCondition.New => "M?i",
+            ProductCondition.LikeNew => "Nh? m?i",
+            ProductCondition.Good => "T?t",
+            ProductCondition.Fair => "Khá",
+            ProductCondition.Poor => "Kém",
+            _ => condition.ToString()
+        };
+    }
+}

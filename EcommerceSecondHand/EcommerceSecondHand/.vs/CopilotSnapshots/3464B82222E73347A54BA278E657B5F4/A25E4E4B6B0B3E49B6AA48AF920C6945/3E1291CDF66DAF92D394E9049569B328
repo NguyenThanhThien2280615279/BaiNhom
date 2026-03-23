@@ -1,0 +1,81 @@
+﻿using EcommerceSecondHand.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+namespace EcommerceSecondHand.Data
+{
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
+        {
+        }
+
+        public DbSet<Product> Products { get; set; } = null!;
+        public DbSet<Category> Categories { get; set; } = null!;
+        public DbSet<Order> Orders { get; set; } = null!;
+        public DbSet<OrderItem> OrderItems { get; set; } = null!;
+        public DbSet<CartItem> CartItems { get; set; } = null!;
+        public DbSet<Review> Reviews { get; set; } = null!;
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // Configure relationships and constraints
+            modelBuilder.Entity<Product>()
+                .HasOne(p => p.Category)
+                .WithMany(c => c.Products)
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Product>()
+                .HasOne(p => p.Seller)
+                .WithMany(u => u.Products)
+                .HasForeignKey(p => p.SellerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.User)
+                .WithMany(u => u.Orders)
+                .HasForeignKey(o => o.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<OrderItem>()
+                .HasOne(oi => oi.Order)
+                .WithMany(o => o.OrderItems)
+                .HasForeignKey(oi => oi.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<OrderItem>()
+                .HasOne(oi => oi.Product)
+                .WithMany(p => p.OrderItems)
+                .HasForeignKey(oi => oi.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CartItem>()
+                .HasOne(ci => ci.User)
+                .WithMany(u => u.CartItems)
+                .HasForeignKey(ci => ci.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<CartItem>()
+                .HasOne(ci => ci.Product)
+                .WithMany(p => p.CartItems)
+                .HasForeignKey(ci => ci.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Product)
+                .WithMany(p => p.Reviews)
+                .HasForeignKey(r => r.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.User)
+                .WithMany(u => u.Reviews)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
+    }
+}

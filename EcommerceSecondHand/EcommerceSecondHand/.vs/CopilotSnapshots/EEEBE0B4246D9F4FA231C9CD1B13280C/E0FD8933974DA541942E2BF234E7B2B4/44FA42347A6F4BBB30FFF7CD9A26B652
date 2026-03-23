@@ -1,0 +1,407 @@
+﻿using EcommerceSecondHand.Data;
+using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace EcommerceSecondHand.Repositories
+{
+    public class ProductRepository : Repository<Product>, IProductRepository
+    {
+        public ProductRepository(ApplicationDbContext context) : base(context)
+        {
+        }
+
+        public async Task<IEnumerable<Product>> GetProductsByCategoryAsync(int categoryId)
+        {
+            return await _dbSet
+                .Where(p => p.CategoryId == categoryId)
+                .Include(p => p.Category)
+                .Include(p => p.Seller)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetProductsBySellerAsync(string sellerId)
+        {
+            return await _dbSet
+                .Where(p => p.SellerId == sellerId)
+                .Include(p => p.Category)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetProductsBySellerAsync(string sellerId, string? sortOrder, int page, int pageSize)
+        {
+            var query = _dbSet.Where(p => p.SellerId == sellerId);
+
+            // Apply sorting
+            query = sortOrder switch
+            {
+                "priceAsc" => query.OrderBy(p => p.Price),
+                "priceDesc" => query.OrderByDescending(p => p.Price),
+                "oldest" => query.OrderBy(p => p.DateCreated),
+                _ => query.OrderByDescending(p => p.DateCreated) // "newest" is default
+            };
+
+            return await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Include(p => p.Category)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> SearchProductsAsync(string searchTerm)
+        {
+            return await _dbSet
+                .Where(p => p.Name.Contains(searchTerm) || p.Description!.Contains(searchTerm))
+                .Include(p => p.Category)
+                .Include(p => p.Seller)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetFeaturedProductsAsync(int count)
+        {
+            return await _dbSet
+                .OrderByDescending(p => p.Reviews!.Count)
+                .Include(p => p.Category)
+                .Include(p => p.Seller)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetRecentProductsAsync(int count)
+        {
+            return await _dbSet
+                .OrderByDescending(p => p.DateCreated)
+                .Include(p => p.Category)
+                .Include(p => p.Seller)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetRecentProductsBySellerAsync(string sellerId, int count)
+        {
+            return await _dbSet
+                .Where(p => p.SellerId == sellerId)
+                .OrderByDescending(p => p.DateCreated)
+                .Take(count)
+                .Include(p => p.Category)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetRecentlyViewedProductsAsync(string userId, int count)
+        {
+            // This would typically involve a view history table, for now return recent products
+            return await _dbSet
+                .OrderByDescending(p => p.DateCreated)
+                .Take(count)
+                .Include(p => p.Category)
+                .Include(p => p.Seller)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetFavoriteProductsAsync(string userId, int page, int pageSize)
+        {
+            // This would typically involve a favorites table, for now return empty list
+            return new List<Product>();
+        }
+
+        public async Task<int> CountFavoriteProductsAsync(string userId)
+        {
+            // This would typically involve a favorites table
+            return 0;
+        }
+
+        public async Task AddToFavoritesAsync(string userId, int productId)
+        {
+            // This would typically involve adding to a favorites table
+            // For now, this is a placeholder
+        }
+
+        public async Task RemoveFromFavoritesAsync(string userId, int productId)
+        {
+            // This would typically involve removing from a favorites table
+            // For now, this is a placeholder
+        }
+
+        public async Task<IEnumerable<Product>> GetViewHistoryAsync(string userId, int page, int pageSize)
+        {
+            // This would typically involve a view history table, for now return empty list
+            return new List<Product>();
+        }
+
+        public async Task<int> CountViewHistoryAsync(string userId)
+        {
+            // This would typically involve a view history table
+            return 0;
+        }
+
+        public async Task ClearViewHistoryAsync(string userId)
+        {
+            // This would typically involve clearing view history table
+            // For now, this is a placeholder
+        }
+
+        public async Task<int> CountProductsBySellerAsync(string sellerId)
+        {
+            return await _dbSet
+                .Where(p => p.SellerId == sellerId)
+                .CountAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetProductsWithFiltersAsync(int? categoryId, decimal? minPrice, decimal? maxPrice, ProductCondition? condition)
+        {
+            var query = _dbSet.AsQueryable();
+
+            if (categoryId.HasValue)
+            {
+                query = query.Where(p => p.CategoryId == categoryId.Value);
+            }
+
+            if (minPrice.HasValue)
+            {
+                query = query.Where(p => p.Price >= minPrice.Value);
+            }
+
+            if (maxPrice.HasValue)
+            {
+                query = query.Where(p => p.Price <= maxPrice.Value);
+            }
+
+            if (condition.HasValue)
+            {
+                query = query.Where(p => p.Condition == condition.Value);
+            }
+
+            return await query
+                .Include(p => p.Category)
+                .Include(p => p.Seller)
+                .ToListAsync();
+        }
+
+        public async Task<Product?> GetProductWithDetailsAsync(int id)
+        {
+            return await _dbSet
+                .Include(p => p.Category)
+                .Include(p => p.Seller)
+                .Include(p => p.Reviews)
+                    .ThenInclude(r => r.User)
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public async Task<IEnumerable<Product>> GetFilteredProductsAsync(int? categoryId, string? searchQuery, string? sortOrder, int page, int pageSize)
+        {
+            var query = _dbSet.AsQueryable();
+
+            // Apply filters
+            if (categoryId.HasValue)
+            {
+                query = query.Where(p => p.CategoryId == categoryId.Value);
+            }
+
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                query = query.Where(p => 
+                    p.Name.Contains(searchQuery) || 
+                    p.Description != null && p.Description.Contains(searchQuery));
+            }
+
+            // Apply sorting
+            query = sortOrder switch
+            {
+                "priceAsc" => query.OrderBy(p => p.Price),
+                "priceDesc" => query.OrderByDescending(p => p.Price),
+                "oldest" => query.OrderBy(p => p.DateCreated),
+                _ => query.OrderByDescending(p => p.DateCreated) // "newest" is default
+            };
+
+            // Apply pagination
+            return await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Include(p => p.Category)
+                .Include(p => p.Seller)
+                .ToListAsync();
+        }
+
+        public async Task<int> GetFilteredProductsCountAsync(int? categoryId, string? searchQuery)
+        {
+            var query = _dbSet.AsQueryable();
+
+            if (categoryId.HasValue)
+            {
+                query = query.Where(p => p.CategoryId == categoryId.Value);
+            }
+
+            if (!string.IsNullOrEmpty(searchQuery))
+            {
+                query = query.Where(p => 
+                    p.Name.Contains(searchQuery) || 
+                    p.Description != null && p.Description.Contains(searchQuery));
+            }
+
+            return await query.CountAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetRelatedProductsAsync(int productId, int count)
+        {
+            var product = await _dbSet.FindAsync(productId);
+            if (product == null)
+            {
+                return new List<Product>();
+            }
+
+            return await _dbSet
+                .Where(p => p.Id != productId && p.CategoryId == product.CategoryId)
+                .OrderByDescending(p => p.DateCreated)
+                .Take(count)
+                .Include(p => p.Category)
+                .Include(p => p.Seller)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetVendorProductsAsync(string vendorId, int count)
+        {
+            return await _dbSet
+                .Where(p => p.SellerId == vendorId)
+                .OrderByDescending(p => p.DateCreated)
+                .Take(count)
+                .Include(p => p.Category)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<string>> GetSearchSuggestionsAsync(string term, int count)
+        {
+            return await _dbSet
+                .Where(p => p.Name.Contains(term))
+                .Select(p => p.Name)
+                .Distinct()
+                .Take(count)
+                .ToListAsync();
+        }
+        
+        public async Task<IEnumerable<Product>> SearchProductsAsync(
+            string query,
+            string categoryId,
+            decimal? minPrice,
+            decimal? maxPrice,
+            ProductCondition? condition,
+            string sortOrder,
+            int page,
+            int pageSize)
+        {
+            var dbQuery = _dbSet.AsQueryable();
+            
+            // Apply search filters
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                dbQuery = dbQuery.Where(p => p.Name.Contains(query) || 
+                                            (p.Description != null && p.Description.Contains(query)));
+            }
+            
+            if (!string.IsNullOrWhiteSpace(categoryId) && int.TryParse(categoryId, out int catId))
+            {
+                dbQuery = dbQuery.Where(p => p.CategoryId == catId);
+            }
+            
+            if (minPrice.HasValue)
+            {
+                dbQuery = dbQuery.Where(p => p.Price >= minPrice.Value);
+            }
+            
+            if (maxPrice.HasValue)
+            {
+                dbQuery = dbQuery.Where(p => p.Price <= maxPrice.Value);
+            }
+            
+            if (condition.HasValue)
+            {
+                dbQuery = dbQuery.Where(p => p.Condition == condition.Value);
+            }
+            
+            // Apply sorting
+            dbQuery = sortOrder switch
+            {
+                "priceAsc" => dbQuery.OrderBy(p => p.Price),
+                "priceDesc" => dbQuery.OrderByDescending(p => p.Price),
+                "nameAsc" => dbQuery.OrderBy(p => p.Name),
+                "nameDesc" => dbQuery.OrderByDescending(p => p.Name),
+                "oldest" => dbQuery.OrderBy(p => p.DateCreated),
+                _ => dbQuery.OrderByDescending(p => p.DateCreated) // "newest" is default
+            };
+            
+            // Apply pagination
+            return await dbQuery
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Include(p => p.Category)
+                .Include(p => p.Seller)
+                .ToListAsync();
+        }
+        
+        public async Task<int> CountSearchResultsAsync(
+            string query,
+            string categoryId,
+            decimal? minPrice,
+            decimal? maxPrice,
+            ProductCondition? condition)
+        {
+            var dbQuery = _dbSet.AsQueryable();
+            
+            // Apply search filters
+            if (!string.IsNullOrWhiteSpace(query))
+            {
+                dbQuery = dbQuery.Where(p => p.Name.Contains(query) || 
+                                            (p.Description != null && p.Description.Contains(query)));
+            }
+            
+            if (!string.IsNullOrWhiteSpace(categoryId) && int.TryParse(categoryId, out int catId))
+            {
+                dbQuery = dbQuery.Where(p => p.CategoryId == catId);
+            }
+            
+            if (minPrice.HasValue)
+            {
+                dbQuery = dbQuery.Where(p => p.Price >= minPrice.Value);
+            }
+            
+            if (maxPrice.HasValue)
+            {
+                dbQuery = dbQuery.Where(p => p.Price <= maxPrice.Value);
+            }
+            
+            if (condition.HasValue)
+            {
+                dbQuery = dbQuery.Where(p => p.Condition == condition.Value);
+            }
+            
+            return await dbQuery.CountAsync();
+        }
+        
+        public async Task<int> CountProductsAsync()
+        {
+            return await _dbSet.CountAsync();
+        }
+        
+        public async Task<int> CountReportedProductsAsync()
+        {
+            // This would typically check for a ReportedFlag or similar property
+            // For now, just return 0 as a placeholder
+            return 0;
+        }
+
+        public async Task UpdateAsync(Product product)
+        {
+            _context.Entry(product).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var product = await _dbSet.FindAsync(id);
+            if (product != null)
+            {
+                _dbSet.Remove(product);
+                await _context.SaveChangesAsync();
+            }
+        }
+    }
+}

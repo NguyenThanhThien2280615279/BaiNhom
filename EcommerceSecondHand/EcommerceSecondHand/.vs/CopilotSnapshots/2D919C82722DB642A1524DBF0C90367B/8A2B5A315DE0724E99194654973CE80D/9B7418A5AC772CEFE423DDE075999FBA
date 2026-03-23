@@ -1,0 +1,338 @@
+﻿@model WalletManagementViewModel
+@{
+    ViewData["Title"] = "Qu?n lý ví ?i?n t?";
+}
+
+<div class="container-fluid mt-4">
+    <h1>Qu?n lý ví ?i?n t?</h1>
+    
+    <div class="row mt-4">
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                T?ng s? d? h? th?ng</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalSystemBalance.ToString("C")</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-bank fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                T?ng ti?n ?ang ch? n?p</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalPendingDeposits.ToString("C")</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-arrow-down-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                T?ng ti?n ?ang ch? rút</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.TotalPendingWithdrawals.ToString("C")</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-arrow-up-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    @if (Model.PendingTransactions.Any())
+    {
+        <div class="card shadow mb-4">
+            <div class="card-header bg-white py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Giao d?ch ?ang ch? x? lý</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Ng??i dùng</th>
+                                <th>Lo?i</th>
+                                <th>S? ti?n</th>
+                                <th>Ph??ng th?c</th>
+                                <th>Ngày t?o</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var transaction in Model.PendingTransactions)
+                            {
+                                <tr>
+                                    <td>@transaction.Id</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            @if (!string.IsNullOrEmpty(transaction.User?.ProfilePicture))
+                                            {
+                                                <img src="@transaction.User.ProfilePicture" class="rounded-circle me-2" alt="@transaction.User.FirstName" width="30" height="30" style="object-fit: cover;">
+                                            }
+                                            else
+                                            {
+                                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;">
+                                                    <i class="bi bi-person-fill"></i>
+                                                </div>
+                                            }
+                                            <span>@transaction.User?.FirstName @transaction.User?.LastName</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge @GetTransactionTypeBadgeClass(transaction.Type)">
+                                            @GetTransactionTypeText(transaction.Type)
+                                        </span>
+                                    </td>
+                                    <td>@transaction.Amount.ToString("C")</td>
+                                    <td>@transaction.PaymentMethod</td>
+                                    <td>@transaction.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <form method="post" asp-action="ApproveTransaction" asp-route-id="@transaction.Id" class="me-1">
+                                                <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('B?n có ch?c ch?n mu?n phê duy?t giao d?ch này?');">
+                                                    <i class="bi bi-check-lg"></i> Duy?t
+                                                </button>
+                                            </form>
+                                            <form method="post" asp-action="RejectTransaction" asp-route-id="@transaction.Id">
+                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('B?n có ch?c ch?n mu?n t? ch?i giao d?ch này?');">
+                                                    <i class="bi bi-x-lg"></i> T? ch?i
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    
+    <div class="card shadow mb-4">
+        <div class="card-header bg-white py-3">
+            <h6 class="m-0 font-weight-bold text-primary">L?ch s? giao d?ch</h6>
+        </div>
+        <div class="card-body">
+            <div class="mb-4">
+                <form method="get" class="row g-3">
+                    <div class="col-md-2">
+                        <label for="filterType" class="form-label">Lo?i giao d?ch</label>
+                        <select name="filterType" id="filterType" class="form-select">
+                            <option value="">T?t c?</option>
+                            <option value="Deposit" selected="@(Model.FilterType == "Deposit")">N?p ti?n</option>
+                            <option value="Withdraw" selected="@(Model.FilterType == "Withdraw")">Rút ti?n</option>
+                            <option value="Purchase" selected="@(Model.FilterType == "Purchase")">Mua hàng</option>
+                            <option value="Sale" selected="@(Model.FilterType == "Sale")">Bán hàng</option>
+                            <option value="Refund" selected="@(Model.FilterType == "Refund")">Hoàn ti?n</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="filterStatus" class="form-label">Tr?ng thái</label>
+                        <select name="filterStatus" id="filterStatus" class="form-select">
+                            <option value="">T?t c?</option>
+                            <option value="Pending" selected="@(Model.FilterStatus == "Pending")">Ch? x? lý</option>
+                            <option value="Completed" selected="@(Model.FilterStatus == "Completed")">Hoàn thành</option>
+                            <option value="Failed" selected="@(Model.FilterStatus == "Failed")">Th?t b?i</option>
+                            <option value="Rejected" selected="@(Model.FilterStatus == "Rejected")">T? ch?i</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="startDate" class="form-label">T? ngày</label>
+                        <input type="date" name="startDate" id="startDate" class="form-control" value="@(Model.StartDate?.ToString("yyyy-MM-dd"))">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="endDate" class="form-label">??n ngày</label>
+                        <input type="date" name="endDate" id="endDate" class="form-control" value="@(Model.EndDate?.ToString("yyyy-MM-dd"))">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Tìm ki?m
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Ng??i dùng</th>
+                            <th>Lo?i</th>
+                            <th>S? ti?n</th>
+                            <th>Ph??ng th?c</th>
+                            <th>Tr?ng thái</th>
+                            <th>Ngày t?o</th>
+                            <th>Ngày x? lý</th>
+                            <th>Ghi chú</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.RecentTransactions.Any())
+                        {
+                            foreach (var transaction in Model.RecentTransactions)
+                            {
+                                <tr>
+                                    <td>@transaction.Id</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            @if (!string.IsNullOrEmpty(transaction.User?.ProfilePicture))
+                                            {
+                                                <img src="@transaction.User.ProfilePicture" class="rounded-circle me-2" alt="@transaction.User.FirstName" width="30" height="30" style="object-fit: cover;">
+                                            }
+                                            else
+                                            {
+                                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;">
+                                                    <i class="bi bi-person-fill"></i>
+                                                </div>
+                                            }
+                                            <span>@transaction.User?.FirstName @transaction.User?.LastName</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge @GetTransactionTypeBadgeClass(transaction.Type)">
+                                            @GetTransactionTypeText(transaction.Type)
+                                        </span>
+                                    </td>
+                                    <td>@transaction.Amount.ToString("C")</td>
+                                    <td>@transaction.PaymentMethod</td>
+                                    <td>
+                                        <span class="badge @GetTransactionStatusBadgeClass(transaction.Status)">
+                                            @GetTransactionStatusText(transaction.Status)
+                                        </span>
+                                    </td>
+                                    <td>@transaction.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@(transaction.ProcessedAt?.ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                                    <td>@(transaction.Description ?? "-")</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="9" class="text-center">Không có giao d?ch nào.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            
+            @if (Model.TotalPages > 1)
+            {
+                <div class="d-flex justify-content-center mt-4">
+                    <nav>
+                        <ul class="pagination">
+                            @for (int i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                    <a class="page-link" href="@GetPageUrl(i)">@i</a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@functions {
+    public string GetTransactionTypeBadgeClass(TransactionType type)
+    {
+        return type switch
+        {
+            TransactionType.Deposit => "bg-success",
+            TransactionType.Withdraw => "bg-danger",
+            TransactionType.Purchase => "bg-primary",
+            TransactionType.Sale => "bg-info",
+            TransactionType.Refund => "bg-warning text-dark",
+            _ => "bg-secondary"
+        };
+    }
+    
+    public string GetTransactionTypeText(TransactionType type)
+    {
+        return type switch
+        {
+            TransactionType.Deposit => "N?p ti?n",
+            TransactionType.Withdraw => "Rút ti?n",
+            TransactionType.Purchase => "Mua hàng",
+            TransactionType.Sale => "Bán hàng",
+            TransactionType.Refund => "Hoàn ti?n",
+            _ => type.ToString()
+        };
+    }
+    
+    public string GetTransactionStatusBadgeClass(TransactionStatus status)
+    {
+        return status switch
+        {
+            TransactionStatus.Pending => "bg-warning text-dark",
+            TransactionStatus.Completed => "bg-success",
+            TransactionStatus.Failed => "bg-danger",
+            TransactionStatus.Rejected => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+    
+    public string GetTransactionStatusText(TransactionStatus status)
+    {
+        return status switch
+        {
+            TransactionStatus.Pending => "Ch? x? lý",
+            TransactionStatus.Completed => "Hoàn thành",
+            TransactionStatus.Failed => "Th?t b?i",
+            TransactionStatus.Rejected => "T? ch?i",
+            _ => status.ToString()
+        };
+    }
+    
+    public string GetPageUrl(int page)
+    {
+        var url = $"/Admin/WalletManagement?page={page}";
+        
+        if (!string.IsNullOrEmpty(Model.FilterType))
+        {
+            url += $"&filterType={Model.FilterType}";
+        }
+        
+        if (!string.IsNullOrEmpty(Model.FilterStatus))
+        {
+            url += $"&filterStatus={Model.FilterStatus}";
+        }
+        
+        if (Model.StartDate.HasValue)
+        {
+            url += $"&startDate={Model.StartDate.Value:yyyy-MM-dd}";
+        }
+        
+        if (Model.EndDate.HasValue)
+        {
+            url += $"&endDate={Model.EndDate.Value:yyyy-MM-dd}";
+        }
+        
+        return url;
+    }
+}

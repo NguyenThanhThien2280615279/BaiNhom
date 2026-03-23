@@ -1,0 +1,59 @@
+@model EcommerceSecondHand.Models.ViewModels.ReviewListViewModel
+
+<div class="container mt-4">
+    <h3>Đánh giá</h3>
+
+    @if (Model.Reviews != null && Model.Reviews.Any())
+    {
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Sản phẩm</th>
+                    <th>Khách hàng</th>
+                    <th>Đánh giá</th>
+                    <th>Ngày</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model.Reviews)
+                {
+                    <tr>
+                        <td>
+                            <a href="@Url.Action("ReviewDetails", "Vendor", new { id = r.Id })" class="text-decoration-none">
+                                @r.Product?.Name
+                            </a>
+                        </td>
+                        <td>@r.User?.FirstName @r.User?.LastName</td>
+                        <td>
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="bi bi-star@(i <= r.Rating ? "-fill" : "") text-warning"></i>
+                            }
+                        </td>
+                        <td>@r.CreatedAt.ToString("dd/MM/yyyy")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @if (Model.TotalPages > 1)
+        {
+            <nav>
+                <ul class="pagination">
+                    <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : null)">
+                        <a class="page-link" href="?page=@(Model.CurrentPage - 1)">Trước</a>
+                    </li>
+                    <li class="page-item disabled"><span class="page-link">Trang @Model.CurrentPage / @Model.TotalPages</span>
+                    </li>
+                    <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : null)">
+                        <a class="page-link" href="?page=@(Model.CurrentPage + 1)">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    }
+    else
+    {
+        <div class="text-muted">Chưa có đánh giá nào.</div>
+    }
+</div>

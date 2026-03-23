@@ -1,0 +1,145 @@
+﻿using EcommerceSecondHand.Data;
+using EcommerceSecondHand.Hubs;
+using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Thêm dịch vụ vào container.
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? 
+    throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => 
+{
+    options.SignIn.RequireConfirmedAccount = false;
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequireNonAlphanumeric = true;
+    options.Password.RequiredLength = 8;
+})
+.AddRoles<IdentityRole>()
+.AddEntityFrameworkStores<ApplicationDbContext>();
+
+// Đăng ký repositories
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IPaymentTransactionRepository, PaymentTransactionRepository>();
+builder.Services.AddScoped<IUserStatisticsRepository, UserStatisticsRepository>();
+builder.Services.AddScoped<ISystemStatisticsRepository, SystemStatisticsRepository>();
+
+// Thêm hỗ trợ cho MVC
+builder.Services.AddControllersWithViews();
+
+// Thêm hỗ trợ cho Razor Pages (giữ lại cho khả năng tương thích)
+builder.Services.AddRazorPages();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("RequireVendorRole", policy => policy.RequireRole("Vendor"));
+    options.AddPolicy("RequireCustomerRole", policy => policy.RequireRole("Customer"));
+});
+
+// Thêm SignalR cho chat real-time
+builder.Services.AddSignalR();
+
+var app = builder.Build();
+
+// Cấu hình pipeline xử lý HTTP request.
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+    // Giá trị HSTS mặc định là 30 ngày. Bạn có thể thay đổi trong trường hợp sản xuất, xem https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Khởi tạo cơ sở dữ liệu với vai trò và người dùng admin
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        
+        // Đảm bảo vai trò tồn tại
+        string[] roles = new[] { "Admin", "Vendor", "Customer" };
+        foreach (var role in roles)
+        {
+            if (!await roleManager.RoleExistsAsync(role))
+            {
+                await roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
+
+        // Tạo người dùng admin nếu chưa tồn tại
+        var adminEmail = "admin@example.com";
+        var adminUser = await userManager.FindByEmailAsync(adminEmail);
+        if (adminUser == null)
+        {
+            adminUser = new ApplicationUser
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                EmailConfirmed = true,
+                FirstName = "Admin",
+                LastName = "User",
+                WalletBalance = 0,
+                RegistrationDate = DateTime.UtcNow,
+                LastLoginDate = DateTime.UtcNow
+            };
+
+            var result = await userManager.CreateAsync(adminUser, "Admin@123");
+            if (result.Succeeded)
+            {
+                await userManager.AddToRoleAsync(adminUser, "Admin");
+            }
+        }
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Đã xảy ra lỗi khi seed cơ sở dữ liệu.");
+    }
+}
+
+// Thiết lập route mặc định cho MVC
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+// Map SignalR hub cho chat
+app.MapHub<ChatHub>("/chatHub");
+
+// Map Razor Pages (giữ lại cho khả năng tương thích)
+app.MapRazorPages();
+
+// Map API Controllers
+app.MapControllers();
+
+app.Run();

@@ -1,0 +1,82 @@
+﻿@model IEnumerable<Order>
+@{
+    ViewData["Title"] = "Đơn hàng của tôi";
+}
+
+<div class="container mt-4">
+    <h1>Đơn hàng của tôi</h1>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Tất cả đơn hàng</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Mã đơn</th>
+                                        <th>Ngày đặt</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model)
+                                    {
+                                        <tr>
+                                            <td>#@order.Id</td>
+                                            <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>@order.TotalAmount.ToString("C")</td>
+                                            <td>
+                                                @{
+                                                    string badgeClass = order.Status switch
+                                                    {
+                                                        OrderStatus.Pending => "bg-warning",
+                                                        OrderStatus.Processing => "bg-info",
+                                                        OrderStatus.Shipped => "bg-primary",
+                                                        OrderStatus.Delivered => "bg-success",
+                                                        OrderStatus.Cancelled => "bg-danger",
+                                                        _ => "bg-secondary"
+                                                    };
+                                                    
+                                                    string statusText = order.Status switch
+                                                    {
+                                                        OrderStatus.Pending => "Chờ xử lý",
+                                                        OrderStatus.Processing => "Đang xử lý",
+                                                        OrderStatus.Shipped => "Đã giao cho vận chuyển",
+                                                        OrderStatus.Delivered => "Đã giao hàng",
+                                                        OrderStatus.Cancelled => "Đã hủy",
+                                                        _ => order.Status.ToString()
+                                                    };
+                                                }
+                                                <span class="badge @badgeClass">@statusText</span>
+                                            </td>
+                                            <td>
+                                                <a asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id" class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i> Xem
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <p class="text-muted">Bạn chưa có đơn hàng nào.</p>
+                            <a asp-controller="Products" asp-action="Index" class="btn btn-primary mt-2">Bắt đầu mua sắm</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

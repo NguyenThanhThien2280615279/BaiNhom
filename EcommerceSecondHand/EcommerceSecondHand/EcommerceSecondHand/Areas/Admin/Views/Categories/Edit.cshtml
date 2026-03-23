@@ -1,0 +1,45 @@
+@model Category
+@{
+    ViewData["Title"] = "Sửa danh mục";
+}
+
+<h2>Sửa danh mục</h2>
+
+<div class="card shp-soft mt-3" style="max-width: 720px;">
+    <div class="card-body">
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="Id" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Ảnh (tải lên hoặc nhập URL)</label>
+                <input type="file" name="imageFile" class="form-control mb-2" accept="image/*" />
+                <input asp-for="ImageUrl" class="form-control" placeholder="hoặc dán URL ảnh..." />
+                <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <div class="mt-2">
+                        <img src="@Model.ImageUrl" alt="Preview" class="img-thumbnail" style="max-width: 200px;">
+                    </div>
+                }
+            </div>
+            <div class="d-flex justify-content-end">
+                <a asp-action="Index" class="btn btn-outline-secondary me-2">Huỷ</a>
+                <button type="submit" class="btn btn-primary">Cập nhật</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

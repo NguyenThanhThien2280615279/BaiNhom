@@ -1,0 +1,220 @@
+@model MessagesViewModel
+@{
+    ViewData["Title"] = "Tin nhắn (Admin)";
+}
+
+<div class="container mt-4">
+    <h1>Tin nhắn (Admin)</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-4 col-lg-3">
+            <div class="card shp-soft mb-4">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Liên hệ</h5>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        @if (Model.Contacts.Any())
+                        {
+                            foreach (var contact in Model.Contacts)
+                            {
+                                var isSelected = Model.SelectedContact?.Id == contact.Id;
+                                <a href="javascript:void(0);" onclick="loadConversation('@contact.Id')"
+                                    class="list-group-item list-group-item-action @(isSelected ? "active" : "")">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            @if (!string.IsNullOrEmpty(contact.ProfilePicture))
+                                            {
+                                                <img src="@contact.ProfilePicture" class="rounded-circle" alt="@contact.FirstName"
+                                                    width="40" height="40" style="object-fit: cover;">
+                                            }
+                                            else
+                                            {
+                                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center"
+                                                    style="width: 40px; height: 40px;">
+                                                    <i class="bi bi-person-fill"></i>
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-0">@contact.FirstName @contact.LastName</h6>
+                                                @if (contact.UnreadMessagesCount > 0)
+                                                {
+                                                    <span class="badge bg-primary rounded-pill">@contact.UnreadMessagesCount</span>
+                                                }
+                                            </div>
+                                            <p class="mb-0 text-muted small text-truncate">
+                                                @(contact.LastMessage?.Content ?? "Không có tin nhắn")
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <p class="mb-0 text-muted">Chưa có cuộc trò chuyện nào.</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8 col-lg-9">
+            <div class="card shp-soft">
+                <div class="card-body p-0" id="conversation-container">
+                    @if (Model.SelectedContact != null)
+                    {
+                        <partial name="_ConversationPartial"
+                            model="new ConversationViewModel { Contact = Model.SelectedContact, Messages = Model.Messages, UserId = Model.UserId, ContactId = Model.ContactId }" />
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <div class="mb-4">
+                                <i class="bi bi-chat-dots text-muted" style="font-size: 4rem;"></i>
+                            </div>
+                            <h3>Chọn một liên hệ để bắt đầu trò chuyện</h3>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl('/chatHub')
+            .build();
+
+        connection.on('ReceiveMessage', function (message) {
+            const currentContactId = getCurrentContactId();
+            if (message.senderId === currentContactId) {
+                appendMessage(message);
+                scrollToBottom();
+            } else {
+                // Nếu tin nhắn từ người khác, cập nhật danh sách liên hệ
+                updateContactList();
+            }
+        });
+
+        connection.start().catch(err => console.error('Error connecting to chat hub:', err));
+
+        function getCurrentContactId() {
+            return document.getElementById('contact-id')?.value;
+        }
+
+        function appendMessage(message) {
+            const messagesContainer = document.getElementById('messages-container');
+            if (!messagesContainer) return;
+
+            const userId = document.getElementById('user-id').value;
+            const isMine = message.senderId === userId;
+
+            const messageHtml = `
+                    <div class="message ${isMine ? 'message-mine' : 'message-theirs'}">
+                        <div class="message-content">
+                            <p>${message.content}</p>
+                            <small class="message-time">${formatTime(new Date(message.timestamp))}</small>
+                        </div>
+                    </div>
+                `;
+
+            messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
+        }
+
+        function scrollToBottom() {
+            const messagesContainer = document.getElementById('messages-container');
+            if (messagesContainer) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        }
+
+        function formatTime(date) {
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function loadConversation(contactId) {
+            fetch(`/Admin/Messages/GetConversation?contactId=${contactId}`)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('conversation-container').innerHTML = html;
+                    scrollToBottom();
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('contactId', contactId);
+                    history.pushState({}, '', url);
+                    document.querySelectorAll('.list-group-item').forEach(item => item.classList.remove('active'));
+                    document.querySelector(`[onclick="loadConversation('${contactId}')"]`).classList.add('active');
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function updateContactList() {
+            // Reload trang để cập nhật danh sách liên hệ và tin nhắn mới
+            location.reload();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            scrollToBottom();
+        });
+    </script>
+}
+
+<style>
+    .message {
+        margin-bottom: 15px;
+        display: flex;
+    }
+
+    .message-mine {
+        justify-content: flex-end;
+    }
+
+    .message-theirs {
+        justify-content: flex-start;
+    }
+
+    .message-content {
+        max-width: 70%;
+        padding: 10px 15px;
+        border-radius: 18px;
+        position: relative;
+    }
+
+    .message-mine .message-content {
+        background-color: var(--shp-primary);
+        color: white;
+        border-bottom-right-radius: 5px;
+    }
+
+    .message-theirs .message-content {
+        background-color: #f1f1f1;
+        border-bottom-left-radius: 5px;
+    }
+
+    .message-content p {
+        margin-bottom: 5px;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    .message-time {
+        display: block;
+        font-size: 0.7rem;
+        opacity: 0.7;
+        text-align: right;
+    }
+
+    .message-mine .message-time {
+        color: rgba(255, 255, 255, 0.8);
+    }
+    }
+</style>

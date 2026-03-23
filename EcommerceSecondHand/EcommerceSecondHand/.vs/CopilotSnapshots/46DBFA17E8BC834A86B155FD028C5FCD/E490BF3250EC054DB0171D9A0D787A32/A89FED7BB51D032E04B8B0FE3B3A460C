@@ -1,0 +1,78 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Models.ViewModels;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Authorize]
+    public class SearchController : Controller
+    {
+        private readonly IProductRepository _productRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public SearchController(
+            IProductRepository productRepository,
+            ICategoryRepository categoryRepository,
+            UserManager<ApplicationUser> userManager)
+        {
+            _productRepository = productRepository;
+            _categoryRepository = categoryRepository;
+            _userManager = userManager;
+        }
+
+        public async Task<IActionResult> Index(
+            string query = "",
+            string categoryId = "",
+            decimal? minPrice = null,
+            decimal? maxPrice = null,
+            ProductCondition? condition = null,
+            string sortOrder = "newest",
+            int page = 1)
+        {
+            const int pageSize = 12;
+
+            // Lấy danh sách sản phẩm dựa trên tìm kiếm
+            var products = await _productRepository.SearchProductsAsync(
+                query,
+                categoryId,
+                minPrice,
+                maxPrice,
+                condition,
+                sortOrder,
+                page,
+                pageSize);
+
+            // Đếm tổng số sản phẩm tìm được
+            var totalCount = await _productRepository.CountSearchResultsAsync(
+                query,
+                categoryId,
+                minPrice,
+                maxPrice,
+                condition);
+
+            // Lấy danh sách danh mục
+            var categories = await _categoryRepository.GetAllAsync();
+
+            var model = new SearchResultViewModel
+            {
+                Query = query,
+                CategoryId = categoryId,
+                MinPrice = minPrice,
+                MaxPrice = maxPrice,
+                Condition = condition,
+                SortOrder = sortOrder,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize),
+                Products = products,
+                Categories = categories
+            };
+
+            return View(model);
+        }
+    }
+}

@@ -1,0 +1,26 @@
+﻿using EcommerceSecondHand.Models;
+using Microsoft.AspNetCore.Identity;
+
+namespace EcommerceSecondHand.Repositories.Interfaces
+{
+    public interface IMessageRepository : IRepository<Message>
+    {
+        Task<IEnumerable<Message>> GetAllAsync();
+        Task<Message?> GetByIdAsync(int id);
+        Task<IEnumerable<Message>> GetUserMessagesAsync(string userId);
+        Task<IEnumerable<Message>> GetConversationAsync(string senderId, string receiverId);
+        Task<IEnumerable<Message>> GetUnreadMessagesAsync(string userId);
+        Task<int> GetUnreadMessagesCountAsync(string userId);
+        Task<IEnumerable<Message>> GetRecentMessagesAsync(string userId, int count);
+        Task MarkAsReadAsync(int messageId);
+        Task MarkAllAsReadAsync(string userId);
+        
+        // Missing methods for Customer/Vendor controllers
+        Task<int> CountUnreadMessagesByUserAsync(string userId);
+        
+        new Task AddAsync(Message message);
+        Task UpdateAsync(Message message);
+        Task DeleteAsync(int id);
+        new Task SaveAsync();
+    }
+}

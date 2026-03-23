@@ -1,0 +1,26 @@
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace EcommerceSecondHand.Models
+{
+    public class ApplicationUser : IdentityUser
+    {
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? Address { get; set; }
+        public decimal WalletBalance { get; set; } = 0;
+        public DateTime RegistrationDate { get; set; } = DateTime.UtcNow;
+        public string? ProfilePicture { get; set; }
+        public bool IsActive { get; set; } = true;
+        public DateTime? LastLoginDate { get; set; }
+        
+        // Navigation properties
+        public virtual ICollection<Order>? Orders { get; set; }
+        public virtual ICollection<Product>? Products { get; set; }
+        public virtual ICollection<Review>? Reviews { get; set; }
+        public virtual ICollection<CartItem>? CartItems { get; set; }
+        public virtual ICollection<Message>? SentMessages { get; set; }
+        public virtual ICollection<Message>? ReceivedMessages { get; set; }
+        public virtual ICollection<Notification>? Notifications { get; set; }
+        public virtual ICollection<PaymentTransaction>? PaymentTransactions { get; set; }
+    }
+}

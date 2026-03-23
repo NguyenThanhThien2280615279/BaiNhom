@@ -1,0 +1,218 @@
+﻿@page
+@model EcommerceSecondHand.Pages.Vendor.IndexModel
+@using EcommerceSecondHand.Models
+@{
+    ViewData["Title"] = "Vendor Dashboard";
+}
+
+<div class="container-fluid mt-4">
+    <h1>Vendor Dashboard</h1>
+    
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <div class="display-4 text-primary mb-2">@Model.TotalProductsListed</div>
+                    <h5>Products Listed</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <div class="display-4 text-success mb-2">@Model.TotalProductsSold</div>
+                    <h5>Products Sold</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <div class="display-4 text-warning mb-2">@Model.TotalSalesAmount.ToString("C")</div>
+                    <h5>Total Sales</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <div class="display-4 text-info mb-2">@Model.AverageRating.ToString("0.0")</div>
+                    <h5>Average Rating</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">My Products</h5>
+                    <a href="/Vendor/Products/Create" class="btn btn-primary btn-sm">+ Add New Product</a>
+                </div>
+                <div class="card-body">
+                    @if (Model.Products.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Price</th>
+                                        <th>Stock</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var product in Model.Products)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                                    {
+                                                        <img src="@product.ImageUrl" alt="@product.Name" class="me-2" style="width: 40px; height: 40px; object-fit: cover;" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                                            <i class="bi bi-image"></i>
+                                                        </div>
+                                                    }
+                                                    <span>@product.Name</span>
+                                                </div>
+                                            </td>
+                                            <td>@product.Price.ToString("C")</td>
+                                            <td>@product.Quantity</td>
+                                            <td>
+                                                @{
+                                                    string statusBadge = product.Quantity > 0 ? "bg-success" : "bg-danger";
+                                                    string statusText = product.Quantity > 0 ? "In Stock" : "Out of Stock";
+                                                }
+                                                <span class="badge @statusBadge">@statusText</span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a href="/Vendor/Products/Edit?id=@product.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                                                    <a href="/Vendor/Products/Details?id=@product.Id" class="btn btn-sm btn-outline-info">View</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-end mt-3">
+                            <a href="/Vendor/Products" class="btn btn-outline-primary">View All Products</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <p class="text-muted">No products found. Start selling by adding a product.</p>
+                            <a href="/Vendor/Products/Create" class="btn btn-primary mt-2">Add Your First Product</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Recent Orders</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentOrders.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var order in Model.RecentOrders)
+                            {
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-0">Order #@order.Id</h6>
+                                            <small class="text-muted">@order.OrderDate.ToString("g")</small>
+                                        </div>
+                                        <div>
+                                            @{
+                                                string badgeClass = order.Status switch
+                                                {
+                                                    OrderStatus.Pending => "bg-warning",
+                                                    OrderStatus.Processing => "bg-info",
+                                                    OrderStatus.Shipped => "bg-primary",
+                                                    OrderStatus.Delivered => "bg-success",
+                                                    OrderStatus.Cancelled => "bg-danger",
+                                                    _ => "bg-secondary"
+                                                };
+                                            }
+                                            <span class="badge @badgeClass">@order.Status.ToString()</span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <span>Items: @order.OrderItems?.Count()</span>
+                                        <span class="mx-2">|</span>
+                                        <span>Total: @order.TotalAmount.ToString("C")</span>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                        <div class="text-center mt-3">
+                            <a href="/Vendor/Orders" class="btn btn-outline-primary btn-sm">View All Orders</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <p class="text-muted">No orders found for your products yet.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Recent Reviews</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentReviews.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var review in Model.RecentReviews)
+                            {
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-0">@review.Product?.Name</h6>
+                                            <small class="text-muted">By @review.User?.FirstName @review.User?.LastName on @review.DateCreated.ToString("g")</small>
+                                        </div>
+                                        <div>
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <i class="bi bi-star@(i <= review.Rating ? "-fill" : "") text-warning"></i>
+                                            }
+                                        </div>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(review.Comment))
+                                    {
+                                        <p class="mt-2 mb-0">@review.Comment</p>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                        <div class="text-center mt-3">
+                            <a href="/Vendor/Reviews" class="btn btn-outline-primary btn-sm">View All Reviews</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <p class="text-muted">No reviews found for your products yet.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,38 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class NotificationsController : ControllerBase
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly INotificationRepository _notificationRepository;
+
+        public NotificationsController(
+            UserManager<ApplicationUser> userManager,
+            INotificationRepository notificationRepository)
+        {
+            _userManager = userManager;
+            _notificationRepository = notificationRepository;
+        }
+
+        [HttpGet("UnreadCount")]
+        public async Task<ActionResult<int>> GetUnreadCount()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            int count = await _notificationRepository.GetUnreadNotificationCountAsync(user.Id);
+            return Ok(count);
+        }
+    }
+}

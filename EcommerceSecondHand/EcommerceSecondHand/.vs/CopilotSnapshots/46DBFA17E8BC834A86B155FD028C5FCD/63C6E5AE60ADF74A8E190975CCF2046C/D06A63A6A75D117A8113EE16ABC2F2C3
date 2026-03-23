@@ -1,0 +1,41 @@
+﻿@model ConversationViewModel
+
+<div id="messagesContainer" style="height: 400px; overflow-y: auto;">
+    @if (Model.Messages.Any())
+    {
+        <div class="d-flex flex-column gap-3 p-2">
+            @foreach (var message in Model.Messages)
+            {
+                bool isCurrentUserMessage = message.SenderId == Model.CurrentUserId;
+                
+                <div class="d-flex @(isCurrentUserMessage ? "justify-content-end" : "justify-content-start")">
+                    <div class="card @(isCurrentUserMessage ? "bg-primary text-white" : "bg-light") shadow-sm" style="max-width: 75%;">
+                        <div class="card-body py-2 px-3">
+                            <p class="mb-0">@message.Content</p>
+                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                <small class="@(isCurrentUserMessage ? "text-white-50" : "text-muted")">
+                                    @message.SentAt.ToString("g")
+                                </small>
+                                @if (isCurrentUserMessage)
+                                {
+                                    <form method="post" asp-controller="Messages" asp-action="DeleteMessage" class="d-inline ms-2">
+                                        <input type="hidden" name="messageId" value="@message.Id" />
+                                        <button type="submit" class="btn btn-link btn-sm text-white p-0">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <p class="text-muted">Không có tin nhắn nào. Bắt đầu cuộc trò chuyện bằng cách gửi tin nhắn.</p>
+        </div>
+    }
+</div>

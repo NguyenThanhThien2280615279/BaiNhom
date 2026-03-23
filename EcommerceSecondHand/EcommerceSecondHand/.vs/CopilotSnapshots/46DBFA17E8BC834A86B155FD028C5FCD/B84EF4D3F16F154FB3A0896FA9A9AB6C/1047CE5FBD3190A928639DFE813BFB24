@@ -1,0 +1,192 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Authorize]
+    public class OrdersController : Controller
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IOrderRepository _orderRepository;
+        private readonly INotificationRepository _notificationRepository;
+
+        public OrdersController(
+            UserManager<ApplicationUser> _userManager,
+            IOrderRepository orderRepository,
+            INotificationRepository notificationRepository)
+        {
+            this._userManager = _userManager;
+            _orderRepository = orderRepository;
+            _notificationRepository = notificationRepository;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var orders = await _orderRepository.GetUserOrdersAsync(user.Id);
+            return View(orders);
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var order = await _orderRepository.GetOrderWithDetailsAsync(id);
+            if (order == null || order.UserId != user.Id)
+            {
+                return NotFound();
+            }
+
+            return View(order);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Cancel(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var order = await _orderRepository.GetByIdAsync(id);
+            if (order == null || order.UserId != user.Id)
+            {
+                return NotFound();
+            }
+
+            // Kiểm tra xem đơn hàng có thể hủy không
+            if (order.Status != OrderStatus.Pending && order.Status != OrderStatus.Processing)
+            {
+                TempData["ErrorMessage"] = "Đơn hàng này không thể hủy.";
+                return RedirectToAction(nameof(Details), new { id = id });
+            }
+
+            // Hủy đơn hàng
+            order.Status = OrderStatus.Cancelled;
+            order.UpdatedAt = DateTime.UtcNow;
+            await _orderRepository.UpdateAsync(order);
+            await _orderRepository.SaveAsync();
+
+            // Tạo thông báo cho người dùng
+            var notification = new Notification
+            {
+                UserId = user.Id,
+                Title = "Đơn hàng đã bị hủy",
+                Message = $"Đơn hàng #{order.OrderNumber} đã bị hủy thành công.",
+                Type = NotificationType.Order,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+                RelatedEntityId = order.Id.ToString(),
+                ActionUrl = $"/Orders/Details/{order.Id}"
+            };
+
+            await _notificationRepository.AddAsync(notification);
+            await _notificationRepository.SaveAsync();
+
+            // Tạo thông báo cho người bán
+            if (!string.IsNullOrEmpty(order.VendorId))
+            {
+                var vendorNotification = new Notification
+                {
+                    UserId = order.VendorId,
+                    Title = "Đơn hàng đã bị hủy",
+                    Message = $"Đơn hàng #{order.OrderNumber} đã bị khách hàng hủy.",
+                    Type = NotificationType.Order,
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow,
+                    RelatedEntityId = order.Id.ToString(),
+                    ActionUrl = $"/Vendor/Orders/Details/{order.Id}"
+                };
+
+                await _notificationRepository.AddAsync(vendorNotification);
+                await _notificationRepository.SaveAsync();
+            }
+
+            TempData["SuccessMessage"] = "Đơn hàng đã được hủy thành công.";
+            return RedirectToAction(nameof(Details), new { id = id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Confirm(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var order = await _orderRepository.GetByIdAsync(id);
+            if (order == null || order.UserId != user.Id)
+            {
+                return NotFound();
+            }
+
+            // Kiểm tra xem đơn hàng có thể xác nhận không
+            if (order.Status != OrderStatus.Shipped)
+            {
+                TempData["ErrorMessage"] = "Đơn hàng này chưa sẵn sàng để xác nhận.";
+                return RedirectToAction(nameof(Details), new { id = id });
+            }
+
+            // Xác nhận đơn hàng
+            order.Status = OrderStatus.Delivered;
+            order.UpdatedAt = DateTime.UtcNow;
+            order.DeliveredAt = DateTime.UtcNow;
+            await _orderRepository.UpdateAsync(order);
+            await _orderRepository.SaveAsync();
+
+            // Tạo thông báo cho người dùng
+            var notification = new Notification
+            {
+                UserId = user.Id,
+                Title = "Đơn hàng đã được giao",
+                Message = $"Đơn hàng #{order.OrderNumber} đã được giao thành công.",
+                Type = NotificationType.Order,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+                RelatedEntityId = order.Id.ToString(),
+                ActionUrl = $"/Orders/Details/{order.Id}"
+            };
+
+            await _notificationRepository.AddAsync(notification);
+            await _notificationRepository.SaveAsync();
+
+            // Tạo thông báo cho người bán
+            if (!string.IsNullOrEmpty(order.VendorId))
+            {
+                var vendorNotification = new Notification
+                {
+                    UserId = order.VendorId,
+                    Title = "Đơn hàng đã được giao",
+                    Message = $"Đơn hàng #{order.OrderNumber} đã được giao thành công.",
+                    Type = NotificationType.Order,
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow,
+                    RelatedEntityId = order.Id.ToString(),
+                    ActionUrl = $"/Vendor/Orders/Details/{order.Id}"
+                };
+
+                await _notificationRepository.AddAsync(vendorNotification);
+                await _notificationRepository.SaveAsync();
+            }
+
+            TempData["SuccessMessage"] = "Đơn hàng đã được xác nhận giao thành công.";
+            return RedirectToAction(nameof(Details), new { id = id });
+        }
+    }
+}

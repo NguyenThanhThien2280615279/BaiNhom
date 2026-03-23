@@ -1,0 +1,136 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace EcommerceSecondHand.Controllers
+{
+    public class ProductsController : Controller
+    {
+        private readonly IProductRepository _productRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly IReviewRepository _reviewRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public ProductsController(
+            IProductRepository productRepository,
+            ICategoryRepository categoryRepository,
+            IReviewRepository reviewRepository,
+            UserManager<ApplicationUser> userManager)
+        {
+            _productRepository = productRepository;
+            _categoryRepository = categoryRepository;
+            _reviewRepository = reviewRepository;
+            _userManager = userManager;
+        }
+
+        public async Task<IActionResult> Index(int? categoryId = null, string searchQuery = null, string sortOrder = null, int page = 1)
+        {
+            const int pageSize = 12;
+            var products = await _productRepository.GetFilteredProductsAsync(categoryId, searchQuery, sortOrder, page, pageSize);
+            var totalCount = await _productRepository.GetFilteredProductsCountAsync(categoryId, searchQuery);
+            
+            var categories = await _categoryRepository.GetAllAsync();
+
+            var model = new ProductListViewModel
+            {
+                Products = products,
+                Categories = categories,
+                CurrentCategoryId = categoryId,
+                SearchQuery = searchQuery,
+                SortOrder = sortOrder,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize),
+                SortOptions = new List<SelectListItem>
+                {
+                    new SelectListItem { Text = "M?i nh?t", Value = "newest", Selected = sortOrder == "newest" },
+                    new SelectListItem { Text = "Giá th?p ??n cao", Value = "priceAsc", Selected = sortOrder == "priceAsc" },
+                    new SelectListItem { Text = "Giá cao ??n th?p", Value = "priceDesc", Selected = sortOrder == "priceDesc" },
+                    new SelectListItem { Text = "?ánh giá cao nh?t", Value = "rating", Selected = sortOrder == "rating" }
+                }
+            };
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var product = await _productRepository.GetProductWithDetailsAsync(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            var reviews = await _reviewRepository.GetReviewsByProductAsync(id);
+            var averageRating = await _reviewRepository.GetAverageRatingForProductAsync(id);
+            
+            var relatedProducts = await _productRepository.GetRelatedProductsAsync(id, 4);
+            
+            // Ki?m tra xem ng??i dùng hi?n t?i ?ã ?ánh giá s?n ph?m này ch?a
+            bool hasUserReviewed = false;
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                hasUserReviewed = await _reviewRepository.HasUserReviewedProductAsync(user.Id, id);
+            }
+
+            var model = new ProductDetailsViewModel
+            {
+                Product = product,
+                Reviews = reviews,
+                AverageRating = averageRating,
+                RelatedProducts = relatedProducts,
+                HasUserReviewed = hasUserReviewed
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddReview(ReviewViewModel model)
+        {
+            if (!User.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToAction("Login", "Account", new { returnUrl = Url.Action("Details", "Products", new { id = model.ProductId }) });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return RedirectToAction(nameof(Details), new { id = model.ProductId });
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Ki?m tra xem ng??i dùng ?ã ?ánh giá s?n ph?m này ch?a
+            bool hasUserReviewed = await _reviewRepository.HasUserReviewedProductAsync(user.Id, model.ProductId);
+            if (hasUserReviewed)
+            {
+                TempData["ErrorMessage"] = "B?n ?ã ?ánh giá s?n ph?m này r?i.";
+                return RedirectToAction(nameof(Details), new { id = model.ProductId });
+            }
+
+            // T?o ?ánh giá m?i
+            var review = new Review
+            {
+                ProductId = model.ProductId,
+                UserId = user.Id,
+                Rating = model.Rating,
+                Comment = model.Comment,
+                DateCreated = DateTime.UtcNow,
+                IsApproved = false // ?ánh giá c?n ???c phê duy?t tr??c khi hi?n th?
+            };
+
+            await _reviewRepository.AddAsync(review);
+            await _reviewRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = "C?m ?n b?n ?ã ?ánh giá! ?ánh giá c?a b?n s? ???c hi?n th? sau khi ???c phê duy?t.";
+            return RedirectToAction(nameof(Details), new { id = model.ProductId });
+        }
+    }
+}

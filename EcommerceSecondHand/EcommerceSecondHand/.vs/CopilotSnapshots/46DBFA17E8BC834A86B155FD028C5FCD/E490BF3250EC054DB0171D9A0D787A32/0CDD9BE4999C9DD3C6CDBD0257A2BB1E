@@ -1,0 +1,101 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Authorize(Policy = "RequireVendorRole")]
+    public class VendorController : Controller
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IProductRepository _productRepository;
+        private readonly IOrderRepository _orderRepository;
+        private readonly IReviewRepository _reviewRepository;
+        private readonly IUserStatisticsRepository _userStatsRepository;
+
+        public VendorController(
+            UserManager<ApplicationUser> userManager,
+            IProductRepository productRepository,
+            IOrderRepository orderRepository,
+            IReviewRepository reviewRepository,
+            IUserStatisticsRepository userStatsRepository)
+        {
+            _userManager = userManager;
+            _productRepository = productRepository;
+            _orderRepository = orderRepository;
+            _reviewRepository = reviewRepository;
+            _userStatsRepository = userStatsRepository;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // C?p nh?t th?ng kê ng??i dùng
+            await _userStatsRepository.UpdateUserStatisticsAsync(user.Id);
+            
+            // L?y th?ng kê ng??i dùng hi?n t?i
+            var stats = await _userStatsRepository.GetUserStatisticsAsync(user.Id);
+            
+            // Chu?n b? d? li?u cho trang
+            var model = new VendorDashboardViewModel
+            {
+                TotalProductsListed = stats.TotalProductsListed,
+                TotalProductsSold = stats.TotalProductsSold,
+                TotalSalesAmount = stats.TotalSalesAmount,
+                AverageRating = stats.AverageRatingReceived,
+                Products = await _productRepository.GetVendorProductsAsync(user.Id, 5),
+                RecentOrders = await _orderRepository.GetVendorRecentOrdersAsync(user.Id, 5),
+                RecentReviews = await _reviewRepository.GetVendorRecentReviewsAsync(user.Id, 3)
+            };
+            
+            return View(model);
+        }
+
+        public IActionResult Products()
+        {
+            return View();
+        }
+
+        public IActionResult Orders()
+        {
+            return View();
+        }
+
+        public IActionResult Reviews()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult CreateProduct()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditProduct(int id)
+        {
+            var product = await _productRepository.GetByIdAsync(id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            // Ki?m tra xem ng??i dùng hi?n t?i có ph?i là ng??i bán s?n ph?m này không
+            var user = await _userManager.GetUserAsync(User);
+            if (product.SellerId != user?.Id)
+            {
+                return Forbid();
+            }
+
+            return View(product);
+        }
+    }
+}

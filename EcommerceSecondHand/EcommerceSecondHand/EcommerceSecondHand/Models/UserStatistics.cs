@@ -1,0 +1,49 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace EcommerceSecondHand.Models
+{
+    public class UserStatistics
+    {
+        [Key]
+        public int Id { get; set; }
+        
+        [Required]
+        public string UserId { get; set; } = string.Empty;
+        
+        public int OrdersCount { get; set; } = 0;
+        
+        public int TotalProductsListed { get; set; } = 0;
+        
+        public int TotalProductsSold { get; set; } = 0;
+        
+        public int TotalPurchases { get; set; } = 0;
+        
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal TotalSalesAmount { get; set; } = 0;
+        
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal TotalPurchasesAmount { get; set; } = 0;
+        
+        public int TotalReviewsReceived { get; set; } = 0;
+        
+        public double AverageRatingReceived { get; set; } = 0;
+        
+        public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
+        
+        // Monthly spending data for the last 12 months
+        public decimal[] MonthlySpending { get; set; } = new decimal[12];
+        
+        // Monthly revenue data for the last 12 months (for vendors)
+        public decimal[] MonthlyRevenue { get; set; } = new decimal[12];
+        
+        // Properties needed by views
+        public decimal TotalSpent { get { return TotalPurchasesAmount; } }
+        public int ProductsCount { get { return TotalProductsListed; } }
+        public int ReviewsCount { get { return TotalReviewsReceived; } }
+        
+        // Navigation property
+        [ForeignKey("UserId")]
+        public ApplicationUser? User { get; set; }
+    }
+}

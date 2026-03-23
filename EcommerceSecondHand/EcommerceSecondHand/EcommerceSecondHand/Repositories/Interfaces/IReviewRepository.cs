@@ -1,0 +1,27 @@
+using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Repositories.Interfaces
+{
+    public interface IReviewRepository
+    {
+        Task<IEnumerable<Review>> GetAllAsync();
+        Task<Review?> GetByIdAsync(int id);
+        Task<IEnumerable<Review>> GetReviewsByProductAsync(int productId);
+        Task<IEnumerable<Review>> GetReviewsByUserAsync(string userId);
+        Task<double> GetAverageRatingForProductAsync(int productId);
+        Task<int> GetReviewCountByProductAsync(int productId);
+        
+        // Add missing methods
+        Task<IEnumerable<Review>> GetRecentReviewsByUserAsync(string userId, int count);
+        Task<IEnumerable<Review>> GetRecentReviewsBySellerAsync(string sellerId, int count);
+        Task<double> GetAverageRatingBySellerAsync(string sellerId);
+        Task<IEnumerable<Review>> GetReviewsBySellerAsync(string sellerId, int page, int pageSize);
+        Task<int> CountReviewsBySellerAsync(string sellerId);
+        Task<bool> HasUserReviewedProductAsync(string userId, int productId);
+        
+        Task AddAsync(Review review);
+        Task UpdateAsync(Review review);
+        Task DeleteAsync(int id);
+        Task SaveAsync();
+    }
+}

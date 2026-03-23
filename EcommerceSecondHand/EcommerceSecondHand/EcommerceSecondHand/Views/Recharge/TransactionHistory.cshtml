@@ -1,0 +1,189 @@
+@model IEnumerable<EcommerceSecondHand.Models.RechargeTransaction>
+@{
+    ViewData["Title"] = "Lịch sử nạp tiền";
+}
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shp-soft">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="bi bi-clock-history me-2"></i>
+                            Lịch sử nạp tiền
+                        </h4>
+                        <a asp-action="Index" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i>
+                            Nạp tiền
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Mã giao dịch</th>
+                                        <th>Gói nạp tiền</th>
+                                        <th>Số tiền</th>
+                                        <th>Trạng thái</th>
+                                        <th>Ngày tạo</th>
+                                        <th>Ngày hoàn thành</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var transaction in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <code>@transaction.TransactionCode</code>
+                                            </td>
+                                            <td>@transaction.RechargePackage?.Name</td>
+                                            <td>
+                                                <div class="text-success">
+                                                    <strong>@transaction.Amount.ToString("N0")₫</strong>
+                                                    @if (transaction.BonusAmount > 0)
+                                                    {
+                                                        <small class="text-warning d-block">+@transaction.BonusAmount.ToString("N0")₫</small>
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @{
+                                                    var statusClass = transaction.Status switch
+                                                    {
+                                                        RechargeStatus.Completed => "badge bg-success",
+                                                        RechargeStatus.Pending => "badge bg-warning",
+                                                        RechargeStatus.Processing => "badge bg-info",
+                                                        RechargeStatus.Failed => "badge bg-danger",
+                                                        RechargeStatus.Canceled => "badge bg-secondary",
+                                                        RechargeStatus.Expired => "badge bg-dark",
+                                                        _ => "badge bg-light text-dark"
+                                                    };
+                                                    var statusText = transaction.Status switch
+                                                    {
+                                                        RechargeStatus.Completed => "Thành công",
+                                                        RechargeStatus.Pending => "Chờ thanh toán",
+                                                        RechargeStatus.Processing => "Đang xử lý",
+                                                        RechargeStatus.Failed => "Thất bại",
+                                                        RechargeStatus.Canceled => "Đã hủy",
+                                                        RechargeStatus.Expired => "Hết hạn",
+                                                        _ => transaction.Status.ToString()
+                                                    };
+                                                }
+                                                <span class="@statusClass">@statusText</span>
+                                            </td>
+                                            <td>@transaction.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>
+                                                @if (transaction.CompletedAt.HasValue)
+                                                {
+                                                    @transaction.CompletedAt.Value.ToString("dd/MM/yyyy HH:mm")
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (transaction.Status == RechargeStatus.Pending)
+                                                {
+                                                    <button class="btn btn-sm btn-outline-danger cancel-btn" 
+                                                            data-transaction-id="@transaction.Id">
+                                                        <i class="bi bi-x-circle me-1"></i>
+                                                        Hủy
+                                                    </button>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">-</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        @if (ViewBag.TotalPages > 1)
+                        {
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center">
+                                    @if (ViewBag.CurrentPage > 1)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" asp-action="TransactionHistory" asp-route-page="@(ViewBag.CurrentPage - 1)">
+                                                <i class="bi bi-chevron-left"></i>
+                                            </a>
+                                        </li>
+                                    }
+
+                                    @for (int i = Math.Max(1, ViewBag.CurrentPage - 2); i <= Math.Min(ViewBag.TotalPages, ViewBag.CurrentPage + 2); i++)
+                                    {
+                                        <li class="page-item @(i == ViewBag.CurrentPage ? "active" : "")">
+                                            <a class="page-link" asp-action="TransactionHistory" asp-route-page="@i">@i</a>
+                                        </li>
+                                    }
+
+                                    @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" asp-action="TransactionHistory" asp-route-page="@(ViewBag.CurrentPage + 1)">
+                                                <i class="bi bi-chevron-right"></i>
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </nav>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
+                            <h5 class="text-muted mt-3">Chưa có giao dịch nào</h5>
+                            <p class="text-muted">Bạn chưa thực hiện giao dịch nạp tiền nào</p>
+                            <a asp-action="Index" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-1"></i>
+                                Nạp tiền ngay
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $('.cancel-btn').click(function() {
+            const transactionId = $(this).data('transaction-id');
+            const button = $(this);
+            
+            if (!confirm('Bạn có chắc chắn muốn hủy giao dịch này?')) {
+                return;
+            }
+            
+            button.prop('disabled', true).html('<i class="bi bi-hourglass-split me-1"></i> Đang xử lý...');
+            
+            $.post('@Url.Action("CancelTransaction")', { transactionId: transactionId })
+                .done(function(response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + response.message);
+                        button.prop('disabled', false).html('<i class="bi bi-x-circle me-1"></i> Hủy');
+                    }
+                })
+                .fail(function() {
+                    alert('Có lỗi xảy ra khi hủy giao dịch');
+                    button.prop('disabled', false).html('<i class="bi bi-x-circle me-1"></i> Hủy');
+                });
+        });
+    </script>
+}

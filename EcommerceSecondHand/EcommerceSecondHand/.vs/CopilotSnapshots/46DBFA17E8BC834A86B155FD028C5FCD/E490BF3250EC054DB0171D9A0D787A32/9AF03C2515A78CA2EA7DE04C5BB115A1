@@ -1,0 +1,67 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Authorize]
+    public class SearchController : Controller
+    {
+        private readonly IProductRepository _productRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public SearchController(
+            IProductRepository productRepository,
+            ICategoryRepository categoryRepository,
+            UserManager<ApplicationUser> userManager)
+        {
+            _productRepository = productRepository;
+            _categoryRepository = categoryRepository;
+            _userManager = userManager;
+        }
+
+        public async Task<IActionResult> Index(string query, int? categoryId = null, string sortOrder = null, int page = 1)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return RedirectToAction("Index", "Products");
+            }
+
+            const int pageSize = 12;
+            var products = await _productRepository.GetFilteredProductsAsync(categoryId, query, sortOrder, page, pageSize);
+            var totalCount = await _productRepository.GetFilteredProductsCountAsync(categoryId, query);
+            
+            var categories = await _categoryRepository.GetAllAsync();
+
+            var model = new SearchResultViewModel
+            {
+                Query = query,
+                Products = products,
+                Categories = categories,
+                CurrentCategoryId = categoryId,
+                SortOrder = sortOrder,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize),
+                TotalResults = totalCount
+            };
+
+            return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Suggestions(string term)
+        {
+            if (string.IsNullOrWhiteSpace(term) || term.Length < 2)
+            {
+                return Json(new string[0]);
+            }
+
+            var suggestions = await _productRepository.GetSearchSuggestionsAsync(term, 5);
+            return Json(suggestions);
+        }
+    }
+}

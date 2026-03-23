@@ -1,0 +1,26 @@
+﻿@model ErrorViewModel
+@{
+    ViewData["Title"] = "L?i";
+}
+
+<h1 class="text-danger">L?i.</h1>
+<h2 class="text-danger">?ã x?y ra l?i khi x? lý yêu c?u c?a b?n.</h2>
+
+@if (Model?.ShowRequestId ?? false)
+{
+    <p>
+        <strong>Mã yêu c?u:</strong> <code>@Model?.RequestId</code>
+    </p>
+}
+
+<div class="card mt-4">
+    <div class="card-body">
+        <h5 class="card-title">B?n có th? th?:</h5>
+        <ul>
+            <li>Làm m?i trang</li>
+            <li>Quay l?i <a asp-controller="Home" asp-action="Index">trang ch?</a></li>
+            <li>Ki?m tra k?t n?i internet c?a b?n</li>
+            <li>Liên h? v?i qu?n tr? viên n?u l?i v?n ti?p t?c x?y ra</li>
+        </ul>
+    </div>
+</div>

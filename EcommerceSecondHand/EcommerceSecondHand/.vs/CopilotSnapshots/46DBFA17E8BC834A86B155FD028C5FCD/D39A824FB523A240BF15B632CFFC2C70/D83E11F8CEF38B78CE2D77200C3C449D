@@ -1,0 +1,217 @@
+﻿@model VendorDashboardViewModel
+@using EcommerceSecondHand.Models
+@{
+    ViewData["Title"] = "Bảng điều khiển Người bán";
+}
+
+<div class="container-fluid mt-4">
+    <h1>Bảng điều khiển Người bán</h1>
+    
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <div class="display-4 text-primary mb-2">@Model.TotalProductsListed</div>
+                    <h5>Sản phẩm đã đăng</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <div class="display-4 text-success mb-2">@Model.TotalProductsSold</div>
+                    <h5>Sản phẩm đã bán</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <div class="display-4 text-warning mb-2">@Model.TotalSalesAmount.ToString("C")</div>
+                    <h5>Tổng doanh thu</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <div class="display-4 text-info mb-2">@Model.AverageRating.ToString("0.0")</div>
+                    <h5>Đánh giá trung bình</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Sản phẩm của tôi</h5>
+                    <a asp-controller="Vendor" asp-action="CreateProduct" class="btn btn-primary btn-sm">+ Thêm sản phẩm mới</a>
+                </div>
+                <div class="card-body">
+                    @if (Model.Products.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Sản phẩm</th>
+                                        <th>Giá</th>
+                                        <th>Tồn kho</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var product in Model.Products)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                                    {
+                                                        <img src="@product.ImageUrl" alt="@product.Name" class="me-2" style="width: 40px; height: 40px; object-fit: cover;" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="bg-secondary text-white d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                                            <i class="bi bi-image"></i>
+                                                        </div>
+                                                    }
+                                                    <span>@product.Name</span>
+                                                </div>
+                                            </td>
+                                            <td>@product.Price.ToString("C")</td>
+                                            <td>@product.Quantity</td>
+                                            <td>
+                                                @{
+                                                    string statusBadge = product.Quantity > 0 ? "bg-success" : "bg-danger";
+                                                    string statusText = product.Quantity > 0 ? "Còn hàng" : "Hết hàng";
+                                                }
+                                                <span class="badge @statusBadge">@statusText</span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a asp-controller="Vendor" asp-action="EditProduct" asp-route-id="@product.Id" class="btn btn-sm btn-outline-primary">Sửa</a>
+                                                    <a asp-controller="Vendor" asp-action="ProductDetails" asp-route-id="@product.Id" class="btn btn-sm btn-outline-info">Xem</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-end mt-3">
+                            <a asp-controller="Vendor" asp-action="Products" class="btn btn-outline-primary">Xem tất cả sản phẩm</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <p class="text-muted">Không tìm thấy sản phẩm nào. Bắt đầu bán hàng bằng cách thêm sản phẩm.</p>
+                            <a asp-controller="Vendor" asp-action="CreateProduct" class="btn btn-primary mt-2">Thêm sản phẩm đầu tiên</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Đơn hàng gần đây</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentOrders.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var order in Model.RecentOrders)
+                            {
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-0">Đơn hàng #@order.Id</h6>
+                                            <small class="text-muted">@order.OrderDate.ToString("g")</small>
+                                        </div>
+                                        <div>
+                                            @{
+                                                string badgeClass = order.Status switch
+                                                {
+                                                    OrderStatus.Pending => "bg-warning",
+                                                    OrderStatus.Processing => "bg-info",
+                                                    OrderStatus.Shipped => "bg-primary",
+                                                    OrderStatus.Delivered => "bg-success",
+                                                    OrderStatus.Cancelled => "bg-danger",
+                                                    _ => "bg-secondary"
+                                                };
+                                            }
+                                            <span class="badge @badgeClass">@order.Status.ToString()</span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <span>Sản phẩm: @order.OrderItems?.Count()</span>
+                                        <span class="mx-2">|</span>
+                                        <span>Tổng: @order.TotalAmount.ToString("C")</span>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                        <div class="text-center mt-3">
+                            <a asp-controller="Vendor" asp-action="Orders" class="btn btn-outline-primary btn-sm">Xem tất cả đơn hàng</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <p class="text-muted">Chưa có đơn hàng nào cho sản phẩm của bạn.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Đánh giá gần đây</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentReviews.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var review in Model.RecentReviews)
+                            {
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-0">@review.Product?.Name</h6>
+                                            <small class="text-muted">Bởi @review.User?.FirstName @review.User?.LastName lúc @review.DateCreated.ToString("g")</small>
+                                        </div>
+                                        <div>
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <i class="bi bi-star@(i <= review.Rating ? "-fill" : "") text-warning"></i>
+                                            }
+                                        </div>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(review.Comment))
+                                    {
+                                        <p class="mt-2 mb-0">@review.Comment</p>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                        <div class="text-center mt-3">
+                            <a asp-controller="Vendor" asp-action="Reviews" class="btn btn-outline-primary btn-sm">Xem tất cả đánh giá</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <p class="text-muted">Chưa có đánh giá nào cho sản phẩm của bạn.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

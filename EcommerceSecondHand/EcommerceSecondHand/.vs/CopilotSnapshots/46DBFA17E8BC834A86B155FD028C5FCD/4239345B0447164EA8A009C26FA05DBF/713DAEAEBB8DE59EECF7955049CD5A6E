@@ -1,0 +1,182 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.ComponentModel.DataAnnotations;
+
+namespace EcommerceSecondHand.Pages.Admin
+{
+    [Authorize(Policy = "RequireAdminRole")]
+    public class WalletManagementModel : PageModel
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IPaymentTransactionRepository _transactionRepository;
+        private readonly INotificationRepository _notificationRepository;
+
+        public WalletManagementModel(
+            UserManager<ApplicationUser> userManager,
+            IPaymentTransactionRepository transactionRepository,
+            INotificationRepository notificationRepository)
+        {
+            _userManager = userManager;
+            _transactionRepository = transactionRepository;
+            _notificationRepository = notificationRepository;
+        }
+
+        [BindProperty]
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        [BindProperty]
+        [Required]
+        [Range(0.01, 10000, ErrorMessage = "Amount must be between $0.01 and $10,000")]
+        public decimal Amount { get; set; }
+
+        [BindProperty]
+        public string? Description { get; set; }
+
+        public IEnumerable<PaymentTransaction> RecentTransactions { get; set; } = new List<PaymentTransaction>();
+
+        public async Task<IActionResult> OnGetAsync()
+        {
+            // Get recent transactions
+            RecentTransactions = await _transactionRepository.GetRecentTransactionsAsync(20);
+            return Page();
+        }
+
+        public async Task<IActionResult> OnPostAddFundsAsync()
+        {
+            if (!ModelState.IsValid)
+            {
+                RecentTransactions = await _transactionRepository.GetRecentTransactionsAsync(20);
+                return Page();
+            }
+
+            // Find the user
+            var user = await _userManager.FindByEmailAsync(Email);
+            if (user == null)
+            {
+                ModelState.AddModelError("Email", "User not found.");
+                RecentTransactions = await _transactionRepository.GetRecentTransactionsAsync(20);
+                return Page();
+            }
+
+            // Create transaction reference
+            string transactionReference = $"ADM-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
+
+            // Create transaction record
+            var transaction = new PaymentTransaction
+            {
+                UserId = user.Id,
+                Amount = Amount,
+                Type = TransactionType.AdminAdjustment,
+                Status = TransactionStatus.Completed,
+                TransactionReference = transactionReference,
+                Description = string.IsNullOrEmpty(Description) 
+                    ? $"Admin added funds: {Amount:C}" 
+                    : Description,
+                CreatedAt = DateTime.UtcNow,
+                CompletedAt = DateTime.UtcNow
+            };
+
+            await _transactionRepository.AddAsync(transaction);
+            await _transactionRepository.SaveAsync();
+
+            // Update user's wallet balance
+            user.WalletBalance += Amount;
+            await _userManager.UpdateAsync(user);
+
+            // Create notification
+            var notification = new Notification
+            {
+                UserId = user.Id,
+                Title = "Funds Added",
+                Message = $"An administrator has added {Amount:C} to your wallet. {(string.IsNullOrEmpty(Description) ? "" : $"Reason: {Description}")}",
+                Type = NotificationType.Payment,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+                RelatedEntityId = transaction.Id.ToString(),
+                ActionUrl = "/Wallet/Index"
+            };
+
+            await _notificationRepository.AddAsync(notification);
+            await _notificationRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = $"Successfully added {Amount:C} to {user.Email}'s wallet.";
+            return RedirectToPage();
+        }
+
+        public async Task<IActionResult> OnPostRemoveFundsAsync()
+        {
+            if (!ModelState.IsValid)
+            {
+                RecentTransactions = await _transactionRepository.GetRecentTransactionsAsync(20);
+                return Page();
+            }
+
+            // Find the user
+            var user = await _userManager.FindByEmailAsync(Email);
+            if (user == null)
+            {
+                ModelState.AddModelError("Email", "User not found.");
+                RecentTransactions = await _transactionRepository.GetRecentTransactionsAsync(20);
+                return Page();
+            }
+
+            // Check if user has enough balance
+            if (user.WalletBalance < Amount)
+            {
+                ModelState.AddModelError("Amount", "User does not have enough balance.");
+                RecentTransactions = await _transactionRepository.GetRecentTransactionsAsync(20);
+                return Page();
+            }
+
+            // Create transaction reference
+            string transactionReference = $"ADM-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
+
+            // Create transaction record
+            var transaction = new PaymentTransaction
+            {
+                UserId = user.Id,
+                Amount = Amount,
+                Type = TransactionType.AdminAdjustment,
+                Status = TransactionStatus.Completed,
+                TransactionReference = transactionReference,
+                Description = string.IsNullOrEmpty(Description) 
+                    ? $"Admin removed funds: {Amount:C}" 
+                    : Description,
+                CreatedAt = DateTime.UtcNow,
+                CompletedAt = DateTime.UtcNow
+            };
+
+            await _transactionRepository.AddAsync(transaction);
+            await _transactionRepository.SaveAsync();
+
+            // Update user's wallet balance
+            user.WalletBalance -= Amount;
+            await _userManager.UpdateAsync(user);
+
+            // Create notification
+            var notification = new Notification
+            {
+                UserId = user.Id,
+                Title = "Funds Removed",
+                Message = $"An administrator has removed {Amount:C} from your wallet. {(string.IsNullOrEmpty(Description) ? "" : $"Reason: {Description}")}",
+                Type = NotificationType.Payment,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+                RelatedEntityId = transaction.Id.ToString(),
+                ActionUrl = "/Wallet/Index"
+            };
+
+            await _notificationRepository.AddAsync(notification);
+            await _notificationRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = $"Successfully removed {Amount:C} from {user.Email}'s wallet.";
+            return RedirectToPage();
+        }
+    }
+}

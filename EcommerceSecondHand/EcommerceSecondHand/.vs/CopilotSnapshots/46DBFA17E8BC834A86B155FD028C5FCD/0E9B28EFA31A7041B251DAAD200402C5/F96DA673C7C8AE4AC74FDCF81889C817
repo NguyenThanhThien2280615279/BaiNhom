@@ -1,0 +1,3 @@
+﻿@using EcommerceSecondHand
+@using EcommerceSecondHand.Models
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

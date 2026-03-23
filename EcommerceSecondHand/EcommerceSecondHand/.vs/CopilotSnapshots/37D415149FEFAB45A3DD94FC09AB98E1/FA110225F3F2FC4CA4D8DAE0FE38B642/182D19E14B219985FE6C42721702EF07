@@ -1,0 +1,293 @@
+﻿@model Order
+@{
+    ViewData["Title"] = "Chi ti?t ??n hàng";
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang ch?</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Orders" asp-action="Index">??n hàng c?a tôi</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Chi ti?t ??n hàng</li>
+        </ol>
+    </nav>
+    
+    <h1>Chi ti?t ??n hàng</h1>
+    
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Thông tin ??n hàng</h5>
+                        <span class="badge @GetStatusBadgeClass(Model.Status)">@GetStatusText(Model.Status)</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p><strong>Mã ??n hàng:</strong> @Model.OrderNumber</p>
+                            <p><strong>Ngày ??t:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+                            <p><strong>Ph??ng th?c thanh toán:</strong> @GetPaymentMethodText(Model.PaymentMethod)</p>
+                            <p><strong>Tr?ng thái thanh toán:</strong> @GetPaymentStatusText(Model.PaymentStatus)</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>??a ch? giao hàng:</strong> @Model.ShippingAddress</p>
+                            <p><strong>Thành ph?:</strong> @Model.ShippingCity</p>
+                            <p><strong>Qu?c gia:</strong> @Model.ShippingCountry</p>
+                            <p><strong>Mã b?u ?i?n:</strong> @Model.ShippingPostalCode</p>
+                        </div>
+                    </div>
+                    
+                    <h6>S?n ph?m</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>S?n ph?m</th>
+                                    <th>S? l??ng</th>
+                                    <th>??n giá</th>
+                                    <th>Thành ti?n</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OrderItems ?? Enumerable.Empty<OrderItem>())
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                @if (!string.IsNullOrEmpty(item.Product?.ImageUrl))
+                                                {
+                                                    <img src="@item.Product.ImageUrl" alt="@item.Product.Name" class="img-thumbnail me-2" style="width: 50px; height: 50px; object-fit: cover;">
+                                                }
+                                                else
+                                                {
+                                                    <div class="bg-secondary text-white d-flex align-items-center justify-content-center me-2" style="width: 50px; height: 50px;">
+                                                        <i class="bi bi-image"></i>
+                                                    </div>
+                                                }
+                                                <span>@item.Product?.Name</span>
+                                            </div>
+                                        </td>
+                                        <td>@item.Quantity</td>
+                                        <td>@item.Price.ToString("C")</td>
+                                        <td>@((item.Price * item.Quantity).ToString("C"))</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>T?ng c?ng:</strong></td>
+                                    <td><strong>@Model.TotalAmount.ToString("C")</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    
+                    @if (Model.Status == OrderStatus.Shipped)
+                    {
+                        <form method="post" asp-controller="Orders" asp-action="Confirm" asp-route-id="@Model.Id" class="mt-4">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle me-1"></i> Xác nh?n ?ã nh?n hàng
+                            </button>
+                        </form>
+                    }
+                    
+                    @if (Model.Status == OrderStatus.Pending || Model.Status == OrderStatus.Processing)
+                    {
+                        <form method="post" asp-controller="Orders" asp-action="Cancel" asp-route-id="@Model.Id" class="mt-4" onsubmit="return confirm('B?n có ch?c ch?n mu?n h?y ??n hàng này?');">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-x-circle me-1"></i> H?y ??n hàng
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Tr?ng thái ??n hàng</h5>
+                </div>
+                <div class="card-body">
+                    <div class="position-relative order-tracking">
+                        <div class="step @(Model.OrderDate != default ? "active" : "")">
+                            <span class="icon"><i class="bi bi-cart-check"></i></span>
+                            <div class="step-info">
+                                <h6>??t hàng</h6>
+                                <p>@(Model.OrderDate != default ? Model.OrderDate.ToString("dd/MM/yyyy HH:mm") : "-")</p>
+                            </div>
+                        </div>
+                        <div class="step @(Model.Status >= OrderStatus.Processing ? "active" : "")">
+                            <span class="icon"><i class="bi bi-box-seam"></i></span>
+                            <div class="step-info">
+                                <h6>X? lý</h6>
+                                <p>@(Model.UpdatedAt != default && Model.Status >= OrderStatus.Processing ? Model.UpdatedAt.ToString("dd/MM/yyyy HH:mm") : "-")</p>
+                            </div>
+                        </div>
+                        <div class="step @(Model.Status >= OrderStatus.Shipped ? "active" : "")">
+                            <span class="icon"><i class="bi bi-truck"></i></span>
+                            <div class="step-info">
+                                <h6>V?n chuy?n</h6>
+                                <p>@(Model.ShippedAt.HasValue ? Model.ShippedAt.Value.ToString("dd/MM/yyyy HH:mm") : "-")</p>
+                            </div>
+                        </div>
+                        <div class="step @(Model.Status >= OrderStatus.Delivered ? "active" : "")">
+                            <span class="icon"><i class="bi bi-house-door"></i></span>
+                            <div class="step-info">
+                                <h6>Giao hàng</h6>
+                                <p>@(Model.DeliveredAt.HasValue ? Model.DeliveredAt.Value.ToString("dd/MM/yyyy HH:mm") : "-")</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            @if (Model.Status == OrderStatus.Cancelled)
+            {
+                <div class="card shadow-sm bg-danger text-white">
+                    <div class="card-body">
+                        <h5><i class="bi bi-exclamation-triangle me-2"></i> ??n hàng ?ã b? h?y</h5>
+                        <p>??n hàng này ?ã b? h?y vào @Model.UpdatedAt.ToString("dd/MM/yyyy HH:mm").</p>
+                    </div>
+                </div>
+            }
+            
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">H? tr?</h5>
+                </div>
+                <div class="card-body">
+                    <p>N?u b?n có b?t k? câu h?i nào v? ??n hàng này, vui lòng liên h? v?i chúng tôi.</p>
+                    <a href="#" class="btn btn-outline-primary w-100 mb-2">
+                        <i class="bi bi-chat-dots me-1"></i> Nh?n tin v?i ng??i bán
+                    </a>
+                    <a href="mailto:support@ecommercesecondhand.com" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-envelope me-1"></i> Liên h? h? tr?
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .order-tracking {
+            padding: 0 1rem;
+        }
+        
+        .order-tracking .step {
+            display: flex;
+            position: relative;
+            padding-bottom: 1.5rem;
+        }
+        
+        .order-tracking .step:last-child {
+            padding-bottom: 0;
+        }
+        
+        .order-tracking .step::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 30px;
+            height: calc(100% - 30px);
+            width: 2px;
+            background-color: #e9ecef;
+        }
+        
+        .order-tracking .step:last-child::before {
+            display: none;
+        }
+        
+        .order-tracking .step.active::before {
+            background-color: #0d6efd;
+        }
+        
+        .order-tracking .step .icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            color: #6c757d;
+            margin-right: 1rem;
+            z-index: 1;
+        }
+        
+        .order-tracking .step.active .icon {
+            background-color: #0d6efd;
+            color: white;
+        }
+        
+        .order-tracking .step-info {
+            flex: 1;
+        }
+        
+        .order-tracking .step-info h6 {
+            margin-bottom: 0.25rem;
+        }
+        
+        .order-tracking .step-info p {
+            margin-bottom: 0;
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+    </style>
+}
+
+@functions {
+    public string GetStatusBadgeClass(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "bg-warning text-dark",
+            OrderStatus.Processing => "bg-info text-dark",
+            OrderStatus.Shipped => "bg-primary",
+            OrderStatus.Delivered => "bg-success",
+            OrderStatus.Cancelled => "bg-danger",
+            OrderStatus.Refunded => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+    
+    public string GetStatusText(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "Ch? x? lý",
+            OrderStatus.Processing => "?ang x? lý",
+            OrderStatus.Shipped => "?ang v?n chuy?n",
+            OrderStatus.Delivered => "?ã giao hàng",
+            OrderStatus.Cancelled => "?ã h?y",
+            OrderStatus.Refunded => "?ã hoàn ti?n",
+            _ => status.ToString()
+        };
+    }
+    
+    public string GetPaymentMethodText(string paymentMethod)
+    {
+        return paymentMethod switch
+        {
+            "Wallet" => "Ví ?i?n t?",
+            "COD" => "Thanh toán khi nh?n hàng",
+            _ => paymentMethod
+        };
+    }
+    
+    public string GetPaymentStatusText(PaymentStatus status)
+    {
+        return status switch
+        {
+            PaymentStatus.Pending => "Ch? thanh toán",
+            PaymentStatus.Paid => "?ã thanh toán",
+            PaymentStatus.Failed => "Thanh toán th?t b?i",
+            PaymentStatus.Refunded => "?ã hoàn ti?n",
+            _ => status.ToString()
+        };
+    }
+}

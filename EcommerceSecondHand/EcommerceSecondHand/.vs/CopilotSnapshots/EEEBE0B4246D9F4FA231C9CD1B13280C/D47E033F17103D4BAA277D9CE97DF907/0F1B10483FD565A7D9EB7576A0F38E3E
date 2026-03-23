@@ -1,0 +1,136 @@
+﻿using EcommerceSecondHand.Data;
+using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace EcommerceSecondHand.Repositories
+{
+    public class PaymentTransactionRepository : Repository<PaymentTransaction>, IPaymentTransactionRepository
+    {
+        public PaymentTransactionRepository(ApplicationDbContext context) : base(context)
+        {
+        }
+
+        public async Task<IEnumerable<PaymentTransaction>> GetUserTransactionsAsync(string userId)
+        {
+            return await _dbSet
+                .Where(pt => pt.UserId == userId)
+                .OrderByDescending(pt => pt.CreatedAt)
+                .Include(pt => pt.Order)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<PaymentTransaction>> GetUserTransactionsByTypeAsync(string userId, TransactionType type)
+        {
+            return await _dbSet
+                .Where(pt => pt.UserId == userId && pt.Type == type)
+                .OrderByDescending(pt => pt.CreatedAt)
+                .Include(pt => pt.Order)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<PaymentTransaction>> GetPaginatedTransactionsAsync(string userId, int page, int pageSize)
+        {
+            return await _dbSet
+                .Where(pt => pt.UserId == userId)
+                .OrderByDescending(pt => pt.CreatedAt)
+                .Include(pt => pt.Order)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+
+        public async Task<int> GetTransactionsCountAsync(string userId)
+        {
+            return await _dbSet
+                .Where(pt => pt.UserId == userId)
+                .CountAsync();
+        }
+
+        public async Task<PaymentTransaction?> GetLastTransactionAsync(string userId)
+        {
+            return await _dbSet
+                .Where(pt => pt.UserId == userId)
+                .OrderByDescending(pt => pt.CreatedAt)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<decimal> GetTotalSpentAsync(string userId)
+        {
+            return await _dbSet
+                .Where(pt => pt.UserId == userId && 
+                       pt.Status == TransactionStatus.Completed && 
+                       pt.Type == TransactionType.Purchase)
+                .SumAsync(pt => pt.Amount);
+        }
+
+        public async Task UpdateAsync(PaymentTransaction transaction)
+        {
+            _context.Entry(transaction).State = EntityState.Modified;
+            await SaveAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var transaction = await GetByIdAsync(id);
+            if (transaction != null)
+            {
+                _dbSet.Remove(transaction);
+                await SaveAsync();
+            }
+        }
+
+        public async Task<IEnumerable<PaymentTransaction>> GetRecentTransactionsAsync(int count)
+        {
+            return await _dbSet
+                .OrderByDescending(pt => pt.CreatedAt)
+                .Include(pt => pt.User)
+                .Include(pt => pt.Order)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<PaymentTransaction>> GetTransactionsByStatusAsync(TransactionStatus status)
+        {
+            return await _dbSet
+                .Where(pt => pt.Status == status)
+                .OrderByDescending(pt => pt.CreatedAt)
+                .Include(pt => pt.User)
+                .Include(pt => pt.Order)
+                .ToListAsync();
+        }
+
+        public async Task<PaymentTransaction?> GetTransactionByReferenceAsync(string reference)
+        {
+            return await _dbSet
+                .FirstOrDefaultAsync(pt => pt.TransactionReference == reference);
+        }
+
+        public async Task<decimal> GetTotalRevenueAsync()
+        {
+            return await _dbSet
+                .Where(pt => pt.Status == TransactionStatus.Completed && 
+                       (pt.Type == TransactionType.Purchase || pt.Type == TransactionType.Sale))
+                .SumAsync(pt => pt.Amount);
+        }
+
+        public async Task<decimal> GetRevenueForPeriodAsync(DateTime startDate, DateTime endDate)
+        {
+            return await _dbSet
+                .Where(pt => pt.Status == TransactionStatus.Completed && 
+                       (pt.Type == TransactionType.Purchase || pt.Type == TransactionType.Sale) &&
+                       pt.CreatedAt >= startDate && pt.CreatedAt <= endDate)
+                .SumAsync(pt => pt.Amount);
+        }
+
+        public async Task<IEnumerable<PaymentTransaction>> GetRecentTransactionsByUserAsync(string userId, int count)
+        {
+            return await _dbSet
+                .Where(pt => pt.UserId == userId)
+                .OrderByDescending(pt => pt.CreatedAt)
+                .Include(pt => pt.Order)
+                .Take(count)
+                .ToListAsync();
+        }
+    }
+}

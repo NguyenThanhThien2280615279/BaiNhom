@@ -1,0 +1,12 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Models
+{
+    public class ProfileViewModel
+    {
+        public ApplicationUser? User { get; set; }
+        public UserStatistics? UserStatistics { get; set; }
+        public decimal WalletBalance { get; set; }
+        public decimal TotalSpent { get; set; }
+    }
+}

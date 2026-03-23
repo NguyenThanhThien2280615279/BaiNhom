@@ -1,0 +1,146 @@
+﻿using EcommerceSecondHand.Data;
+using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace EcommerceSecondHand.Repositories
+{
+    public class UserStatisticsRepository : Repository<UserStatistics>, IUserStatisticsRepository
+    {
+        public UserStatisticsRepository(ApplicationDbContext context) : base(context)
+        {
+        }
+
+        public async Task<UserStatistics?> GetUserStatisticsAsync(string userId)
+        {
+            return await _dbSet
+                .Include(us => us.User)
+                .FirstOrDefaultAsync(us => us.UserId == userId);
+        }
+
+        public async Task UpdateUserStatisticsAsync(string userId)
+        {
+            var userStats = await _dbSet.FirstOrDefaultAsync(us => us.UserId == userId);
+            
+            if (userStats == null)
+            {
+                userStats = new UserStatistics { UserId = userId };
+                await _dbSet.AddAsync(userStats);
+            }
+
+            // Products listed
+            userStats.TotalProductsListed = await _context.Products
+                .CountAsync(p => p.SellerId == userId);
+
+            // Products sold (items that have been in completed orders)
+            var soldProductIds = await _context.OrderItems
+                .Include(oi => oi.Order)
+                .Include(oi => oi.Product)
+                .Where(oi => oi.Product!.SellerId == userId && 
+                            (oi.Order!.Status == OrderStatus.Delivered || 
+                             oi.Order.Status == OrderStatus.Shipped))
+                .Select(oi => oi.ProductId)
+                .Distinct()
+                .ToListAsync();
+
+            userStats.TotalProductsSold = soldProductIds.Count;
+
+            // Total sales amount
+            userStats.TotalSalesAmount = await _context.OrderItems
+                .Include(oi => oi.Order)
+                .Include(oi => oi.Product)
+                .Where(oi => oi.Product!.SellerId == userId && 
+                            (oi.Order!.Status == OrderStatus.Delivered || 
+                             oi.Order.Status == OrderStatus.Shipped))
+                .SumAsync(oi => oi.UnitPrice * oi.Quantity);
+
+            // Total purchases
+            userStats.TotalPurchases = await _context.Orders
+                .CountAsync(o => o.UserId == userId && 
+                           (o.Status == OrderStatus.Delivered || 
+                            o.Status == OrderStatus.Shipped));
+
+            // Total purchases amount
+            userStats.TotalPurchasesAmount = await _context.Orders
+                .Where(o => o.UserId == userId && 
+                           (o.Status == OrderStatus.Delivered || 
+                            o.Status == OrderStatus.Shipped))
+                .SumAsync(o => o.TotalAmount);
+
+            // Reviews stats
+            var reviews = await _context.Reviews
+                .Include(r => r.Product)
+                .Where(r => r.Product!.SellerId == userId)
+                .ToListAsync();
+
+            userStats.TotalReviewsReceived = reviews.Count;
+            
+            if (reviews.Any())
+            {
+                userStats.AverageRatingReceived = reviews.Average(r => r.Rating);
+            }
+
+            userStats.LastUpdated = DateTime.UtcNow;
+            
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<UserStatistics>> GetTopSellersAsync(int count)
+        {
+            return await _dbSet
+                .OrderByDescending(us => us.TotalSalesAmount)
+                .Include(us => us.User)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<UserStatistics>> GetTopBuyersAsync(int count)
+        {
+            return await _dbSet
+                .OrderByDescending(us => us.TotalPurchasesAmount)
+                .Include(us => us.User)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public new async Task<UserStatistics?> GetByIdAsync(int id)
+        {
+            return await _dbSet.FindAsync(id);
+        }
+
+        public async Task<UserStatistics?> GetByUserIdAsync(string userId)
+        {
+            return await _dbSet.FirstOrDefaultAsync(u => u.UserId == userId);
+        }
+
+        public new async Task<IEnumerable<UserStatistics>> GetAllAsync()
+        {
+            return await _dbSet.ToListAsync();
+        }
+
+        public new async Task AddAsync(UserStatistics userStatistics)
+        {
+            await _dbSet.AddAsync(userStatistics);
+        }
+
+        public Task UpdateAsync(UserStatistics userStatistics)
+        {
+            _context.Entry(userStatistics).State = EntityState.Modified;
+            return Task.CompletedTask;
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var userStatistics = await _dbSet.FindAsync(id);
+            if (userStatistics != null)
+            {
+                _dbSet.Remove(userStatistics);
+            }
+        }
+
+        public new async Task SaveAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
+    }
+}

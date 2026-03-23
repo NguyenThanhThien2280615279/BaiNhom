@@ -1,0 +1,258 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Models.ViewModels;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Authorize]
+    public class CheckoutController : Controller
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ICartRepository _cartRepository;
+        private readonly IOrderRepository _orderRepository;
+        private readonly IProductRepository _productRepository;
+        private readonly IPaymentTransactionRepository _transactionRepository;
+        private readonly INotificationRepository _notificationRepository;
+
+        public CheckoutController(
+            UserManager<ApplicationUser> userManager,
+            ICartRepository cartRepository,
+            IOrderRepository orderRepository,
+            IProductRepository productRepository,
+            IPaymentTransactionRepository transactionRepository,
+            INotificationRepository notificationRepository)
+        {
+            _userManager = userManager;
+            _cartRepository = cartRepository;
+            _orderRepository = orderRepository;
+            _productRepository = productRepository;
+            _transactionRepository = transactionRepository;
+            _notificationRepository = notificationRepository;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var cartItems = await _cartRepository.GetCartItemsAsync(user.Id);
+            if (!cartItems.Any())
+            {
+                TempData["ErrorMessage"] = "Giỏ hàng của bạn đang trống. Vui lòng thêm sản phẩm trước khi thanh toán.";
+                return RedirectToAction("Index", "WebCart");
+            }
+
+            // Kiểm tra số lượng sản phẩm trong kho
+            foreach (var item in cartItems)
+            {
+                if (item.Product != null && item.Quantity > item.Product.Quantity)
+                {
+                    TempData["ErrorMessage"] = "Một số sản phẩm trong giỏ hàng không đủ số lượng. Vui lòng cập nhật giỏ hàng trước khi thanh toán.";
+                    return RedirectToAction("Index", "WebCart");
+                }
+            }
+
+            // Tính tổng tiền
+            var subtotal = cartItems.Sum(item => item.Product?.Price * item.Quantity ?? 0);
+            var shippingFee = 0m; // Miễn phí vận chuyển
+            var total = subtotal + shippingFee;
+
+            var model = new CheckoutViewModel
+            {
+                CartItems = cartItems,
+                Subtotal = subtotal,
+                ShippingFee = shippingFee,
+                Total = total,
+                ShippingAddress = user.Address,
+                ShippingCity = user.City,
+                ShippingCountry = user.Country,
+                ShippingPostalCode = user.PostalCode,
+                PaymentMethod = "Wallet" // Mặc định sử dụng ví
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PlaceOrder(CheckoutViewModel model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var cartItems = await _cartRepository.GetCartItemsAsync(user.Id);
+            if (!cartItems.Any())
+            {
+                TempData["ErrorMessage"] = "Giỏ hàng của bạn đang trống. Vui lòng thêm sản phẩm trước khi thanh toán.";
+                return RedirectToAction("Index", "WebCart");
+            }
+
+            // Tính tổng tiền
+            var subtotal = cartItems.Sum(item => item.Product?.Price * item.Quantity ?? 0);
+            var shippingFee = 0m; // Miễn phí vận chuyển
+            var total = subtotal + shippingFee;
+
+            // Kiểm tra phương thức thanh toán
+            if (model.PaymentMethod == "Wallet")
+            {
+                // Kiểm tra số dư ví
+                if (user.WalletBalance < total)
+                {
+                    TempData["ErrorMessage"] = "Số dư ví của bạn không đủ để thanh toán đơn hàng này.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Trừ tiền từ ví
+                user.WalletBalance -= total;
+                await _userManager.UpdateAsync(user);
+            }
+
+            // Tạo đơn hàng
+            var order = new Order
+            {
+                UserId = user.Id,
+                OrderNumber = GenerateOrderNumber(),
+                Status = OrderStatus.Pending,
+                TotalAmount = total,
+                ShippingAddress = model.ShippingAddress,
+                ShippingCity = model.ShippingCity,
+                ShippingCountry = model.ShippingCountry,
+                ShippingPostalCode = model.ShippingPostalCode,
+                PaymentMethod = model.PaymentMethod,
+                PaymentStatus = PaymentStatus.Paid,
+                OrderDate = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            // Thêm các sản phẩm vào đơn hàng
+            foreach (var item in cartItems)
+            {
+                if (item.Product != null)
+                {
+                    // Tạo OrderItem
+                    var orderItem = new OrderItem
+                    {
+                        OrderId = order.Id,
+                        ProductId = item.ProductId,
+                        Quantity = item.Quantity,
+                        Price = item.Product.Price
+                    };
+                    order.OrderItems ??= new List<OrderItem>();
+                    order.OrderItems.Add(orderItem);
+
+                    // Cập nhật số lượng sản phẩm
+                    var product = await _productRepository.GetByIdAsync(item.ProductId);
+                    if (product != null)
+                    {
+                        product.Quantity -= item.Quantity;
+                        await _productRepository.UpdateAsync(product);
+                    }
+
+                    // Cập nhật thông tin người bán nếu là sản phẩm đầu tiên trong đơn hàng
+                    if (string.IsNullOrEmpty(order.VendorId) && !string.IsNullOrEmpty(item.Product.SellerId))
+                    {
+                        order.VendorId = item.Product.SellerId;
+                    }
+                }
+            }
+
+            // Lưu đơn hàng
+            await _orderRepository.AddAsync(order);
+            await _orderRepository.SaveAsync();
+
+            // Ghi nhận giao dịch thanh toán
+            if (model.PaymentMethod == "Wallet")
+            {
+                var transaction = new PaymentTransaction
+                {
+                    UserId = user.Id,
+                    Amount = total,
+                    Type = TransactionType.Purchase,
+                    Status = TransactionStatus.Completed,
+                    TransactionReference = $"ORD-{order.OrderNumber}",
+                    Description = $"Thanh toán đơn hàng #{order.OrderNumber}",
+                    CreatedAt = DateTime.UtcNow,
+                    CompletedAt = DateTime.UtcNow
+                };
+
+                await _transactionRepository.AddAsync(transaction);
+                await _transactionRepository.SaveAsync();
+            }
+
+            // Tạo thông báo cho người mua
+            var notification = new Notification
+            {
+                UserId = user.Id,
+                Title = "Đơn hàng đã được đặt",
+                Message = $"Đơn hàng #{order.OrderNumber} của bạn đã được đặt thành công.",
+                Type = NotificationType.Order,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+                RelatedEntityId = order.Id.ToString(),
+                ActionUrl = $"/Orders/Details/{order.Id}"
+            };
+
+            await _notificationRepository.AddAsync(notification);
+
+            // Tạo thông báo cho người bán
+            if (!string.IsNullOrEmpty(order.VendorId))
+            {
+                var vendorNotification = new Notification
+                {
+                    UserId = order.VendorId,
+                    Title = "Đơn hàng mới",
+                    Message = $"Bạn có đơn hàng mới #{order.OrderNumber}.",
+                    Type = NotificationType.Order,
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow,
+                    RelatedEntityId = order.Id.ToString(),
+                    ActionUrl = $"/Vendor/Orders/Details/{order.Id}"
+                };
+
+                await _notificationRepository.AddAsync(vendorNotification);
+            }
+
+            await _notificationRepository.SaveAsync();
+
+            // Xóa giỏ hàng
+            await _cartRepository.ClearCartAsync(user.Id);
+
+            return RedirectToAction(nameof(Confirmation), new { id = order.Id });
+        }
+
+        public async Task<IActionResult> Confirmation(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var order = await _orderRepository.GetOrderWithDetailsAsync(id);
+            if (order == null || order.UserId != user.Id)
+            {
+                return NotFound();
+            }
+
+            return View(order);
+        }
+
+        private string GenerateOrderNumber()
+        {
+            // Tạo mã đơn hàng theo định dạng: ORD-20230812-XXXX
+            var dateStr = DateTime.UtcNow.ToString("yyyyMMdd");
+            var random = new Random();
+            var randomStr = random.Next(1000, 9999).ToString();
+            return $"{dateStr}-{randomStr}";
+        }
+    }
+}

@@ -1,0 +1,239 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Authorize(Policy = "RequireAdminRole")]
+    public class AdminController : Controller
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IOrderRepository _orderRepository;
+        private readonly ISystemStatisticsRepository _systemStatsRepository;
+        private readonly IPaymentTransactionRepository _paymentTransactionRepository;
+        private readonly INotificationRepository _notificationRepository;
+
+        public AdminController(
+            UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole> roleManager,
+            IOrderRepository orderRepository,
+            ISystemStatisticsRepository systemStatsRepository,
+            IPaymentTransactionRepository paymentTransactionRepository,
+            INotificationRepository notificationRepository)
+        {
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _orderRepository = orderRepository;
+            _systemStatsRepository = systemStatsRepository;
+            _paymentTransactionRepository = paymentTransactionRepository;
+            _notificationRepository = notificationRepository;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            // C?p nh?t th?ng kê h? th?ng
+            await _systemStatsRepository.UpdateSystemStatisticsAsync();
+            
+            // L?y th?ng kê m?i nh?t
+            var stats = await _systemStatsRepository.GetCurrentStatisticsAsync();
+            
+            // Kh?i t?o d? li?u cho view
+            var model = new AdminDashboardViewModel
+            {
+                TotalUsers = stats.TotalUsers,
+                TotalProducts = stats.TotalProducts,
+                TotalOrders = stats.TotalOrders,
+                TotalRevenue = stats.TotalRevenue,
+                TotalCustomers = stats.TotalCustomers,
+                TotalVendors = stats.TotalVendors,
+                NewUsersLast30Days = stats.NewUsersLast30Days,
+                ActiveUsersLast30Days = stats.ActiveUsersLast30Days,
+                RecentOrders = await _orderRepository.GetRecentOrdersAsync(5)
+            };
+            
+            // Tính toán ph?n tr?m
+            if (model.TotalUsers > 0)
+            {
+                model.TotalAdmins = model.TotalUsers - model.TotalCustomers - model.TotalVendors;
+                model.CustomerPercentage = Math.Round((double)model.TotalCustomers / model.TotalUsers * 100, 1);
+                model.VendorPercentage = Math.Round((double)model.TotalVendors / model.TotalUsers * 100, 1);
+                model.AdminPercentage = Math.Round((double)model.TotalAdmins / model.TotalUsers * 100, 1);
+            }
+            
+            return View(model);
+        }
+
+        public IActionResult Users()
+        {
+            return View();
+        }
+
+        public IActionResult Orders()
+        {
+            return View();
+        }
+
+        public IActionResult Products()
+        {
+            return View();
+        }
+
+        public IActionResult Categories()
+        {
+            return View();
+        }
+
+        public IActionResult Reviews()
+        {
+            return View();
+        }
+
+        public async Task<IActionResult> WalletManagement()
+        {
+            var model = new WalletManagementViewModel
+            {
+                RecentTransactions = await _paymentTransactionRepository.GetRecentTransactionsAsync(20)
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddFunds(WalletManagementViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.RecentTransactions = await _paymentTransactionRepository.GetRecentTransactionsAsync(20);
+                return View("WalletManagement", model);
+            }
+
+            // Tìm ng??i dùng
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                ModelState.AddModelError("Email", "Không tìm th?y ng??i dùng.");
+                model.RecentTransactions = await _paymentTransactionRepository.GetRecentTransactionsAsync(20);
+                return View("WalletManagement", model);
+            }
+
+            // T?o mã giao d?ch
+            string transactionReference = $"ADM-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
+
+            // T?o b?n ghi giao d?ch
+            var transaction = new PaymentTransaction
+            {
+                UserId = user.Id,
+                Amount = model.Amount,
+                Type = TransactionType.AdminAdjustment,
+                Status = TransactionStatus.Completed,
+                TransactionReference = transactionReference,
+                Description = string.IsNullOrEmpty(model.Description) 
+                    ? $"Admin thêm ti?n: {model.Amount:C}" 
+                    : model.Description,
+                CreatedAt = DateTime.UtcNow,
+                CompletedAt = DateTime.UtcNow
+            };
+
+            await _paymentTransactionRepository.AddAsync(transaction);
+            await _paymentTransactionRepository.SaveAsync();
+
+            // C?p nh?t s? d? ví c?a ng??i dùng
+            user.WalletBalance += model.Amount;
+            await _userManager.UpdateAsync(user);
+
+            // T?o thông báo
+            var notification = new Notification
+            {
+                UserId = user.Id,
+                Title = "?ã thêm ti?n",
+                Message = $"Qu?n tr? viên ?ã thêm {model.Amount:C} vào ví c?a b?n. {(string.IsNullOrEmpty(model.Description) ? "" : $"Lý do: {model.Description}")}",
+                Type = NotificationType.Payment,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+                RelatedEntityId = transaction.Id.ToString(),
+                ActionUrl = "/Wallet"
+            };
+
+            await _notificationRepository.AddAsync(notification);
+            await _notificationRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = $"?ã thêm thành công {model.Amount:C} vào ví c?a {user.Email}.";
+            return RedirectToAction(nameof(WalletManagement));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveFunds(WalletManagementViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.RecentTransactions = await _paymentTransactionRepository.GetRecentTransactionsAsync(20);
+                return View("WalletManagement", model);
+            }
+
+            // Tìm ng??i dùng
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                ModelState.AddModelError("Email", "Không tìm th?y ng??i dùng.");
+                model.RecentTransactions = await _paymentTransactionRepository.GetRecentTransactionsAsync(20);
+                return View("WalletManagement", model);
+            }
+
+            // Ki?m tra s? d?
+            if (user.WalletBalance < model.Amount)
+            {
+                ModelState.AddModelError("Amount", "Ng??i dùng không có ?? s? d?.");
+                model.RecentTransactions = await _paymentTransactionRepository.GetRecentTransactionsAsync(20);
+                return View("WalletManagement", model);
+            }
+
+            // T?o mã giao d?ch
+            string transactionReference = $"ADM-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
+
+            // T?o b?n ghi giao d?ch
+            var transaction = new PaymentTransaction
+            {
+                UserId = user.Id,
+                Amount = model.Amount,
+                Type = TransactionType.AdminAdjustment,
+                Status = TransactionStatus.Completed,
+                TransactionReference = transactionReference,
+                Description = string.IsNullOrEmpty(model.Description) 
+                    ? $"Admin rút ti?n: {model.Amount:C}" 
+                    : model.Description,
+                CreatedAt = DateTime.UtcNow,
+                CompletedAt = DateTime.UtcNow
+            };
+
+            await _paymentTransactionRepository.AddAsync(transaction);
+            await _paymentTransactionRepository.SaveAsync();
+
+            // C?p nh?t s? d? ví c?a ng??i dùng
+            user.WalletBalance -= model.Amount;
+            await _userManager.UpdateAsync(user);
+
+            // T?o thông báo
+            var notification = new Notification
+            {
+                UserId = user.Id,
+                Title = "?ã rút ti?n",
+                Message = $"Qu?n tr? viên ?ã rút {model.Amount:C} t? ví c?a b?n. {(string.IsNullOrEmpty(model.Description) ? "" : $"Lý do: {model.Description}")}",
+                Type = NotificationType.Payment,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+                RelatedEntityId = transaction.Id.ToString(),
+                ActionUrl = "/Wallet"
+            };
+
+            await _notificationRepository.AddAsync(notification);
+            await _notificationRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = $"?ã rút thành công {model.Amount:C} t? ví c?a {user.Email}.";
+            return RedirectToAction(nameof(WalletManagement));
+        }
+    }
+}

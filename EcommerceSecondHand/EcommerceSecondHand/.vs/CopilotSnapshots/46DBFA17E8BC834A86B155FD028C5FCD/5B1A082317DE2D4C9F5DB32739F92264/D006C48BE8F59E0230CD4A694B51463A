@@ -1,0 +1,38 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class CartController : ControllerBase
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ICartRepository _cartRepository;
+
+        public CartController(
+            UserManager<ApplicationUser> userManager,
+            ICartRepository cartRepository)
+        {
+            _userManager = userManager;
+            _cartRepository = cartRepository;
+        }
+
+        [HttpGet("ItemsCount")]
+        public async Task<ActionResult<int>> GetItemsCount()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            int count = await _cartRepository.GetCartItemsCountAsync(user.Id);
+            return Ok(count);
+        }
+    }
+}

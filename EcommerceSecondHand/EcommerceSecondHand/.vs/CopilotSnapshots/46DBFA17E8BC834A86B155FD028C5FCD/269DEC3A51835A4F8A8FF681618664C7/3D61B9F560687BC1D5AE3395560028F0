@@ -1,0 +1,95 @@
+﻿using EcommerceSecondHand.Data;
+using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
+namespace EcommerceSecondHand.Repositories
+{
+    public class MessageRepository : Repository<Message>, IMessageRepository
+    {
+        public MessageRepository(ApplicationDbContext context) : base(context)
+        {
+        }
+
+        public async Task<IEnumerable<Message>> GetConversationAsync(string user1Id, string user2Id)
+        {
+            return await _dbSet
+                .Where(m => (m.SenderId == user1Id && m.RecipientId == user2Id) || 
+                            (m.SenderId == user2Id && m.RecipientId == user1Id))
+                .OrderBy(m => m.Timestamp)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<ApplicationUser>> GetUserContactsAsync(string userId)
+        {
+            // Get all unique user IDs that the current user has had conversations with
+            var contactIds = await _dbSet
+                .Where(m => m.SenderId == userId || m.RecipientId == userId)
+                .Select(m => m.SenderId == userId ? m.RecipientId : m.SenderId)
+                .Distinct()
+                .ToListAsync();
+
+            // Get the actual user objects
+            return await _context.Users
+                .Where(u => contactIds.Contains(u.Id))
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Message>> GetUnreadMessagesAsync(string userId)
+        {
+            return await _dbSet
+                .Where(m => m.RecipientId == userId && !m.IsRead)
+                .OrderByDescending(m => m.Timestamp)
+                .ToListAsync();
+        }
+
+        public async Task<int> GetUnreadMessageCountAsync(string userId)
+        {
+            return await _dbSet
+                .CountAsync(m => m.RecipientId == userId && !m.IsRead);
+        }
+
+        public async Task MarkMessagesAsReadAsync(string receiverId, string senderId)
+        {
+            var unreadMessages = await _dbSet
+                .Where(m => m.RecipientId == receiverId && m.SenderId == senderId && !m.IsRead)
+                .ToListAsync();
+
+            foreach (var message in unreadMessages)
+            {
+                message.IsRead = true;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task MarkAsReadAsync(int messageId)
+        {
+            var message = await _dbSet.FindAsync(messageId);
+            if (message != null && !message.IsRead)
+            {
+                message.IsRead = true;
+                _context.Entry(message).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<IEnumerable<ApplicationUser>> GetRecentContactsAsync(string userId, int count)
+        {
+            // Get distinct users that the current user has interacted with
+            var contactIds = await _dbSet
+                .Where(m => m.SenderId == userId || m.RecipientId == userId)
+                .OrderByDescending(m => m.Timestamp)
+                .Select(m => m.SenderId == userId ? m.RecipientId : m.SenderId)
+                .Distinct()
+                .Take(count)
+                .ToListAsync();
+
+            // Get the actual user objects
+            return await _context.Users
+                .Where(u => contactIds.Contains(u.Id))
+                .ToListAsync();
+        }
+    }
+}

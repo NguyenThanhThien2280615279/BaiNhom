@@ -1,0 +1,243 @@
+:root {
+  --shp-primary: #ee4d2d;
+  --shp-primary-dark: #d73211;
+  --shp-secondary: #ff7337;
+  --shp-bg: #f5f5f5;
+  --shp-text: #222;
+  --shp-muted: #757575;
+  --shp-border: #eee;
+  --shp-radius: 8px;
+}
+
+body {
+  background: var(--shp-bg);
+  color: var(--shp-text);
+}
+
+/* Header */
+.shp-header {
+  background: linear-gradient(180deg, var(--shp-primary), var(--shp-primary-dark));
+}
+
+.shp-header .navbar-brand,
+.shp-header .nav-link,
+.shp-header .dropdown-toggle,
+.shp-header .btn,
+.shp-header span {
+  color: #fff !important;
+}
+
+.shp-header .nav-link.active,
+.shp-header .nav-link:focus,
+.shp-header .nav-link:hover {
+  color: #ffe0d9 !important;
+}
+
+.shp-search {
+  width: 440px;
+  max-width: 100%;
+}
+
+.shp-search .form-control {
+  border: none;
+  border-radius: 999px 0 0 999px;
+  padding-left: 16px;
+}
+
+.shp-search .btn {
+  border: none;
+  border-radius: 0 999px 999px 0;
+  padding: 8px 16px;
+  background: #fff;
+  color: var(--shp-primary);
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--shp-primary);
+  border-color: var(--shp-primary);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--shp-primary-dark);
+  border-color: var(--shp-primary-dark);
+}
+
+.btn-outline-primary {
+  color: var(--shp-primary);
+  border-color: var(--shp-primary);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+  background-color: var(--shp-primary);
+  color: #fff;
+}
+
+/* Badges */
+.badge.bg-primary {
+  background-color: var(--shp-primary) !important;
+}
+
+/* Cards */
+.card.shp-card,
+.shp-card .card,
+.card {
+  border-radius: var(--shp-radius);
+  border-color: var(--shp-border);
+}
+
+.card-header {
+  background: #fff;
+}
+
+.list-group-item {
+  border-color: var(--shp-border);
+}
+
+.list-group-item-action:hover {
+  background-color: #fff5f2;
+}
+
+/* Pagination */
+.pagination .page-item.active .page-link {
+  background-color: var(--shp-primary);
+  border-color: var(--shp-primary);
+}
+
+.pagination .page-link {
+  color: var(--shp-primary);
+}
+
+/* Dropdown menu */
+.dropdown-menu {
+  border-radius: var(--shp-radius);
+  border-color: var(--shp-border);
+}
+
+/* Footer */
+footer.footer {
+  background: #fff;
+}
+
+/* Utility */
+.shp-soft {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+
+/* Admin area */
+.admin-topbar {
+  background: linear-gradient(180deg, var(--shp-primary), var(--shp-primary-dark));
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+}
+
+.admin-topbar .navbar-brand, .admin-topbar .nav-link, .admin-topbar .btn {
+  color: #fff !important;
+}
+
+.admin-topbar .nav-link:hover {
+  color: #ffe0d9 !important;
+}
+
+.admin-topbar .nav-link[type="submit"]:hover {
+  color: #ffe0d9 !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.admin-sidebar {
+  background: #fff;
+  border-right: 1px solid var(--shp-border);
+  min-height: calc(100vh - 76px);
+  position: sticky;
+  top: 76px;
+  z-index: 1020;
+}
+
+.admin-sidebar .list-group-item {
+  border: none;
+  padding: 12px 16px;
+  border-radius: 0;
+  transition: all 0.2s ease;
+}
+
+.admin-sidebar .list-group-item.active {
+  background: var(--shp-primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+.admin-sidebar .list-group-item.active i {
+  color: #fff;
+}
+
+.admin-sidebar .list-group-item:hover:not(.active) {
+  background: #fff5f2;
+  color: var(--shp-primary);
+  transform: translateX(4px);
+}
+
+.admin-sidebar .list-group-item i {
+  width: 20px;
+  text-align: center;
+}
+
+.admin-kpi .card {
+  border: none;
+  border-radius: var(--shp-radius);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+}
+
+.admin-kpi .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.admin-table .table thead th {
+  background: #fafafa;
+  border-bottom: 2px solid var(--shp-border);
+  font-weight: 600;
+}
+
+.admin-table .card {
+  border: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    position: static;
+    min-height: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--shp-border);
+  }
+  
+  .admin-kpi .col-6 {
+    margin-bottom: 1rem;
+  }
+  
+  .admin-table .col-lg-6 {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Notification list styling */
+.notification-item.unread {
+  background: #fff7f5;
+}
+
+.notification-item .title {
+  font-weight: 600;
+}
+
+.notification-item .meta {
+  color: var(--shp-muted);
+}
+
+

@@ -1,0 +1,109 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Models.ViewModels;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Authorize]
+    public class WebCartController : Controller
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ICartRepository _cartRepository;
+
+        public WebCartController(
+            UserManager<ApplicationUser> userManager,
+            ICartRepository cartRepository)
+        {
+            _userManager = userManager;
+            _cartRepository = cartRepository;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var cartItems = await _cartRepository.GetCartItemsAsync(user.Id);
+            var model = new CartViewModel
+            {
+                CartItems = cartItems
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateQuantity(int cartItemId, int quantity)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (quantity <= 0)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            var cartItem = await _cartRepository.GetByIdAsync(cartItemId);
+            if (cartItem == null || cartItem.UserId != user.Id)
+            {
+                return NotFound();
+            }
+
+            cartItem.Quantity = quantity;
+            await _cartRepository.UpdateAsync(cartItem);
+            await _cartRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = "Giỏ hàng đã được cập nhật.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveItem(int cartItemId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var cartItem = await _cartRepository.GetByIdAsync(cartItemId);
+            if (cartItem == null || cartItem.UserId != user.Id)
+            {
+                return NotFound();
+            }
+
+            await _cartRepository.DeleteAsync(cartItemId);
+            await _cartRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = "Sản phẩm đã được xóa khỏi giỏ hàng.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ClearCart()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            await _cartRepository.ClearCartAsync(user.Id);
+
+            TempData["SuccessMessage"] = "Giỏ hàng đã được xóa.";
+            return RedirectToAction(nameof(Index));
+        }
+    }
+}

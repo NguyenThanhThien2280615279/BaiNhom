@@ -1,0 +1,26 @@
+﻿@model ErrorViewModel
+@{
+    ViewData["Title"] = "Lỗi";
+}
+
+<h1 class="text-danger">Lỗi.</h1>
+<h2 class="text-danger">Đã xảy ra lỗi khi xử lý yêu cầu của bạn.</h2>
+
+@if (Model?.ShowRequestId ?? false)
+{
+    <p>
+        <strong>Mã yêu cầu:</strong> <code>@Model?.RequestId</code>
+    </p>
+}
+
+<div class="card mt-4">
+    <div class="card-body">
+        <h5 class="card-title">Bạn có thể thử:</h5>
+        <ul>
+            <li>Làm mới trang</li>
+            <li>Quay lại <a asp-controller="Home" asp-action="Index">trang chủ</a></li>
+            <li>Kiểm tra kết nối internet của bạn</li>
+            <li>Liên hệ với quản trị viên nếu lỗi vẫn tiếp tục xảy ra</li>
+        </ul>
+    </div>
+</div>

@@ -1,0 +1,317 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - EcommerceSecondHand</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/EcommerceSecondHand.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/jquery-ui/jquery-ui.min.css" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">EcommerceSecondHand</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Products" asp-action="Index">Sản phẩm</a>
+                        </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Admin" asp-action="Index">Quản lý</a>
+                                </li>
+                            }
+                            else if (User.IsInRole("Vendor"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Vendor" asp-action="Index">Kênh người bán</a>
+                                </li>
+                            }
+                            else if (User.IsInRole("Customer"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Customer" asp-action="Index">Bảng điều khiển</a>
+                                </li>
+                            }
+                        }
+                    </ul>
+                    
+                    <form class="d-flex me-3" asp-controller="Search" asp-action="Index" method="get">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="query" id="searchInput" placeholder="Tìm kiếm sản phẩm..." aria-label="Tìm kiếm" required>
+                            <button class="btn btn-outline-primary" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <ul class="navbar-nav">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="notificationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-bell"></i>
+                                    <span class="badge rounded-pill bg-danger notification-badge" id="notificationCount" style="display: none;">0</span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown" id="notificationsDropdownMenu">
+                                    <li><h6 class="dropdown-header">Thông báo</h6></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item text-center" asp-controller="WebNotifications" asp-action="Index">Xem tất cả</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Messages" asp-action="Index">
+                                    <i class="bi bi-chat-dots"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="WebCart" asp-action="Index">
+                                    <i class="bi bi-cart"></i>
+                                    <span class="badge rounded-pill bg-primary cart-badge" id="cartItemCount" style="display: none;">0</span>
+                                </a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-circle"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">Hồ sơ</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Orders" asp-action="Index">Đơn hàng</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Wallet" asp-action="Index">Ví</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                                            <button type="submit" class="dropdown-item">Đăng xuất</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Đăng ký</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Đăng nhập</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <div class="container">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container py-4">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>EcommerceSecondHand</h5>
+                    <p>Nền tảng mua bán hàng đã qua sử dụng uy tín và chất lượng.</p>
+                </div>
+                <div class="col-md-2">
+                    <h5>Về chúng tôi</h5>
+                    <ul class="list-unstyled">
+                        <li><a asp-controller="Home" asp-action="Privacy" class="text-decoration-none">Chính sách</a></li>
+                        <li><a href="#" class="text-decoration-none">Điều khoản</a></li>
+                        <li><a href="#" class="text-decoration-none">Liên hệ</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2">
+                    <h5>Danh mục</h5>
+                    <ul class="list-unstyled">
+                        <li><a asp-controller="Products" asp-action="Index" class="text-decoration-none">Tất cả sản phẩm</a></li>
+                        <li><a href="#" class="text-decoration-none">Điện tử</a></li>
+                        <li><a href="#" class="text-decoration-none">Thời trang</a></li>
+                        <li><a href="#" class="text-decoration-none">Nội thất</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Kết nối với chúng tôi</h5>
+                    <div class="d-flex gap-3 fs-4">
+                        <a href="#" class="text-decoration-none"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="text-decoration-none"><i class="bi bi-twitter"></i></a>
+                        <a href="#" class="text-decoration-none"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="text-decoration-none"><i class="bi bi-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <div class="d-flex justify-content-between">
+                <p>&copy; 2023 - EcommerceSecondHand - <a asp-controller="Home" asp-action="Privacy">Privacy</a></p>
+                <p>Made with <i class="bi bi-heart-fill text-danger"></i> by Trần Trọng Huy</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-ui/jquery-ui.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Autocomplete cho thanh tìm kiếm
+            $("#searchInput").autocomplete({
+                source: function(request, response) {
+                    $.ajax({
+                        url: '/Search/Suggestions',
+                        data: { term: request.term },
+                        success: function(data) {
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 2,
+                select: function(event, ui) {
+                    $("#searchInput").val(ui.item.value);
+                    $("form[action='/Search/Index']").submit();
+                }
+            });
+        });
+    </script>
+    
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <script>
+            // Hàm lấy số lượng sản phẩm trong giỏ hàng
+            function getCartItemsCount() {
+                $.ajax({
+                    url: '/api/Cart/ItemsCount',
+                    type: 'GET',
+                    success: function (data) {
+                        if (data > 0) {
+                            $('#cartItemCount').text(data).show();
+                        } else {
+                            $('#cartItemCount').hide();
+                        }
+                    }
+                });
+            }
+            
+            // Hàm lấy thông báo chưa đọc
+            function getUnreadNotifications() {
+                $.ajax({
+                    url: '/api/Notifications/GetUnreadCount',
+                    type: 'GET',
+                    success: function (data) {
+                        if (data > 0) {
+                            $('#notificationCount').text(data).show();
+                        } else {
+                            $('#notificationCount').hide();
+                        }
+                    }
+                });
+                
+                $.ajax({
+                    url: '/api/Notifications/GetRecent',
+                    type: 'GET',
+                    success: function (data) {
+                        var menu = $('#notificationsDropdownMenu');
+                        menu.find('li:not(:first-child):not(:last-child)').remove();
+                        
+                        if (data.length > 0) {
+                            $.each(data, function (i, notification) {
+                                var iconClass = '';
+                                switch (notification.type) {
+                                    case 0: iconClass = 'bi-info-circle'; break;
+                                    case 1: iconClass = 'bi-box'; break;
+                                    case 2: iconClass = 'bi-credit-card'; break;
+                                    case 3: iconClass = 'bi-chat-dots'; break;
+                                    case 4: iconClass = 'bi-tag'; break;
+                                    case 5: iconClass = 'bi-star'; break;
+                                    default: iconClass = 'bi-bell'; break;
+                                }
+                                
+                                var item = $('<li>').addClass('dropdown-item-text');
+                                var link = $('<a>').addClass('text-decoration-none').attr('href', notification.actionUrl || '/WebNotifications');
+                                var content = $('<div>').addClass('d-flex align-items-start');
+                                
+                                content.append($('<i>').addClass('bi ' + iconClass + ' me-2 mt-1'));
+                                
+                                var textContent = $('<div>');
+                                textContent.append($('<div>').addClass('fw-bold').text(notification.title));
+                                textContent.append($('<div>').addClass('small text-muted').text(notification.message));
+                                
+                                content.append(textContent);
+                                link.append(content);
+                                item.append(link);
+                                
+                                menu.find('hr').before(item);
+                            });
+                        } else {
+                            var item = $('<li>').addClass('dropdown-item-text text-center');
+                            item.text('Không có thông báo mới');
+                            menu.find('hr').before(item);
+                        }
+                    }
+                });
+            }
+            
+            // Khởi tạo các hàm khi trang được tải
+            $(document).ready(function () {
+                getCartItemsCount();
+                getUnreadNotifications();
+                
+                // Thiết lập cập nhật định kỳ
+                setInterval(function () {
+                    getUnreadNotifications();
+                }, 60000); // Cập nhật mỗi phút
+            });
+            
+            // Khởi tạo SignalR hub cho thông báo thời gian thực
+            const notificationConnection = new signalR.HubConnectionBuilder()
+                .withUrl("/notificationHub")
+                .build();
+                
+            notificationConnection.on("ReceiveNotification", function () {
+                getUnreadNotifications();
+            });
+            
+            notificationConnection.start().catch(function (err) {
+                console.error(err.toString());
+            });
+        </script>
+    }
+    
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

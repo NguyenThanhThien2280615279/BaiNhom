@@ -1,0 +1,17 @@
+﻿using EcommerceSecondHand.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
+
+namespace EcommerceSecondHand.Models
+{
+    public class ProductListViewModel
+    {
+        public IEnumerable<Product> Products { get; set; } = new List<Product>();
+        public IEnumerable<Category> Categories { get; set; } = new List<Category>();
+        public int? CurrentCategoryId { get; set; }
+        public string? SearchQuery { get; set; }
+        public string? SortOrder { get; set; }
+        public int CurrentPage { get; set; }
+        public int TotalPages { get; set; }
+        public IEnumerable<SelectListItem> SortOptions { get; set; } = new List<SelectListItem>();
+    }
+}

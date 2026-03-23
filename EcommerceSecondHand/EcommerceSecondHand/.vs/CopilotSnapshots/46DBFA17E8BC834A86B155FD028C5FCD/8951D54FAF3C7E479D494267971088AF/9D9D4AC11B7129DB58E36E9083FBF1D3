@@ -1,0 +1,13 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Repositories.Interfaces
+{
+    public interface IMessageRepository : IRepository<Message>
+    {
+        Task<IEnumerable<Message>> GetConversationAsync(string user1Id, string user2Id);
+        Task<IEnumerable<Message>> GetUnreadMessagesAsync(string userId);
+        Task<int> GetUnreadMessageCountAsync(string userId);
+        Task MarkAsReadAsync(int messageId);
+        Task<IEnumerable<ApplicationUser>> GetRecentContactsAsync(string userId, int count);
+    }
+}

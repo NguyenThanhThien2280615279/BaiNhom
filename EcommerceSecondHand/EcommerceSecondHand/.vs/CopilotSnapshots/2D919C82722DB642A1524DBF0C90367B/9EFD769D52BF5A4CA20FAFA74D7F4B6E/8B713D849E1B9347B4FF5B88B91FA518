@@ -1,0 +1,34 @@
+﻿@{
+    ViewData["Title"] = "Chính sách b?o m?t";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>Trang này s? ch?a thông tin v? chính sách b?o m?t c?a EcommerceSecondHand.</p>
+
+<div class="card mt-4">
+    <div class="card-body">
+        <h5 class="card-title">Thu th?p thông tin</h5>
+        <p>Chúng tôi thu th?p các thông tin cá nhân nh? tên, ??a ch? email, ??a ch? giao hàng khi b?n ??ng ký tài kho?n ho?c th?c hi?n giao d?ch trên n?n t?ng c?a chúng tôi.</p>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-body">
+        <h5 class="card-title">S? d?ng thông tin</h5>
+        <p>Chúng tôi s? d?ng thông tin thu th?p ??:</p>
+        <ul>
+            <li>X? lý ??n hàng và thanh toán</li>
+            <li>C?i thi?n tr?i nghi?m ng??i dùng</li>
+            <li>G?i thông báo v? ??n hàng và s?n ph?m</li>
+            <li>Cung c?p h? tr? khách hàng</li>
+        </ul>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-body">
+        <h5 class="card-title">B?o m?t thông tin</h5>
+        <p>Chúng tôi cam k?t b?o v? thông tin cá nhân c?a b?n b?ng các bi?n pháp b?o m?t phù h?p và không chia s? thông tin v?i bên th? ba khi ch?a có s? ??ng ý c?a b?n.</p>
+    </div>
+</div>

@@ -1,0 +1,153 @@
+﻿@model WalletManagementViewModel
+@using EcommerceSecondHand.Models
+@{
+    ViewData["Title"] = "Quản lý ví";
+}
+
+<div class="container mt-4">
+    <h1>Quản lý ví</h1>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Thêm tiền vào ví người dùng</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-action="AddFunds">
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label">Email người dùng</label>
+                            <input asp-for="Email" class="form-control" placeholder="Nhập email người dùng" required />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Amount" class="form-label">Số tiền</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="Amount" class="form-control" placeholder="Nhập số tiền" required min="1" step="0.01" />
+                            </div>
+                            <span asp-validation-for="Amount" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Mô tả</label>
+                            <input asp-for="Description" class="form-control" placeholder="Nhập mô tả (không bắt buộc)" />
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Thêm tiền</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Rút tiền từ ví người dùng</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-action="RemoveFunds">
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label">Email người dùng</label>
+                            <input asp-for="Email" class="form-control" placeholder="Nhập email người dùng" required />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Amount" class="form-label">Số tiền</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="Amount" class="form-control" placeholder="Nhập số tiền" required min="1" step="0.01" />
+                            </div>
+                            <span asp-validation-for="Amount" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Mô tả</label>
+                            <input asp-for="Description" class="form-control" placeholder="Nhập mô tả (không bắt buộc)" />
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-danger">Rút tiền</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Giao dịch gần đây</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentTransactions.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Người dùng</th>
+                                        <th>Loại</th>
+                                        <th>Số tiền</th>
+                                        <th>Mô tả</th>
+                                        <th>Ngày</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var transaction in Model.RecentTransactions)
+                                    {
+                                        <tr>
+                                            <td>@transaction.User?.Email</td>
+                                            <td>
+                                                <span class="badge @(transaction.Type == TransactionType.Deposit || transaction.Type == TransactionType.AdminAdjustment ? "bg-success" : "bg-danger")">
+                                                    @transaction.Type.ToString()
+                                                </span>
+                                            </td>
+                                            <td class="@(transaction.Type == TransactionType.Deposit || transaction.Type == TransactionType.AdminAdjustment ? "text-success" : "text-danger")">
+                                                @((transaction.Type == TransactionType.Deposit || transaction.Type == TransactionType.AdminAdjustment ? "+" : "-") + transaction.Amount.ToString("C"))
+                                            </td>
+                                            <td>@transaction.Description</td>
+                                            <td>@transaction.CreatedAt.ToString("g")</td>
+                                            <td>
+                                                @{
+                                                    string badgeClass = transaction.Status switch
+                                                    {
+                                                        TransactionStatus.Completed => "bg-success",
+                                                        TransactionStatus.Pending => "bg-warning",
+                                                        TransactionStatus.Failed => "bg-danger",
+                                                        TransactionStatus.Cancelled => "bg-secondary",
+                                                        _ => "bg-secondary"
+                                                    };
+                                                }
+                                                <span class="badge @badgeClass">@transaction.Status.ToString()</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <p class="text-muted">Không tìm thấy giao dịch gần đây.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

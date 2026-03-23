@@ -1,0 +1,195 @@
+﻿@model DepositViewModel
+@{
+    ViewData["Title"] = "N?p ti?n vào ví";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">N?p ti?n vào ví</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-controller="Wallet" asp-action="Deposit">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Amount" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">VND</span>
+                                <input asp-for="Amount" class="form-control" type="number" min="10000" max="100000000" step="10000">
+                            </div>
+                            <span asp-validation-for="Amount" class="text-danger"></span>
+                            <div class="form-text">S? ti?n t?i thi?u là 10,000 VND. T?i ?a là 100,000,000 VND.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="PaymentMethod" class="form-label"></label>
+                            <select asp-for="PaymentMethod" class="form-select">
+                                <option value="">-- Ch?n ph??ng th?c thanh toán --</option>
+                                <option value="BankTransfer">Chuy?n kho?n ngân hàng</option>
+                                <option value="Momo">Ví MoMo</option>
+                                <option value="ZaloPay">ZaloPay</option>
+                                <option value="VNPay">VNPay</option>
+                            </select>
+                            <span asp-validation-for="PaymentMethod" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Note" class="form-label"></label>
+                            <textarea asp-for="Note" class="form-control" rows="3" placeholder="Nh?p ghi chú n?u có"></textarea>
+                            <span asp-validation-for="Note" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="alert alert-info">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        <i class="bi bi-info-circle-fill"></i>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5 class="alert-heading">L?u ý quan tr?ng</h5>
+                                        <p class="mb-0">Sau khi nh?n "N?p ti?n", b?n s? nh?n ???c h??ng d?n ?? hoàn t?t giao d?ch. S? ti?n s? ???c c?ng vào ví c?a b?n sau khi admin xác nh?n giao d?ch ?ã hoàn t?t.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="/Wallet" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Quay l?i
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-wallet2"></i> N?p ti?n
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">H??ng d?n n?p ti?n</h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="depositInstructions">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingBankTransfer">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBankTransfer" aria-expanded="true" aria-controls="collapseBankTransfer">
+                                    Chuy?n kho?n ngân hàng
+                                </button>
+                            </h2>
+                            <div id="collapseBankTransfer" class="accordion-collapse collapse show" aria-labelledby="headingBankTransfer">
+                                <div class="accordion-body">
+                                    <ol>
+                                        <li>Chuy?n kho?n ??n tài kho?n sau:</li>
+                                        <div class="card bg-light mt-2 mb-3">
+                                            <div class="card-body">
+                                                <p class="mb-1"><strong>Ngân hàng:</strong> Vietcombank</p>
+                                                <p class="mb-1"><strong>S? tài kho?n:</strong> 1234567890</p>
+                                                <p class="mb-1"><strong>Ch? tài kho?n:</strong> CÔNG TY TNHH ECOMMERCE SECOND HAND</p>
+                                                <p class="mb-0"><strong>N?i dung:</strong> NAP [Email c?a b?n]</p>
+                                            </div>
+                                        </div>
+                                        <li>Sau khi chuy?n kho?n, vui lòng ch? xác nh?n t? admin (th??ng trong vòng 24 gi? làm vi?c).</li>
+                                        <li>Ti?n s? ???c c?ng vào tài kho?n c?a b?n sau khi giao d?ch ???c xác nh?n.</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingMomo">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMomo" aria-expanded="false" aria-controls="collapseMomo">
+                                    Ví MoMo
+                                </button>
+                            </h2>
+                            <div id="collapseMomo" class="accordion-collapse collapse" aria-labelledby="headingMomo">
+                                <div class="accordion-body">
+                                    <ol>
+                                        <li>Quét mã QR ho?c chuy?n ti?n ??n s? ?i?n tho?i:</li>
+                                        <div class="card bg-light mt-2 mb-3">
+                                            <div class="card-body text-center">
+                                                <p class="mb-1"><strong>S? ?i?n tho?i:</strong> 0987654321</p>
+                                                <p class="mb-1"><strong>Tên tài kho?n:</strong> ECOMMERCE SECOND HAND</p>
+                                                <p class="mb-0"><strong>N?i dung:</strong> NAP [Email c?a b?n]</p>
+                                                <!-- Placeholder for QR code -->
+                                                <div class="mt-3 mb-2 bg-white p-2 d-inline-block">
+                                                    <img src="https://placehold.co/200x200/png?text=Momo+QR" alt="Momo QR Code" class="img-fluid">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <li>Sau khi chuy?n ti?n, vui lòng ch? xác nh?n t? admin.</li>
+                                        <li>Ti?n s? ???c c?ng vào tài kho?n c?a b?n sau khi giao d?ch ???c xác nh?n.</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingZaloPay">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseZaloPay" aria-expanded="false" aria-controls="collapseZaloPay">
+                                    ZaloPay
+                                </button>
+                            </h2>
+                            <div id="collapseZaloPay" class="accordion-collapse collapse" aria-labelledby="headingZaloPay">
+                                <div class="accordion-body">
+                                    <ol>
+                                        <li>Quét mã QR ho?c chuy?n ti?n ??n s? ?i?n tho?i:</li>
+                                        <div class="card bg-light mt-2 mb-3">
+                                            <div class="card-body text-center">
+                                                <p class="mb-1"><strong>S? ?i?n tho?i:</strong> 0987654321</p>
+                                                <p class="mb-1"><strong>Tên tài kho?n:</strong> ECOMMERCE SECOND HAND</p>
+                                                <p class="mb-0"><strong>N?i dung:</strong> NAP [Email c?a b?n]</p>
+                                                <!-- Placeholder for QR code -->
+                                                <div class="mt-3 mb-2 bg-white p-2 d-inline-block">
+                                                    <img src="https://placehold.co/200x200/png?text=ZaloPay+QR" alt="ZaloPay QR Code" class="img-fluid">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <li>Sau khi chuy?n ti?n, vui lòng ch? xác nh?n t? admin.</li>
+                                        <li>Ti?n s? ???c c?ng vào tài kho?n c?a b?n sau khi giao d?ch ???c xác nh?n.</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingVNPay">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseVNPay" aria-expanded="false" aria-controls="collapseVNPay">
+                                    VNPay
+                                </button>
+                            </h2>
+                            <div id="collapseVNPay" class="accordion-collapse collapse" aria-labelledby="headingVNPay">
+                                <div class="accordion-body">
+                                    <ol>
+                                        <li>Quét mã QR ho?c nh?p thông tin chuy?n kho?n:</li>
+                                        <div class="card bg-light mt-2 mb-3">
+                                            <div class="card-body text-center">
+                                                <p class="mb-1"><strong>Ngân hàng:</strong> Vietcombank</p>
+                                                <p class="mb-1"><strong>S? tài kho?n:</strong> 1234567890</p>
+                                                <p class="mb-1"><strong>Ch? tài kho?n:</strong> CÔNG TY TNHH ECOMMERCE SECOND HAND</p>
+                                                <p class="mb-0"><strong>N?i dung:</strong> NAP [Email c?a b?n]</p>
+                                                <!-- Placeholder for QR code -->
+                                                <div class="mt-3 mb-2 bg-white p-2 d-inline-block">
+                                                    <img src="https://placehold.co/200x200/png?text=VNPay+QR" alt="VNPay QR Code" class="img-fluid">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <li>Sau khi chuy?n ti?n, vui lòng ch? xác nh?n t? admin.</li>
+                                        <li>Ti?n s? ???c c?ng vào tài kho?n c?a b?n sau khi giao d?ch ???c xác nh?n.</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,170 @@
+﻿@model CartViewModel
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    var hasQuantityWarning = ViewData["QuantityWarning"] as bool? ?? false;
+}
+
+<div class="container mt-4">
+    <h1>Giỏ hàng</h1>
+    
+    @if (Model.CartItems.Any())
+    {
+        <div class="row mt-4">
+            <div class="col-md-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Sản phẩm (@Model.CartItems.Count())</h5>
+                            <form method="post" asp-controller="WebCart" asp-action="ClearCart" onsubmit="return confirm('Bạn có chắc chắn muốn xóa tất cả sản phẩm trong giỏ hàng?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash me-1"></i> Xóa tất cả
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @if (hasQuantityWarning)
+                        {
+                            <div class="alert alert-warning">
+                                <i class="bi bi-exclamation-triangle me-2"></i> Một số sản phẩm trong giỏ hàng có số lượng vượt quá số lượng có sẵn. Vui lòng cập nhật lại số lượng.
+                            </div>
+                        }
+                        
+                        <div class="list-group list-group-flush">
+                            @foreach (var item in Model.CartItems)
+                            {
+                                <div class="list-group-item">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-2">
+                                            @if (!string.IsNullOrEmpty(item.Product?.ImageUrl))
+                                            {
+                                                <img src="@item.Product.ImageUrl" alt="@item.Product.Name" class="img-fluid rounded" />
+                                            }
+                                            else
+                                            {
+                                                <div class="bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                                                    <i class="bi bi-image"></i>
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="col-md-5">
+                                            <h5 class="mb-1">
+                                                <a asp-controller="Products" asp-action="Details" asp-route-id="@item.ProductId" class="text-decoration-none">
+                                                    @item.Product?.Name
+                                                </a>
+                                            </h5>
+                                            <p class="text-muted mb-1">Người bán: @item.Product?.Seller?.FirstName @item.Product?.Seller?.LastName</p>
+                                            @if (item.Product != null && item.Quantity > item.Product.Quantity)
+                                            {
+                                                <div class="text-danger small">
+                                                    <i class="bi bi-exclamation-circle me-1"></i> Số lượng có sẵn: @item.Product.Quantity
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="input-group input-group-sm">
+                                                <form method="post" asp-controller="WebCart" asp-action="UpdateQuantity">
+                                                    <input type="hidden" name="cartItemId" value="@item.Id" />
+                                                    <div class="input-group">
+                                                        <button type="button" class="btn btn-outline-secondary" onclick="decrementQuantity('@item.Id')">-</button>
+                                                        <input type="number" id="quantity-@item.Id" name="quantity" class="form-control text-center" value="@item.Quantity" min="1" onchange="updateQuantity('@item.Id')">
+                                                        <button type="button" class="btn btn-outline-secondary" onclick="incrementQuantity('@item.Id')">+</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 text-end">
+                                            <h5 class="text-primary mb-0">@((item.Product?.Price * item.Quantity).ToString("C"))</h5>
+                                            <div class="text-muted small">@item.Product?.Price.ToString("C") / đơn vị</div>
+                                        </div>
+                                        <div class="col-md-1 text-end">
+                                            <form method="post" asp-controller="WebCart" asp-action="RemoveFromCart">
+                                                <input type="hidden" name="cartItemId" value="@item.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">Tóm tắt đơn hàng</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Tạm tính</span>
+                            <span>@Model.SubTotal.ToString("C")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Phí vận chuyển</span>
+                            <span>Miễn phí</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="fw-bold">Tổng cộng</span>
+                            <span class="text-primary fw-bold">@Model.SubTotal.ToString("C")</span>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <form method="get" asp-controller="WebCart" asp-action="Checkout">
+                                <button type="submit" class="btn btn-primary btn-lg w-100" @(hasQuantityWarning ? "disabled" : "")>
+                                    Tiến hành thanh toán
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <a asp-controller="Products" asp-action="Index" class="text-decoration-none">
+                                <i class="bi bi-arrow-left me-1"></i> Tiếp tục mua sắm
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <div class="mb-4">
+                <i class="bi bi-cart" style="font-size: 5rem;"></i>
+            </div>
+            <h3>Giỏ hàng của bạn đang trống</h3>
+            <p class="text-muted">Hãy thêm sản phẩm vào giỏ hàng để bắt đầu mua sắm</p>
+            <a asp-controller="Products" asp-action="Index" class="btn btn-primary mt-3">
+                Bắt đầu mua sắm
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function incrementQuantity(itemId) {
+            const input = document.getElementById('quantity-' + itemId);
+            input.value = parseInt(input.value) + 1;
+            updateQuantity(itemId);
+        }
+        
+        function decrementQuantity(itemId) {
+            const input = document.getElementById('quantity-' + itemId);
+            if (parseInt(input.value) > 1) {
+                input.value = parseInt(input.value) - 1;
+                updateQuantity(itemId);
+            }
+        }
+        
+        function updateQuantity(itemId) {
+            const form = document.getElementById('quantity-' + itemId).closest('form');
+            form.submit();
+        }
+    </script>
+}

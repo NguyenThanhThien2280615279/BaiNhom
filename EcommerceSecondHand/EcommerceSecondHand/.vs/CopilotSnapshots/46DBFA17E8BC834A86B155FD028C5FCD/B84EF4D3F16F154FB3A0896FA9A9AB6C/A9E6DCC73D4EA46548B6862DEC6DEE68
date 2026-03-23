@@ -1,0 +1,25 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Models
+{
+    public class AdminDashboardViewModel
+    {
+        public int TotalUsers { get; set; }
+        public int TotalProducts { get; set; }
+        public int TotalOrders { get; set; }
+        public decimal TotalRevenue { get; set; }
+        
+        public int TotalCustomers { get; set; }
+        public int TotalVendors { get; set; }
+        public int TotalAdmins { get; set; }
+        
+        public double CustomerPercentage { get; set; }
+        public double VendorPercentage { get; set; }
+        public double AdminPercentage { get; set; }
+        
+        public int NewUsersLast30Days { get; set; }
+        public int ActiveUsersLast30Days { get; set; }
+        
+        public IEnumerable<Order> RecentOrders { get; set; } = new List<Order>();
+    }
+}

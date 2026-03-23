@@ -1,0 +1,19 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Repositories.Interfaces
+{
+    public interface IPaymentTransactionRepository 
+    {
+        Task<IEnumerable<PaymentTransaction>> GetAllAsync();
+        Task<PaymentTransaction?> GetByIdAsync(int id);
+        Task<IEnumerable<PaymentTransaction>> GetUserTransactionsAsync(string userId);
+        Task<IEnumerable<PaymentTransaction>> GetPaginatedTransactionsAsync(string userId, int page, int pageSize);
+        Task<int> GetTransactionsCountAsync(string userId);
+        Task<PaymentTransaction?> GetLastTransactionAsync(string userId);
+        Task<decimal> GetTotalSpentAsync(string userId);
+        Task AddAsync(PaymentTransaction transaction);
+        Task UpdateAsync(PaymentTransaction transaction);
+        Task DeleteAsync(int id);
+        Task SaveAsync();
+    }
+}

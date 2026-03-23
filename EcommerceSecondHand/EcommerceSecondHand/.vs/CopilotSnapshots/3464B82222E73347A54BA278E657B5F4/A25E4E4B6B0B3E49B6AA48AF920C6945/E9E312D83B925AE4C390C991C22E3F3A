@@ -1,0 +1,36 @@
+﻿using EcommerceSecondHand.Data;
+using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace EcommerceSecondHand.Repositories
+{
+    public class CategoryRepository : Repository<Category>, ICategoryRepository
+    {
+        public CategoryRepository(ApplicationDbContext context) : base(context)
+        {
+        }
+
+        public async Task<IEnumerable<Category>> GetCategoriesWithProductCountAsync()
+        {
+            return await _dbSet
+                .Select(c => new Category
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Description = c.Description,
+                    ImageUrl = c.ImageUrl,
+                    Products = c.Products!.ToList()
+                })
+                .ToListAsync();
+        }
+
+        public async Task<Category?> GetCategoryWithProductsAsync(int categoryId)
+        {
+            return await _dbSet
+                .Include(c => c.Products)
+                .ThenInclude(p => p!.Seller)
+                .FirstOrDefaultAsync(c => c.Id == categoryId);
+        }
+    }
+}

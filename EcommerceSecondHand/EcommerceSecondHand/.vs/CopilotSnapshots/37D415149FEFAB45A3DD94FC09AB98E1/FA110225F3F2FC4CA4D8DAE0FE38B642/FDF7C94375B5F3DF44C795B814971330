@@ -1,0 +1,46 @@
+﻿@model Order
+@{
+    ViewData["Title"] = "Đặt hàng thành công";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body text-center p-5">
+                    <div class="mb-4">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+                    </div>
+                    <h1>Đặt hàng thành công!</h1>
+                    <p class="lead">Cảm ơn bạn đã mua hàng tại EcommerceSecondHand.</p>
+                    <div class="alert alert-light my-4">
+                        <p class="mb-1">Mã đơn hàng: <strong>@Model.OrderNumber</strong></p>
+                        <p class="mb-1">Tổng tiền: <strong>@Model.TotalAmount.ToString("C")</strong></p>
+                        <p class="mb-0">Phương thức thanh toán: <strong>@GetPaymentMethodText(Model.PaymentMethod)</strong></p>
+                    </div>
+                    <p>Chúng tôi đã gửi thông tin đơn hàng qua email của bạn. Bạn cũng có thể theo dõi đơn hàng này trong mục "Đơn hàng của tôi".</p>
+                    <div class="mt-4">
+                        <a asp-controller="Orders" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-primary me-2">
+                            <i class="bi bi-bag-check me-1"></i> Xem chi tiết đơn hàng
+                        </a>
+                        <a asp-controller="Products" asp-action="Index" class="btn btn-outline-primary">
+                            <i class="bi bi-arrow-left me-1"></i> Tiếp tục mua sắm
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    public string GetPaymentMethodText(string paymentMethod)
+    {
+        return paymentMethod switch
+        {
+            "Wallet" => "Ví điện tử",
+            "COD" => "Thanh toán khi nhận hàng",
+            _ => paymentMethod
+        };
+    }
+}

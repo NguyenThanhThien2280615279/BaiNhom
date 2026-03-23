@@ -1,0 +1,17 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Repositories.Interfaces
+{
+    public interface ICartRepository
+    {
+        Task<IEnumerable<CartItem>> GetCartItemsByUserAsync(string userId);
+        Task<CartItem?> GetCartItemAsync(int cartItemId);
+        Task<CartItem?> GetCartItemAsync(string userId, int productId);
+        Task AddItemToCartAsync(CartItem cartItem);
+        Task UpdateCartItemQuantityAsync(int cartItemId, int quantity);
+        Task RemoveCartItemAsync(int cartItemId);
+        Task ClearCartAsync(string userId);
+        Task<int> GetCartItemsCountAsync(string userId);
+        Task<decimal> GetCartTotalAsync(string userId);
+    }
+}

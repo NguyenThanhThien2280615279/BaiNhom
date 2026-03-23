@@ -1,0 +1,15 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Models
+{
+    public class WalletViewModel
+    {
+        public decimal CurrentBalance { get; set; }
+        public decimal TotalDeposits { get; set; }
+        public decimal TotalWithdrawals { get; set; }
+        public decimal TotalPurchases { get; set; }
+        public decimal TotalSales { get; set; }
+        
+        public IEnumerable<PaymentTransaction> Transactions { get; set; } = new List<PaymentTransaction>();
+    }
+}

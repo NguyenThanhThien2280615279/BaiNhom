@@ -1,0 +1,12 @@
+﻿using EcommerceSecondHand.Models;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace EcommerceSecondHand.Models.ViewModels
+{
+    public class CartViewModel
+    {
+        public IEnumerable<CartItem> CartItems { get; set; } = new List<CartItem>();
+        public decimal SubTotal => CartItems.Sum(item => item.Product?.Price * item.Quantity ?? 0);
+    }
+}

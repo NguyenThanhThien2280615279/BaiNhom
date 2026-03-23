@@ -1,0 +1,187 @@
+@using System.Globalization
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Quản trị hệ thống";
+    var vi = CultureInfo.GetCultureInfo("vi-VN");
+
+    string Money(decimal v) => string.Format(vi, "{0:N0} đ", v);
+    string TimeVN(DateTime dt) => dt.ToLocalTime().ToString("dd/MM/yyyy HH:mm");
+
+    string OrderBadge(OrderStatus status) => status switch
+    {
+        OrderStatus.Pending => "badge bg-warning",
+        OrderStatus.Accepted => "badge bg-success",
+        OrderStatus.Canceled => "badge bg-danger",
+        OrderStatus.Refunded => "badge bg-secondary",
+        _ => "badge bg-secondary"
+    };
+
+    string InitialOf(string? email)
+    {
+        if (string.IsNullOrWhiteSpace(email)) return "?";
+        var c = email.Trim()[0];
+        return char.ToUpperInvariant(c).ToString();
+    }
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Tổng quan</h2>
+    <small class="text-muted">Cập nhật lần cuối: @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</small>
+</div>
+
+<div class="row g-3 mb-4 admin-kpi">
+    <div class="col-6 col-md-3">
+        <div class="card text-bg-primary h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fs-6 opacity-75">Người dùng</div>
+                        <div class="fs-3 fw-bold">@Model?.TotalUsers</div>
+                        <small class="opacity-75">Tổng số tài khoản</small>
+                    </div>
+                    <span class="bi bi-people fs-1 opacity-75" role="img" aria-label="Người dùng"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-bg-success h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fs-6 opacity-75">Sản phẩm</div>
+                        <div class="fs-3 fw-bold">@Model?.TotalProducts</div>
+                        <small class="opacity-75">Sản phẩm đang bán</small>
+                    </div>
+                    <span class="bi bi-box-seam fs-1 opacity-75" role="img" aria-label="Sản phẩm"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-bg-warning h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fs-6 opacity-75">Đơn hàng</div>
+                        <div class="fs-3 fw-bold">@Model?.TotalOrders</div>
+                        <small class="opacity-75">Tổng số đơn hàng</small>
+                    </div>
+                    <span class="bi bi-receipt fs-1 opacity-75" role="img" aria-label="Đơn hàng"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card text-bg-danger h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fs-6 opacity-75">Doanh thu</div>
+                        <div class="fs-3 fw-bold">@Money(Model?.TotalRevenue ?? 0)</div>
+                        <small class="opacity-75">Tổng doanh thu</small>
+                    </div>
+                    <span class="bi bi-currency-exchange fs-1 opacity-75" role="img" aria-label="Doanh thu"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 admin-table">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><i class="bi bi-people me-2"></i>Người dùng mới</h6>
+                <a asp-controller="Users" asp-action="Index" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+            </div>
+            <div class="card-body p-0">
+                @if (Model?.RecentUsers?.Any() == true)
+                {
+                    <table class="table table-sm mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Email</th>
+                                <th style="width: 160px;">Ngày tạo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var u in Model!.RecentUsers!)
+                            {
+                                <tr class="table-row-hover" onclick="window.location='@Url.Action("Details","Users", new { id = u.Id })'" style="cursor:pointer;">
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2"
+                                                 style="width: 32px; height: 32px;">
+                                                <span class="text-white fw-bold">@InitialOf(u.Email)</span>
+                                            </div>
+                                            <span>@(u.Email ?? "(không có email)")</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">@TimeVN(u.CreatedAt)</small>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-person-x fs-1" role="img" aria-label="Không có người dùng"></i>
+                        <p class="mt-2 mb-0">Chưa có người dùng nào</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><i class="bi bi-receipt me-2"></i>Đơn hàng gần đây</h6>
+                <a asp-controller="Orders" asp-action="Index" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+            </div>
+            <div class="card-body p-0">
+                @if (Model?.RecentOrders?.Any() == true)
+                {
+                    <table class="table table-sm mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 160px;">Mã</th>
+                                <th style="width: 160px;">Tổng</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var o in Model!.RecentOrders!)
+                            {
+                                <tr class="table-row-hover" onclick="window.location='@Url.Action("Details","Orders", new { id = o.Id })'" style="cursor:pointer;">
+                                    <td><code class="text-primary">@o.OrderNumber</code></td>
+                                    <td><span class="fw-bold">@Money(o.TotalAmount)</span></td>
+                                    <td>
+                                        <span class="@OrderBadge(o.Status)">@o.Status</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-cart-x fs-1" role="img" aria-label="Không có đơn hàng"></i>
+                        <p class="mt-2 mb-0">Chưa có đơn hàng nào</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-row-hover:hover {
+        background-color: rgba(0,0,0,.03);
+    }
+</style>

@@ -1,0 +1,40 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace EcommerceSecondHand.Models
+{
+    public class SystemStatistics
+    {
+        [Key]
+        public int Id { get; set; }
+        
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal TotalRevenue { get; set; } = 0;
+        
+        public int TotalUsers { get; set; } = 0;
+        
+        public int TotalVendors { get; set; } = 0;
+        
+        public int TotalCustomers { get; set; } = 0;
+        
+        public int TotalProducts { get; set; } = 0;
+        
+        public int TotalOrders { get; set; } = 0;
+        
+        public int TotalOrdersCompleted { get; set; } = 0;
+        
+        public int ActiveUsersLast30Days { get; set; } = 0;
+        
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal RevenueLast30Days { get; set; } = 0;
+        
+        public int NewUsersLast30Days { get; set; } = 0;
+        
+        public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
+        
+        // Properties needed by views
+        public decimal[] MonthlyRevenue { get; set; } = new decimal[12];
+        public string[] CategoryNames { get; set; } = Array.Empty<string>();
+        public int[] ProductsPerCategory { get; set; } = Array.Empty<int>();
+    }
+}

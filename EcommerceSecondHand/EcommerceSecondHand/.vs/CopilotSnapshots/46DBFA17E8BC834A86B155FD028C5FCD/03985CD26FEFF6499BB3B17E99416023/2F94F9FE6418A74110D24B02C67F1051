@@ -1,0 +1,160 @@
+﻿using EcommerceSecondHand.Data;
+using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace EcommerceSecondHand.Repositories
+{
+    public class NotificationRepository : INotificationRepository
+    {
+        private readonly ApplicationDbContext _context;
+
+        public NotificationRepository(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<IEnumerable<Notification>> GetAllAsync()
+        {
+            return await _context.Notifications.ToListAsync();
+        }
+
+        public async Task<Notification?> GetByIdAsync(int id)
+        {
+            return await _context.Notifications.FindAsync(id);
+        }
+
+        public async Task<IEnumerable<Notification>> GetUserNotificationsAsync(string userId)
+        {
+            return await _context.Notifications
+                .Where(n => n.UserId == userId)
+                .OrderByDescending(n => n.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Notification>> GetPaginatedNotificationsAsync(string userId, NotificationType? type, bool unreadOnly, int page, int pageSize)
+        {
+            var query = _context.Notifications.Where(n => n.UserId == userId);
+
+            if (type.HasValue)
+            {
+                query = query.Where(n => n.Type == type.Value);
+            }
+
+            if (unreadOnly)
+            {
+                query = query.Where(n => !n.IsRead);
+            }
+
+            return await query
+                .OrderByDescending(n => n.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+
+        public async Task<int> GetNotificationsCountAsync(string userId, NotificationType? type, bool unreadOnly)
+        {
+            var query = _context.Notifications.Where(n => n.UserId == userId);
+
+            if (type.HasValue)
+            {
+                query = query.Where(n => n.Type == type.Value);
+            }
+
+            if (unreadOnly)
+            {
+                query = query.Where(n => !n.IsRead);
+            }
+
+            return await query.CountAsync();
+        }
+
+        public async Task<int> GetUnreadNotificationsCountAsync(string userId)
+        {
+            return await _context.Notifications
+                .Where(n => n.UserId == userId && !n.IsRead)
+                .CountAsync();
+        }
+
+        public async Task<IEnumerable<Notification>> GetRecentNotificationsAsync(string userId, int count)
+        {
+            return await _context.Notifications
+                .Where(n => n.UserId == userId)
+                .OrderByDescending(n => n.CreatedAt)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task MarkAllAsReadAsync(string userId)
+        {
+            var notifications = await _context.Notifications
+                .Where(n => n.UserId == userId && !n.IsRead)
+                .ToListAsync();
+
+            foreach (var notification in notifications)
+            {
+                notification.IsRead = true;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task MarkAsReadAsync(int notificationId)
+        {
+            var notification = await _context.Notifications.FindAsync(notificationId);
+            if (notification != null && !notification.IsRead)
+            {
+                notification.IsRead = true;
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task DeleteNotificationAsync(int notificationId)
+        {
+            var notification = await _context.Notifications.FindAsync(notificationId);
+            if (notification != null)
+            {
+                _context.Notifications.Remove(notification);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task DeleteAllAsync(string userId)
+        {
+            var notifications = await _context.Notifications
+                .Where(n => n.UserId == userId)
+                .ToListAsync();
+
+            _context.Notifications.RemoveRange(notifications);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AddAsync(Notification notification)
+        {
+            await _context.Notifications.AddAsync(notification);
+            await SaveAsync();
+        }
+
+        public async Task UpdateAsync(Notification notification)
+        {
+            _context.Notifications.Update(notification);
+            await SaveAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var notification = await _context.Notifications.FindAsync(id);
+            if (notification != null)
+            {
+                _context.Notifications.Remove(notification);
+                await SaveAsync();
+            }
+        }
+
+        public async Task SaveAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
+    }
+}

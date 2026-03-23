@@ -1,0 +1,79 @@
+﻿using EcommerceSecondHand.Data;
+using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace EcommerceSecondHand.Repositories
+{
+    public class NotificationRepository : Repository<Notification>, INotificationRepository
+    {
+        public NotificationRepository(ApplicationDbContext context) : base(context)
+        {
+        }
+
+        public async Task<IEnumerable<Notification>> GetUserNotificationsAsync(string userId)
+        {
+            return await _dbSet
+                .Where(n => n.UserId == userId)
+                .OrderByDescending(n => n.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Notification>> GetUnreadNotificationsAsync(string userId)
+        {
+            return await _dbSet
+                .Where(n => n.UserId == userId && !n.IsRead)
+                .OrderByDescending(n => n.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<int> GetUnreadNotificationCountAsync(string userId)
+        {
+            return await _dbSet
+                .CountAsync(n => n.UserId == userId && !n.IsRead);
+        }
+
+        public async Task MarkAsReadAsync(int notificationId)
+        {
+            var notification = await _dbSet.FindAsync(notificationId);
+            if (notification != null && !notification.IsRead)
+            {
+                notification.IsRead = true;
+                notification.ReadAt = DateTime.UtcNow;
+                _context.Entry(notification).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task MarkAllAsReadAsync(string userId)
+        {
+            var unreadNotifications = await _dbSet
+                .Where(n => n.UserId == userId && !n.IsRead)
+                .ToListAsync();
+
+            foreach (var notification in unreadNotifications)
+            {
+                notification.IsRead = true;
+                notification.ReadAt = DateTime.UtcNow;
+                _context.Entry(notification).State = EntityState.Modified;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<bool> DeleteNotificationAsync(int notificationId, string userId)
+        {
+            var notification = await _dbSet
+                .FirstOrDefaultAsync(n => n.Id == notificationId && n.UserId == userId);
+
+            if (notification != null)
+            {
+                _dbSet.Remove(notification);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+
+            return false;
+        }
+    }
+}

@@ -1,0 +1,101 @@
+@using EcommerceSecondHand.Models
+@using Microsoft.AspNetCore.Mvc.Rendering
+@model Order
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+}
+
+@functions {
+    string GetStatusText(OrderStatus s) => s switch
+    {
+        OrderStatus.Pending => "Chờ xử lý",
+        OrderStatus.Canceled => "Đã hủy",
+        OrderStatus.Refunded => "Đã hoàn tiền",
+        OrderStatus.Completed => "Thành công",
+        _ => s.ToString()
+    };
+
+    string GetStatusClass(OrderStatus s) => s switch
+    {
+        OrderStatus.Pending => "warning",
+        OrderStatus.Canceled => "danger",
+        OrderStatus.Refunded => "secondary",
+        OrderStatus.Completed => "success",
+        _ => "secondary"
+    };
+}
+
+<h2 class="mb-3">Đơn hàng @Model.OrderNumber</h2>
+
+@{
+    var badgeText = GetStatusText(Model.Status);
+    var badgeClass = GetStatusClass(Model.Status);
+}
+
+<dl class="row">
+    <dt class="col-sm-2">Tổng</dt>
+    <dd class="col-sm-10">@Model.TotalAmount.ToString("N0") đ</dd>
+
+    <dt class="col-sm-2">Trạng thái</dt>
+    <dd class="col-sm-10">
+        <span class="badge bg-@badgeClass">@badgeText</span>
+    </dd>
+
+    <dt class="col-sm-2">Ngày</dt>
+    <dd class="col-sm-10">@Model.OrderDate.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</dd>
+</dl>
+
+<h5>Mặt hàng</h5>
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>Sản phẩm</th>
+            <th>Số lượng</th>
+            <th>Đơn giá</th>
+            <th>Thành tiền</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.OrderItems ?? new List<OrderItem>())
+        {
+            <tr>
+                <td>@item.Product?.Name</td>
+                <td>@item.Quantity</td>
+                <td>@item.UnitPrice.ToString("N0") đ</td>
+                <td>@item.Price.ToString("N0") đ</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@{
+    // Dropdown hiển thị
+    var choices = new List<(OrderStatus val, string text)>
+    {
+        (OrderStatus.Pending,   "Chờ xử lý"),
+        (OrderStatus.Canceled,  "Đã hủy"),
+        (OrderStatus.Refunded,  "Đã hoàn tiền"),
+        (OrderStatus.Completed, "Thành công"),
+    };
+
+    // Nếu đơn đã thành công → ẩn Đã hoàn tiền
+    if (Model.Status == OrderStatus.Completed)
+    {
+        choices = choices.Where(c => c.val != OrderStatus.Refunded).ToList();
+    }
+
+    var selectItems = choices.Select(c => new SelectListItem
+            {
+                Value = ((int)c.val).ToString(),
+                Text = c.text,
+                Selected = (Model.Status == c.val)
+            }).ToList();
+}
+
+<form asp-action="UpdateStatus" method="post" class="d-flex gap-2 mt-3">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@Model.Id" />
+    @Html.DropDownList("status", selectItems, new { @class = "form-select w-auto" })
+    <button type="submit" class="btn btn-primary">Cập nhật</button>
+    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+</form>

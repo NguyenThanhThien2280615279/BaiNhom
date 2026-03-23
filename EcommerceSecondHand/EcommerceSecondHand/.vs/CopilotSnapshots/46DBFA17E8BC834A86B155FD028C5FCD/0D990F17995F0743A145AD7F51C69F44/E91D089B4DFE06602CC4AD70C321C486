@@ -1,0 +1,174 @@
+﻿@model NotificationsViewModel
+@{
+    ViewData["Title"] = "Thông báo";
+
+    string GetNotificationIcon(NotificationType type) => type switch
+    {
+        NotificationType.System => "bi-info-circle",
+        NotificationType.Order => "bi-box",
+        NotificationType.Payment => "bi-credit-card",
+        NotificationType.Message => "bi-chat-dots",
+        NotificationType.Product => "bi-tag",
+        NotificationType.Review => "bi-star",
+        _ => "bi-bell"
+    };
+
+    string GetNotificationBadgeClass(NotificationType type) => type switch
+    {
+        NotificationType.System => "bg-info",
+        NotificationType.Order => "bg-primary",
+        NotificationType.Payment => "bg-success",
+        NotificationType.Message => "bg-warning",
+        NotificationType.Product => "bg-secondary",
+        NotificationType.Review => "bg-danger",
+        _ => "bg-dark"
+    };
+}
+
+<div class="container mt-4">
+    <h1>Thông báo</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Bộ lọc</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a asp-controller="WebNotifications" asp-action="Index" class="list-group-item list-group-item-action @(string.IsNullOrEmpty(Model.Filter) ? "active" : "")">
+                            <i class="bi bi-bell me-2"></i> Tất cả thông báo
+                            <span class="badge bg-primary rounded-pill float-end">@Model.UnreadCount</span>
+                        </a>
+                        <a asp-controller="WebNotifications" asp-action="Index" asp-route-filter="System" class="list-group-item list-group-item-action @(Model.Filter == "System" ? "active" : "")">
+                            <i class="bi bi-info-circle me-2"></i> Hệ thống
+                        </a>
+                        <a asp-controller="WebNotifications" asp-action="Index" asp-route-filter="Order" class="list-group-item list-group-item-action @(Model.Filter == "Order" ? "active" : "")">
+                            <i class="bi bi-box me-2"></i> Đơn hàng
+                        </a>
+                        <a asp-controller="WebNotifications" asp-action="Index" asp-route-filter="Payment" class="list-group-item list-group-item-action @(Model.Filter == "Payment" ? "active" : "")">
+                            <i class="bi bi-credit-card me-2"></i> Thanh toán
+                        </a>
+                        <a asp-controller="WebNotifications" asp-action="Index" asp-route-filter="Message" class="list-group-item list-group-item-action @(Model.Filter == "Message" ? "active" : "")">
+                            <i class="bi bi-chat-dots me-2"></i> Tin nhắn
+                        </a>
+                        <a asp-controller="WebNotifications" asp-action="Index" asp-route-filter="Product" class="list-group-item list-group-item-action @(Model.Filter == "Product" ? "active" : "")">
+                            <i class="bi bi-tag me-2"></i> Sản phẩm
+                        </a>
+                        <a asp-controller="WebNotifications" asp-action="Index" asp-route-filter="Review" class="list-group-item list-group-item-action @(Model.Filter == "Review" ? "active" : "")">
+                            <i class="bi bi-star me-2"></i> Đánh giá
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Thao tác</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <form method="post" asp-controller="WebNotifications" asp-action="MarkAllAsRead">
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-check-all me-1"></i> Đánh dấu tất cả đã đọc
+                            </button>
+                        </form>
+                        <form method="post" asp-controller="WebNotifications" asp-action="DeleteAll" onsubmit="return confirm('Bạn có chắc chắn muốn xóa tất cả thông báo?');">
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="bi bi-trash me-1"></i> Xóa tất cả thông báo
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        @if (string.IsNullOrEmpty(Model.Filter))
+                        {
+                            <span>Tất cả thông báo</span>
+                        }
+                        else
+                        {
+                            <span>Thông báo @Model.Filter.ToLower()</span>
+                        }
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Notifications.Any())
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var notification in Model.Notifications)
+                            {
+                                <div class="list-group-item list-group-item-action @(notification.IsRead ? "" : "bg-light")">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-3">
+                                                <span class="badge @GetNotificationBadgeClass(notification.Type) p-2">
+                                                    <i class="bi @GetNotificationIcon(notification.Type)"></i>
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1">@notification.Title</h6>
+                                                <p class="mb-1">@notification.Message</p>
+                                                <small class="text-muted">@notification.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            @if (!string.IsNullOrEmpty(notification.ActionUrl))
+                                            {
+                                                <a href="@notification.ActionUrl" class="btn btn-sm btn-outline-primary me-2">
+                                                    <i class="bi bi-box-arrow-up-right"></i>
+                                                </a>
+                                            }
+
+                                            @if (!notification.IsRead)
+                                            {
+                                                <form method="post" asp-controller="WebNotifications" asp-action="MarkAsRead" asp-route-id="@notification.Id" asp-route-returnUrl="@Url.Action("Index", "WebNotifications", new { filter = Model.Filter, page = Model.CurrentPage })">
+                                                    <button type="submit" class="btn btn-sm btn-outline-secondary me-2">
+                                                        <i class="bi bi-check"></i>
+                                                    </button>
+                                                </form>
+                                            }
+
+                                            <form method="post" asp-controller="WebNotifications" asp-action="Delete" asp-route-id="@notification.Id">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        @if (Model.TotalPages > 1)
+                        {
+                            <div class="d-flex justify-content-center mt-4">
+                                <nav>
+                                    <ul class="pagination">
+                                        @for (int i = 1; i <= Model.TotalPages; i++)
+                                        {
+                                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                                <a class="page-link" asp-controller="WebNotifications" asp-action="Index" asp-route-filter="@Model.Filter" asp-route-page="@i">@i</a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </nav>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <p class="text-muted">Không có thông báo nào.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

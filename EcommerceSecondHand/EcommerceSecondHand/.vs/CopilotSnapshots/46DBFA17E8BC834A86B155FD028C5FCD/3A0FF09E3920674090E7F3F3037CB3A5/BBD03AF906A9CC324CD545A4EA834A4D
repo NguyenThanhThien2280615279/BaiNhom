@@ -1,0 +1,29 @@
+﻿using EcommerceSecondHand.Models;
+using System.ComponentModel.DataAnnotations;
+
+namespace EcommerceSecondHand.Models.ViewModels
+{
+    public class CheckoutViewModel
+    {
+        public IEnumerable<CartItem> CartItems { get; set; } = new List<CartItem>();
+        
+        public decimal Subtotal { get; set; }
+        
+        public decimal ShippingFee { get; set; }
+        
+        public decimal Total { get; set; }
+        
+        [Required(ErrorMessage = "Địa chỉ giao hàng là bắt buộc")]
+        [StringLength(500, ErrorMessage = "Địa chỉ giao hàng không được vượt quá 500 ký tự")]
+        public string ShippingAddress { get; set; } = string.Empty;
+        
+        public string? ShippingCity { get; set; }
+        
+        public string? ShippingCountry { get; set; }
+        
+        public string? ShippingPostalCode { get; set; }
+        
+        [Required(ErrorMessage = "Phương thức thanh toán là bắt buộc")]
+        public string PaymentMethod { get; set; } = string.Empty;
+    }
+}}

@@ -1,0 +1,26 @@
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+<script>
+    // Ensure overrides run AFTER jquery.validate is loaded
+    (function () {
+        if (!window.jQuery || !jQuery.validator) return;
+
+        function normalizeToInvariantDecimal(value) {
+            if (typeof value !== 'string') return value;
+            return value.replace(/\./g, '').replace(',', '.');
+        }
+
+        var originalNumber = jQuery.validator.methods.number;
+        jQuery.validator.methods.number = function (value, element) {
+            if (this.optional(element)) return true;
+            return originalNumber.call(this, value, element) ||
+                originalNumber.call(this, normalizeToInvariantDecimal(value), element);
+        };
+
+        var originalRange = jQuery.validator.methods.range;
+        jQuery.validator.methods.range = function (value, element, param) {
+            if (this.optional(element)) return true;
+            return originalRange.call(this, normalizeToInvariantDecimal(value), element, param);
+        };
+    })();
+</script>

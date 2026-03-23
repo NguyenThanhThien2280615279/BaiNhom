@@ -1,0 +1,47 @@
+﻿@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Chào mừng đến với EcommerceSecondHand</h1>
+    <p>Nền tảng mua bán hàng secondhand đáng tin cậy.</p>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Sản phẩm nổi bật</h5>
+                <div class="row">
+                    <!-- Sẽ hiển thị danh sách sản phẩm nổi bật ở đây -->
+                    <p class="text-center">Đang tải sản phẩm...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Sản phẩm mới</h5>
+                <div class="row">
+                    <!-- Sẽ hiển thị danh sách sản phẩm mới ở đây -->
+                    <p class="text-center">Đang tải sản phẩm...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Danh mục sản phẩm</h5>
+                <ul class="list-group list-group-flush">
+                    <!-- Sẽ hiển thị danh sách danh mục ở đây -->
+                    <li class="list-group-item">Đang tải danh mục...</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

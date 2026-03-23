@@ -1,0 +1,20 @@
+﻿using EcommerceSecondHand.Models;
+using System.ComponentModel.DataAnnotations;
+
+namespace EcommerceSecondHand.Models
+{
+    public class WalletManagementViewModel
+    {
+        [Required(ErrorMessage = "Email là bắt buộc")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        public string Email { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Số tiền là bắt buộc")]
+        [Range(0.01, 10000, ErrorMessage = "Số tiền phải từ 0.01 đến 10,000")]
+        public decimal Amount { get; set; }
+
+        public string? Description { get; set; }
+
+        public IEnumerable<PaymentTransaction> RecentTransactions { get; set; } = new List<PaymentTransaction>();
+    }
+}

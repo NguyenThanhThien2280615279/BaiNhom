@@ -1,0 +1,16 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace EcommerceSecondHand.Models
+{
+    public class ReviewViewModel
+    {
+        public int ProductId { get; set; }
+
+        [Required(ErrorMessage = "Vui lòng chọn số sao đánh giá")]
+        [Range(1, 5, ErrorMessage = "Đánh giá phải từ 1 đến 5 sao")]
+        public int Rating { get; set; }
+
+        [StringLength(500, ErrorMessage = "Nhận xét không được vượt quá 500 ký tự")]
+        public string? Comment { get; set; }
+    }
+}

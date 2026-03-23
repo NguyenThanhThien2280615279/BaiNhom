@@ -1,0 +1,166 @@
+@model AdminEditUserViewModel
+@{
+    ViewData["Title"] = "Chỉnh sửa người dùng";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0"><i class="bi bi-pencil me-2"></i>Chỉnh sửa người dùng</h2>
+    <div>
+        <a class="btn btn-outline-secondary" asp-action="Index">
+            <i class="bi bi-arrow-left me-1"></i>Quay lại
+        </a>
+        <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@Model.Id">
+            <i class="bi bi-eye me-1"></i>Xem chi tiết
+        </a>
+    </div>
+</div>
+
+<form asp-action="Edit" method="post">
+    <div class="row g-4">
+        <!-- Thông tin cơ bản -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-person me-2"></i>Thông tin cá nhân</h5>
+                </div>
+                <div class="card-body">
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label">Email *</label>
+                        <input asp-for="Email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="FirstName" class="form-label">Họ *</label>
+                                <input asp-for="FirstName" class="form-control" />
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="LastName" class="form-label">Tên *</label>
+                                <input asp-for="LastName" class="form-control" />
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="PhoneNumber" class="form-label">Số điện thoại</label>
+                        <input asp-for="PhoneNumber" class="form-control" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Address" class="form-label">Địa chỉ</label>
+                        <textarea asp-for="Address" class="form-control" rows="2"></textarea>
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="City" class="form-label">Thành phố</label>
+                                <input asp-for="City" class="form-control" />
+                                <span asp-validation-for="City" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Country" class="form-label">Quốc gia</label>
+                                <input asp-for="Country" class="form-control" />
+                                <span asp-validation-for="Country" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="PostalCode" class="form-label">Mã bưu điện</label>
+                        <input asp-for="PostalCode" class="form-control" />
+                        <span asp-validation-for="PostalCode" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Bio" class="form-label">Giới thiệu</label>
+                        <textarea asp-for="Bio" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="Bio" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thông tin tài khoản -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-shield-check me-2"></i>Thông tin tài khoản</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="WalletBalance" class="form-label">Số dư ví (đ)</label>
+                        <input asp-for="WalletBalance" class="form-control" type="number" step="1000" min="0" />
+                        <span asp-validation-for="WalletBalance" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="CurrentRole" class="form-label">Vai trò</label>
+                        <select asp-for="CurrentRole" class="form-select">
+                            <option value="">Chọn vai trò</option>
+                            @foreach (var role in Model.AvailableRoles)
+                            {
+                                <option value="@role">@role</option>
+                            }
+                        </select>
+                        <span asp-validation-for="CurrentRole" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input asp-for="EmailConfirmed" class="form-check-input" type="checkbox" />
+                            <label asp-for="EmailConfirmed" class="form-check-label">
+                                Email đã xác thực
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input asp-for="LockoutEnabled" class="form-check-input" type="checkbox" />
+                            <label asp-for="LockoutEnabled" class="form-check-label">
+                                Cho phép khóa tài khoản
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="LockoutEnd" class="form-label">Thời gian khóa đến</label>
+                        <input asp-for="LockoutEnd" class="form-control" type="datetime-local" />
+                        <span asp-validation-for="LockoutEnd" class="text-danger"></span>
+                        <small class="form-text text-muted">Để trống để mở khóa ngay lập tức</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-end gap-2">
+                <a class="btn btn-outline-secondary" asp-action="Index">Hủy</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>Cập nhật
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

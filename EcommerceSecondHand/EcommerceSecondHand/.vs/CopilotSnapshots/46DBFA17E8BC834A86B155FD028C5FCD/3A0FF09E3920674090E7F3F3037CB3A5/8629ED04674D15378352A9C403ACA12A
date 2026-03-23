@@ -1,0 +1,12 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Models
+{
+    public class MessagesViewModel
+    {
+        public string CurrentUserId { get; set; } = string.Empty;
+        public IEnumerable<ApplicationUser> Contacts { get; set; } = new List<ApplicationUser>();
+        public ApplicationUser? SelectedContact { get; set; }
+        public IEnumerable<Message> Messages { get; set; } = new List<Message>();
+    }
+}

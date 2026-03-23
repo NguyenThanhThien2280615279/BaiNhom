@@ -1,0 +1,247 @@
+﻿@model WalletViewModel
+@{
+    ViewData["Title"] = "Ví điện tử";
+}
+
+<div class="container mt-4">
+    <h1>Ví điện tử</h1>
+    
+    <div class="row mt-4">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-wallet2 text-primary" style="font-size: 4rem;"></i>
+                    </div>
+                    <h2 class="card-title">Số dư hiện tại</h2>
+                    <h1 class="text-primary">@Model.Balance.ToString("C")</h1>
+                    <div class="mt-4">
+                        <a href="/Wallet/Deposit" class="btn btn-success me-2">
+                            <i class="bi bi-plus-circle"></i> Nạp tiền
+                        </a>
+                        <a href="/Wallet/Withdraw" class="btn btn-danger">
+                            <i class="bi bi-dash-circle"></i> Rút tiền
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Thông tin ví</h5>
+                    <p class="card-text">
+                        <i class="bi bi-info-circle text-primary me-2"></i>
+                        Ví điện tử giúp bạn thanh toán nhanh chóng và an toàn khi mua sắm trên nền tảng của chúng tôi.
+                    </p>
+                    <p class="card-text">
+                        <i class="bi bi-shield-check text-primary me-2"></i>
+                        Mọi giao dịch đều được bảo mật và xác thực đầy đủ.
+                    </p>
+                    <h6 class="mt-4">Hướng dẫn:</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-check2-circle text-success me-2"></i> Nạp tiền: Chọn "Nạp tiền" và làm theo hướng dẫn</li>
+                        <li><i class="bi bi-check2-circle text-success me-2"></i> Rút tiền: Chọn "Rút tiền" và làm theo hướng dẫn</li>
+                        <li><i class="bi bi-check2-circle text-success me-2"></i> Mua hàng: Chọn thanh toán bằng ví khi mua sắm</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Lịch sử giao dịch</h5>
+                <div>
+                    <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse">
+                        <i class="bi bi-filter"></i> Bộ lọc
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="collapse" id="filterCollapse">
+            <div class="card-body border-bottom">
+                <form method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="filterType" class="form-label">Loại giao dịch</label>
+                        <select name="filterType" id="filterType" class="form-select">
+                            <option value="">Tất cả</option>
+                            <option value="Deposit" selected="@(Model.FilterType == "Deposit")">Nạp tiền</option>
+                            <option value="Withdraw" selected="@(Model.FilterType == "Withdraw")">Rút tiền</option>
+                            <option value="Purchase" selected="@(Model.FilterType == "Purchase")">Mua hàng</option>
+                            <option value="Sale" selected="@(Model.FilterType == "Sale")">Bán hàng</option>
+                            <option value="Refund" selected="@(Model.FilterType == "Refund")">Hoàn tiền</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="startDate" class="form-label">Từ ngày</label>
+                        <input type="date" name="startDate" id="startDate" class="form-control" value="@(Model.StartDate?.ToString("yyyy-MM-dd"))">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="endDate" class="form-label">Đến ngày</label>
+                        <input type="date" name="endDate" id="endDate" class="form-control" value="@(Model.EndDate?.ToString("yyyy-MM-dd"))">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="bi bi-search"></i> Tìm kiếm
+                        </button>
+                        <a href="/Wallet" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Xóa bộ lọc
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Loại</th>
+                            <th>Số tiền</th>
+                            <th>Phương thức</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày giao dịch</th>
+                            <th>Mô tả</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Transactions.Any())
+                        {
+                            foreach (var transaction in Model.Transactions)
+                            {
+                                <tr>
+                                    <td>@transaction.Id</td>
+                                    <td>
+                                        <span class="badge @GetTransactionTypeBadgeClass(transaction.Type)">
+                                            @GetTransactionTypeText(transaction.Type)
+                                        </span>
+                                    </td>
+                                    <td class="@(IsPositiveTransaction(transaction.Type) ? "text-success" : "text-danger")">
+                                        @(IsPositiveTransaction(transaction.Type) ? "+" : "-")@transaction.Amount.ToString("C")
+                                    </td>
+                                    <td>@transaction.PaymentMethod</td>
+                                    <td>
+                                        <span class="badge @GetTransactionStatusBadgeClass(transaction.Status)">
+                                            @GetTransactionStatusText(transaction.Status)
+                                        </span>
+                                    </td>
+                                    <td>@transaction.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@(transaction.Description ?? "-")</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <p class="mb-0 text-muted">Không có giao dịch nào.</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            
+            @if (Model.TotalPages > 1)
+            {
+                <div class="d-flex justify-content-center mt-4">
+                    <nav>
+                        <ul class="pagination">
+                            @for (int i = 1; i <= Model.TotalPages; i++)
+                            {
+                                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                    <a class="page-link" href="@GetPageUrl(i)">@i</a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@functions {
+    public string GetTransactionTypeBadgeClass(TransactionType type)
+    {
+        return type switch
+        {
+            TransactionType.Deposit => "bg-success",
+            TransactionType.Withdraw => "bg-danger",
+            TransactionType.Purchase => "bg-primary",
+            TransactionType.Sale => "bg-info",
+            TransactionType.Refund => "bg-warning text-dark",
+            _ => "bg-secondary"
+        };
+    }
+    
+    public string GetTransactionTypeText(TransactionType type)
+    {
+        return type switch
+        {
+            TransactionType.Deposit => "Nạp tiền",
+            TransactionType.Withdraw => "Rút tiền",
+            TransactionType.Purchase => "Mua hàng",
+            TransactionType.Sale => "Bán hàng",
+            TransactionType.Refund => "Hoàn tiền",
+            _ => type.ToString()
+        };
+    }
+    
+    public string GetTransactionStatusBadgeClass(TransactionStatus status)
+    {
+        return status switch
+        {
+            TransactionStatus.Pending => "bg-warning text-dark",
+            TransactionStatus.Completed => "bg-success",
+            TransactionStatus.Failed => "bg-danger",
+            TransactionStatus.Rejected => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+    
+    public string GetTransactionStatusText(TransactionStatus status)
+    {
+        return status switch
+        {
+            TransactionStatus.Pending => "Chờ xử lý",
+            TransactionStatus.Completed => "Hoàn thành",
+            TransactionStatus.Failed => "Thất bại",
+            TransactionStatus.Rejected => "Từ chối",
+            _ => status.ToString()
+        };
+    }
+    
+    public bool IsPositiveTransaction(TransactionType type)
+    {
+        return type == TransactionType.Deposit || type == TransactionType.Sale || type == TransactionType.Refund;
+    }
+    
+    public string GetPageUrl(int page)
+    {
+        var url = $"/Wallet?page={page}";
+        
+        if (!string.IsNullOrEmpty(Model.FilterType))
+        {
+            url += $"&filterType={Model.FilterType}";
+        }
+        
+        if (Model.StartDate.HasValue)
+        {
+            url += $"&startDate={Model.StartDate.Value:yyyy-MM-dd}";
+        }
+        
+        if (Model.EndDate.HasValue)
+        {
+            url += $"&endDate={Model.EndDate.Value:yyyy-MM-dd}";
+        }
+        
+        return url;
+    }
+}

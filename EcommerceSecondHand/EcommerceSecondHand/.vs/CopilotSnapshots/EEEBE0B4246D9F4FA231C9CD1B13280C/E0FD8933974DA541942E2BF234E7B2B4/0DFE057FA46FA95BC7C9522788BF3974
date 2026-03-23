@@ -1,0 +1,178 @@
+﻿using EcommerceSecondHand.Hubs;
+using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Models.ViewModels;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Authorize]
+    public class MessagesController : Controller
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IMessageRepository _messageRepository;
+        private readonly IHubContext<ChatHub> _chatHub;
+        private readonly INotificationRepository _notificationRepository;
+
+        public MessagesController(
+            UserManager<ApplicationUser> userManager,
+            IMessageRepository messageRepository,
+            IHubContext<ChatHub> chatHub,
+            INotificationRepository notificationRepository)
+        {
+            _userManager = userManager;
+            _messageRepository = messageRepository;
+            _chatHub = chatHub;
+            _notificationRepository = notificationRepository;
+        }
+
+        public async Task<IActionResult> Index(string? contactId = null)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // L?y danh sách ng??i liên h?
+            var contacts = await _messageRepository.GetUserContactsAsync(user.Id);
+
+            ApplicationUser? selectedContact = null;
+            IEnumerable<Message> messages = new List<Message>();
+
+            if (!string.IsNullOrEmpty(contactId))
+            {
+                // L?y thông tin ng??i liên h? ?ã ch?n
+                selectedContact = await _userManager.FindByIdAsync(contactId);
+                if (selectedContact != null)
+                {
+                    // L?y tin nh?n gi?a ng??i dùng và ng??i liên h?
+                    messages = await _messageRepository.GetConversationAsync(user.Id, contactId);
+
+                    // ?ánh d?u tin nh?n ?ã ??c
+                    await _messageRepository.MarkMessagesAsReadAsync(user.Id, contactId);
+                }
+            }
+            else if (contacts.Any())
+            {
+                // N?u không có contactId, l?y ng??i liên h? ??u tiên
+                selectedContact = contacts.First();
+                messages = await _messageRepository.GetConversationAsync(user.Id, selectedContact.Id);
+                await _messageRepository.MarkMessagesAsReadAsync(user.Id, selectedContact.Id);
+            }
+
+            var model = new MessagesViewModel
+            {
+                Contacts = contacts,
+                SelectedContact = selectedContact,
+                Messages = messages,
+                UserId = user.Id,
+                ContactId = selectedContact?.Id
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendMessage(string recipientId, string content)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (string.IsNullOrEmpty(recipientId) || string.IsNullOrEmpty(content))
+            {
+                return BadRequest("Ng??i nh?n và n?i dung tin nh?n không ???c ?? tr?ng.");
+            }
+
+            var recipient = await _userManager.FindByIdAsync(recipientId);
+            if (recipient == null)
+            {
+                return NotFound("Không tìm th?y ng??i nh?n.");
+            }
+
+            // T?o tin nh?n m?i
+            var message = new Message
+            {
+                SenderId = user.Id,
+                ReceiverId = recipientId,
+                Content = content,
+                DateSent = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow,
+                IsRead = false
+            };
+
+            await _messageRepository.AddAsync(message);
+            await _messageRepository.SaveAsync();
+
+            // G?i thông báo qua SignalR
+            await _chatHub.Clients.User(recipientId).SendAsync("ReceiveMessage", new
+            {
+                messageId = message.Id,
+                senderId = message.SenderId,
+                senderName = $"{user.FirstName} {user.LastName}",
+                content = message.Content,
+                timestamp = message.Timestamp.ToString("yyyy-MM-ddTHH:mm:ss"),
+                isRead = message.IsRead
+            });
+
+            // T?o thông báo cho ng??i nh?n
+            var notification = new Notification
+            {
+                UserId = recipientId,
+                Title = $"Tin nh?n m?i t? {user.FirstName} {user.LastName}",
+                Message = content.Length > 50 ? content.Substring(0, 47) + "..." : content,
+                Type = NotificationType.Message,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+                RelatedEntityId = user.Id,
+                ActionUrl = $"/Messages?contactId={user.Id}"
+            };
+
+            await _notificationRepository.AddAsync(notification);
+            await _notificationRepository.SaveAsync();
+
+            return RedirectToAction(nameof(Index), new { contactId = recipientId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetConversation(string contactId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (string.IsNullOrEmpty(contactId))
+            {
+                return BadRequest("Không có ng??i liên h? ???c ch?n.");
+            }
+
+            var contact = await _userManager.FindByIdAsync(contactId);
+            if (contact == null)
+            {
+                return NotFound("Không tìm th?y ng??i liên h?.");
+            }
+
+            var messages = await _messageRepository.GetConversationAsync(user.Id, contactId);
+            await _messageRepository.MarkMessagesAsReadAsync(user.Id, contactId);
+
+            var model = new ConversationViewModel
+            {
+                Contact = contact,
+                Messages = messages,
+                UserId = user.Id,
+                ContactId = contactId
+            };
+
+            return PartialView("_ConversationPartial", model);
+        }
+    }
+}

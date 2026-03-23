@@ -1,0 +1,187 @@
+﻿@model ProfileViewModel
+@{
+    ViewData["Title"] = "Hồ sơ cá nhân";
+}
+
+<div class="container mt-4">
+    <h1>Hồ sơ cá nhân</h1>
+    
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    @if (!string.IsNullOrEmpty(Model.User?.ProfilePicture))
+                    {
+                        <img src="@Model.User.ProfilePicture" alt="@Model.User.FirstName" class="rounded-circle img-thumbnail mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                    }
+                    else
+                    {
+                        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 150px; height: 150px;">
+                            <i class="bi bi-person" style="font-size: 3rem;"></i>
+                        </div>
+                    }
+                    <h3>@Model.User?.FirstName @Model.User?.LastName</h3>
+                    <p class="text-muted">@(User.IsInRole("Vendor") ? "Người bán" : "Khách hàng")</p>
+                    
+                    <div class="d-grid gap-2 mt-3">
+                        <a asp-controller="Account" asp-action="Edit" class="btn btn-primary">
+                            <i class="bi bi-pencil me-1"></i> Chỉnh sửa hồ sơ
+                        </a>
+                        <a asp-controller="Account" asp-action="ChangePassword" class="btn btn-outline-secondary">
+                            <i class="bi bi-lock me-1"></i> Đổi mật khẩu
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Thông tin tài khoản</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong><i class="bi bi-envelope me-2"></i>Email:</strong> @Model.User?.Email</p>
+                    <p><strong><i class="bi bi-telephone me-2"></i>Số điện thoại:</strong> @(Model.User?.PhoneNumber ?? "Chưa cập nhật")</p>
+                    <p><strong><i class="bi bi-geo-alt me-2"></i>Địa chỉ:</strong> @(Model.User?.Address ?? "Chưa cập nhật")</p>
+                    <p><strong><i class="bi bi-calendar me-2"></i>Ngày tham gia:</strong> @Model.User?.CreatedAt.ToString("dd/MM/yyyy")</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Tổng quan</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="text-primary mb-0">@Model.WalletBalance.ToString("C")</h5>
+                                    <p class="text-muted mb-0">Số dư ví</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="text-success mb-0">@Model.TotalSpent.ToString("C")</h5>
+                                    <p class="text-muted mb-0">Tổng chi tiêu</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="text-info mb-0">@(Model.UserStatistics?.OrdersCount ?? 0)</h5>
+                                    <p class="text-muted mb-0">Đơn hàng</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    @if (User.IsInRole("Vendor"))
+                    {
+                        <div class="row mt-3">
+                            <div class="col-md-4 mb-3">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h5 class="text-warning mb-0">@(Model.UserStatistics?.TotalProductsListed ?? 0)</h5>
+                                        <p class="text-muted mb-0">Sản phẩm đã đăng</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h5 class="text-success mb-0">@(Model.UserStatistics?.TotalSalesAmount.ToString("C") ?? "$0.00")</h5>
+                                        <p class="text-muted mb-0">Doanh thu</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h5 class="text-info mb-0">@(Model.UserStatistics?.AverageRatingReceived.ToString("0.0") ?? "0.0")</h5>
+                                        <p class="text-muted mb-0">Đánh giá trung bình</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Liên kết nhanh</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="d-grid">
+                                <a asp-controller="Orders" asp-action="Index" class="btn btn-outline-primary">
+                                    <i class="bi bi-bag me-1"></i> Đơn hàng của tôi
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="d-grid">
+                                <a asp-controller="Wallet" asp-action="Index" class="btn btn-outline-primary">
+                                    <i class="bi bi-wallet2 me-1"></i> Ví của tôi
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="d-grid">
+                                <a asp-controller="Notifications" asp-action="Index" class="btn btn-outline-primary">
+                                    <i class="bi bi-bell me-1"></i> Thông báo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="d-grid">
+                                <a asp-controller="Messages" asp-action="Index" class="btn btn-outline-primary">
+                                    <i class="bi bi-chat-dots me-1"></i> Tin nhắn
+                                </a>
+                            </div>
+                        </div>
+                        @if (User.IsInRole("Vendor"))
+                        {
+                            <div class="col-md-4 mb-3">
+                                <div class="d-grid">
+                                    <a asp-controller="Vendor" asp-action="Index" class="btn btn-outline-primary">
+                                        <i class="bi bi-shop me-1"></i> Quản lý cửa hàng
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                        else if (User.IsInRole("Customer"))
+                        {
+                            <div class="col-md-4 mb-3">
+                                <div class="d-grid">
+                                    <a asp-controller="WebCart" asp-action="Index" class="btn btn-outline-primary">
+                                        <i class="bi bi-cart me-1"></i> Giỏ hàng
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <div class="col-md-4 mb-3">
+                                <div class="d-grid">
+                                    <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-primary">
+                                        <i class="bi bi-speedometer me-1"></i> Bảng điều khiển Admin
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

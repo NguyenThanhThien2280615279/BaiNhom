@@ -1,0 +1,63 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Authorize(Policy = "RequireCustomerRole")]
+    public class CustomerController : Controller
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IOrderRepository _orderRepository;
+        private readonly ICartRepository _cartRepository;
+        private readonly IReviewRepository _reviewRepository;
+        private readonly IPaymentTransactionRepository _transactionRepository;
+        private readonly IUserStatisticsRepository _userStatsRepository;
+
+        public CustomerController(
+            UserManager<ApplicationUser> userManager,
+            IOrderRepository orderRepository,
+            ICartRepository cartRepository,
+            IReviewRepository reviewRepository,
+            IPaymentTransactionRepository transactionRepository,
+            IUserStatisticsRepository userStatsRepository)
+        {
+            _userManager = userManager;
+            _orderRepository = orderRepository;
+            _cartRepository = cartRepository;
+            _reviewRepository = reviewRepository;
+            _transactionRepository = transactionRepository;
+            _userStatsRepository = userStatsRepository;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // C?p nh?t th?ng kê ng??i dùng
+            await _userStatsRepository.UpdateUserStatisticsAsync(user.Id);
+            
+            // L?y d? li?u cho b?ng ?i?u khi?n
+            var model = new CustomerDashboardViewModel
+            {
+                OrdersCount = await _orderRepository.GetUserOrdersCountAsync(user.Id),
+                CartItemsCount = await _cartRepository.GetCartItemsCountAsync(user.Id),
+                ReviewsCount = await _reviewRepository.GetUserReviewsCountAsync(user.Id),
+                WalletBalance = user.WalletBalance,
+                RecentOrders = await _orderRepository.GetRecentUserOrdersAsync(user.Id, 5),
+                CartItems = await _cartRepository.GetCartItemsAsync(user.Id),
+                Reviews = await _reviewRepository.GetRecentUserReviewsAsync(user.Id, 3),
+                LastTransaction = await _transactionRepository.GetLastTransactionAsync(user.Id),
+                TotalSpent = await _transactionRepository.GetTotalSpentAsync(user.Id)
+            };
+            
+            return View(model);
+        }
+    }
+}

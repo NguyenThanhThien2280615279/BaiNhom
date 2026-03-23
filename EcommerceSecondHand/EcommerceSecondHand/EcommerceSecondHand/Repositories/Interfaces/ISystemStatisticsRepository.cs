@@ -1,0 +1,15 @@
+using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Repositories.Interfaces
+{
+    public interface ISystemStatisticsRepository : IRepository<SystemStatistics>
+    {
+        Task<SystemStatistics> GetCurrentStatisticsAsync();
+        Task UpdateSystemStatisticsAsync();
+        Task<decimal> GetTotalRevenueAsync();
+        Task<int> GetTotalUsersAsync();
+        Task<int> GetActiveUsersInPeriodAsync(int days);
+        Task<decimal> GetRevenueForPeriodAsync(DateTime startDate, DateTime endDate);
+        Task<SystemStatistics> GetStatisticsAsync();
+    }
+}

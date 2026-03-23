@@ -1,0 +1,18 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Models
+{
+    public class CustomerDashboardViewModel
+    {
+        public int OrdersCount { get; set; }
+        public int CartItemsCount { get; set; }
+        public int ReviewsCount { get; set; }
+        public decimal WalletBalance { get; set; }
+        public decimal TotalSpent { get; set; }
+        
+        public IEnumerable<Order> RecentOrders { get; set; } = new List<Order>();
+        public IEnumerable<CartItem> CartItems { get; set; } = new List<CartItem>();
+        public IEnumerable<Review> Reviews { get; set; } = new List<Review>();
+        public PaymentTransaction? LastTransaction { get; set; }
+    }
+}

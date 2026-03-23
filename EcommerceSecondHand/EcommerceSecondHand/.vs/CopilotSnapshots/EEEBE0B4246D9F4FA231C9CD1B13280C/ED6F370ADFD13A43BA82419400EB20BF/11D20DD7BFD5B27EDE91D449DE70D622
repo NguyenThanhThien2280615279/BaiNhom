@@ -1,0 +1,14 @@
+﻿namespace EcommerceSecondHand.Models
+{
+    public enum NotificationType
+    {
+        System,
+        Order,
+        Message,
+        Chat,
+        Product,
+        Payment,
+        Promotion,
+        Other
+    }
+}

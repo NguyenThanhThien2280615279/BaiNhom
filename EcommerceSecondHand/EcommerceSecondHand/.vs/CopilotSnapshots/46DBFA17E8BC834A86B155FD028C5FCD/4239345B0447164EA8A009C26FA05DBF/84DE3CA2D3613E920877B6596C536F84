@@ -1,0 +1,95 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+namespace EcommerceSecondHand.Pages.Wallet
+{
+    [Authorize]
+    public class DepositModel : PageModel
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IPaymentTransactionRepository _transactionRepository;
+        private readonly INotificationRepository _notificationRepository;
+
+        public DepositModel(
+            UserManager<ApplicationUser> userManager,
+            IPaymentTransactionRepository transactionRepository,
+            INotificationRepository notificationRepository)
+        {
+            _userManager = userManager;
+            _transactionRepository = transactionRepository;
+            _notificationRepository = notificationRepository;
+        }
+
+        [BindProperty]
+        [Range(1, 10000, ErrorMessage = "Amount must be between $1 and $10,000")]
+        public decimal Amount { get; set; }
+
+        public void OnGet()
+        {
+            // Initialize with default values if needed
+        }
+
+        public async Task<IActionResult> OnPostAsync()
+        {
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            // Create a transaction reference
+            string transactionReference = $"DEP-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
+
+            // In a real-world scenario, you would integrate with a payment processor here
+            // For now, we'll simulate a successful deposit
+
+            // Create transaction record
+            var transaction = new PaymentTransaction
+            {
+                UserId = user.Id,
+                Amount = Amount,
+                Type = TransactionType.Deposit,
+                Status = TransactionStatus.Completed, // In reality, this would start as Pending
+                TransactionReference = transactionReference,
+                Description = $"Wallet deposit of {Amount:C}",
+                CreatedAt = DateTime.UtcNow,
+                CompletedAt = DateTime.UtcNow // In reality, this would be set when the payment completes
+            };
+
+            await _transactionRepository.AddAsync(transaction);
+            await _transactionRepository.SaveAsync();
+
+            // Update user's wallet balance
+            user.WalletBalance += Amount;
+            await _userManager.UpdateAsync(user);
+
+            // Create notification
+            var notification = new Notification
+            {
+                UserId = user.Id,
+                Title = "Deposit Successful",
+                Message = $"Your deposit of {Amount:C} has been completed successfully. Transaction reference: {transactionReference}",
+                Type = NotificationType.Payment,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+                RelatedEntityId = transaction.Id.ToString(),
+                ActionUrl = "/Wallet/Index"
+            };
+
+            await _notificationRepository.AddAsync(notification);
+            await _notificationRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = $"Your deposit of {Amount:C} has been completed successfully.";
+            return RedirectToPage("./Index");
+        }
+    }
+}

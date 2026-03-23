@@ -1,0 +1,994 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\controllers\\productscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\controllers\\productscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\controllers\\customercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\controllers\\customercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\controllers\\chatbotcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\controllers\\chatbotcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\appsettings.development.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\web.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\web.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\vnpay_response_codes_integration.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\vnpay_response_codes_integration.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\data\\applicationdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\services\\blockchainreputationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\services\\blockchainreputationservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\views\\home\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\views\\_viewstart.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\views\\_viewstart.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\filters\\disallowroleattribute.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\filters\\disallowroleattribute.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\views\\webcart\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\views\\webcart\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\controllers\\orderscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\controllers\\orderscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\contracts\\reputation_abi.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\contracts\\reputation_abi.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\controllers\\checkoutcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\controllers\\checkoutcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\controllers\\cartcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\controllers\\cartcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\controllers\\webnotificationscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\controllers\\webnotificationscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\controllers\\webcartcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\controllers\\webcartcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\controllers\\vendorcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\controllers\\vendorcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\controllers\\serversocketcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\controllers\\serversocketcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\controllers\\rechargecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\controllers\\rechargecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\controllers\\onchaincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\controllers\\onchaincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\controllers\\notificationscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\controllers\\notificationscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\controllers\\messagescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\controllers\\messagescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\views\\products\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\views\\products\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\views\\orders\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\views\\orders\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\repositories\\interfaces\\ireviewrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\repositories\\interfaces\\ireviewrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\views\\onchain\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\views\\onchain\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\models\\onchainlog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\models\\onchainlog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\areas\\admin\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\areas\\admin\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\models\\applicationuser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\models\\applicationuser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\areas\\admin\\controllers\\reviewscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\areas\\admin\\controllers\\reviewscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\models\\review.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\models\\review.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\models\\order.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\models\\order.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\views\\recharge\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\views\\recharge\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\repositories\\paymenttransactionrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\repositories\\paymenttransactionrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\repositories\\interfaces\\ipaymenttransactionrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\repositories\\interfaces\\ipaymenttransactionrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\repositories\\interfaces\\irechargerepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\repositories\\interfaces\\irechargerepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\models\\paymenttransaction.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\models\\paymenttransaction.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\models\\paymentinformationmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\models\\paymentinformationmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\models\\paymentresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\models\\paymentresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\areas\\admin\\views\\orders\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\areas\\admin\\views\\orders\\details.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\views\\vendor\\editproduct.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\views\\vendor\\editproduct.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\views\\vendor\\products.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\views\\vendor\\products.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\models\\viewmodels\\productformviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\models\\viewmodels\\productformviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\models\\viewmodels\\editprofileviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\models\\viewmodels\\editprofileviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\models\\viewmodels\\productdetailsviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\models\\viewmodels\\productdetailsviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\views\\products\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\views\\products\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\models\\product.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\models\\product.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\ecommercesecondhand.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\ecommercesecondhand.csproj||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\views\\orders\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\views\\orders\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\views\\vendor\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\views\\vendor\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\views\\webnotifications\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\views\\webnotifications\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\Work-CSharp\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Wallet\\Index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|d:\\project\\ecommercesecondhand 29-10\\ecommercesecondhand\\ecommercesecondhand\\migrations\\20251101092405_addblockchainreputationfieldstouser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{B4ADF972-DA30-4743-A219-4F1DBF242931}|EcommerceSecondHand\\EcommerceSecondHand.csproj|solutionrelative:ecommercesecondhand\\migrations\\20251101092405_addblockchainreputationfieldstouser.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 5,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\appsettings.json",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\appsettings.json",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\appsettings.json",
+              "RelativeToolTip": "EcommerceSecondHand\\appsettings.json",
+              "ViewState": "AgIAACQAAAAAAAAAAAAcwD4AAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-11-01T09:33:10.985Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ChatbotController.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\ChatbotController.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Controllers\\ChatbotController.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\ChatbotController.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Controllers\\ChatbotController.cs",
+              "ViewState": "AgIAAFYAAAAAAAAAAAAcwH8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-02T03:37:26.94Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "appsettings.Development.json",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\appsettings.Development.json",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\appsettings.Development.json",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\appsettings.Development.json",
+              "RelativeToolTip": "EcommerceSecondHand\\appsettings.Development.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAABdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-12-02T14:26:08.082Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AccountController.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\AccountController.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Controllers\\AccountController.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\AccountController.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Controllers\\AccountController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-18T03:37:10.829Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "CustomerController.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\CustomerController.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Controllers\\CustomerController.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\CustomerController.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Controllers\\CustomerController.cs",
+              "ViewState": "AgIAAF8AAAAAAAAAAAAhwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-18T03:37:23.105Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "ProductsController.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\ProductsController.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Controllers\\ProductsController.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\ProductsController.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Controllers\\ProductsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAOEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-24T12:38:41.561Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "ApplicationDbContext.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Data\\ApplicationDbContext.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Data\\ApplicationDbContext.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Data\\ApplicationDbContext.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Data\\ApplicationDbContext.cs",
+              "ViewState": "AgIAAGkAAAAAAAAAAAAQwG4AAAA1AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-01T08:50:08.086Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "_Layout.cshtml",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Shared\\_Layout.cshtml",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Shared\\_Layout.cshtml",
+              "RelativeToolTip": "EcommerceSecondHand\\Views\\Shared\\_Layout.cshtml",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAhwBIBAABfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-16T02:50:08.34Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Program.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Program.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Program.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Program.cs",
+              "ViewState": "AgIAAGIAAAAAAAAAAAAowGYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-01T09:35:00.118Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "web.config",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\web.config",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\web.config",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\web.config",
+              "RelativeToolTip": "EcommerceSecondHand\\web.config",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000601|",
+              "WhenOpened": "2026-03-17T08:29:22.618Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "VNPay_Response_Codes_Integration.md",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\VNPay_Response_Codes_Integration.md",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\VNPay_Response_Codes_Integration.md",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\VNPay_Response_Codes_Integration.md",
+              "RelativeToolTip": "EcommerceSecondHand\\VNPay_Response_Codes_Integration.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2026-03-17T08:32:16.211Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "BlockchainReputationService.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Services\\BlockchainReputationService.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Services\\BlockchainReputationService.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Services\\BlockchainReputationService.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Services\\BlockchainReputationService.cs",
+              "ViewState": "AgIAAEkAAAAAAAAAAIBJwF8AAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-01T09:28:50.489Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "OrdersController.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\OrdersController.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Controllers\\OrdersController.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\OrdersController.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Controllers\\OrdersController.cs",
+              "ViewState": "AgIAAM0BAAAAAAAAAAAQwNsBAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-01T08:53:27.085Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Home\\Index.cshtml",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Views\\Home\\Index.cshtml",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Home\\Index.cshtml",
+              "RelativeToolTip": "EcommerceSecondHand\\Views\\Home\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-02T03:09:40.941Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\WebCart\\Index.cshtml",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Views\\WebCart\\Index.cshtml",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\WebCart\\Index.cshtml",
+              "RelativeToolTip": "EcommerceSecondHand\\Views\\WebCart\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-16T02:48:37.306Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "DisallowRoleAttribute.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Filters\\DisallowRoleAttribute.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Filters\\DisallowRoleAttribute.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Filters\\DisallowRoleAttribute.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Filters\\DisallowRoleAttribute.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAQwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-16T02:49:02.244Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "_ViewStart.cshtml",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\_ViewStart.cshtml",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Views\\_ViewStart.cshtml",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\_ViewStart.cshtml",
+              "RelativeToolTip": "EcommerceSecondHand\\Views\\_ViewStart.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-12-16T02:49:56.732Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "reputation_abi.json",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Contracts\\reputation_abi.json",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Contracts\\reputation_abi.json",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Contracts\\reputation_abi.json",
+              "RelativeToolTip": "EcommerceSecondHand\\Contracts\\reputation_abi.json",
+              "ViewState": "AgIAAJAAAAAAAAAAAAAcwLkAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-12-02T14:24:46.407Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "CartController.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\CartController.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Controllers\\CartController.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\CartController.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Controllers\\CartController.cs",
+              "ViewState": "AgIAAIkAAAAAAAAAAAAIwLAAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-26T02:18:21.957Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "CheckoutController.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\CheckoutController.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Controllers\\CheckoutController.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\CheckoutController.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Controllers\\CheckoutController.cs",
+              "ViewState": "AgIAAPwAAAAAAAAAAAAIwCMBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-26T02:20:10.812Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "VendorController.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\VendorController.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Controllers\\VendorController.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\VendorController.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Controllers\\VendorController.cs",
+              "ViewState": "AgIAAK4BAAAAAAAAAAAUwNYBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-26T01:33:29.589Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "WebNotificationsController.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\WebNotificationsController.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Controllers\\WebNotificationsController.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\WebNotificationsController.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Controllers\\WebNotificationsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-18T03:38:10.636Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "ServerSocketController.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\ServerSocketController.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Controllers\\ServerSocketController.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\ServerSocketController.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Controllers\\ServerSocketController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-18T03:38:02.03Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "OnChainController.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\OnChainController.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Controllers\\OnChainController.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\OnChainController.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Controllers\\OnChainController.cs",
+              "ViewState": "AgIAABEAAAAAAAAAAAAUwDkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-01T12:57:14.839Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "WebCartController.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\WebCartController.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Controllers\\WebCartController.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\WebCartController.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Controllers\\WebCartController.cs",
+              "ViewState": "AgIAAEIAAAAAAAAAAAAkwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-26T02:18:12.282Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "NotificationsController.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\NotificationsController.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Controllers\\NotificationsController.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\NotificationsController.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Controllers\\NotificationsController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-18T03:37:29.988Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "MessagesController.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\MessagesController.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Controllers\\MessagesController.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\MessagesController.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Controllers\\MessagesController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-18T03:37:27.474Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "RechargeController.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\RechargeController.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Controllers\\RechargeController.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\RechargeController.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Controllers\\RechargeController.cs",
+              "ViewState": "AgIAAA8BAAAAAAAAAAAcwDgBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-26T03:24:01.504Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "IReviewRepository.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Repositories\\Interfaces\\IReviewRepository.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Repositories\\Interfaces\\IReviewRepository.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Repositories\\Interfaces\\IReviewRepository.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Repositories\\Interfaces\\IReviewRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAcwBoAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-04T02:45:59.169Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "Details.cshtml",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Products\\Details.cshtml",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Views\\Products\\Details.cshtml",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Products\\Details.cshtml",
+              "RelativeToolTip": "EcommerceSecondHand\\Views\\Products\\Details.cshtml",
+              "ViewState": "AgIAABYCAAAAAAAAAAAgwDICAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-26T01:32:55.957Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Controllers\\HomeController.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Controllers\\HomeController.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAwwCwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-25T01:03:43.749Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\OnChain\\Index.cshtml",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Views\\OnChain\\Index.cshtml",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\OnChain\\Index.cshtml",
+              "RelativeToolTip": "EcommerceSecondHand\\Views\\OnChain\\Index.cshtml",
+              "ViewState": "AgIAAC0AAAAAAAAAAAAgwFYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-11-01T12:56:04.002Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": "OnChainLog.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\OnChainLog.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Models\\OnChainLog.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\OnChainLog.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Models\\OnChainLog.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-01T12:36:12.941Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "Details.cshtml",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Orders\\Details.cshtml",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Views\\Orders\\Details.cshtml",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Orders\\Details.cshtml",
+              "RelativeToolTip": "EcommerceSecondHand\\Views\\Orders\\Details.cshtml",
+              "ViewState": "AgIAAJQBAAAAAAAAAAAgwLABAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-18T07:52:28.786Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 34,
+              "Title": "AdminController.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Areas\\Admin\\Controllers\\AdminController.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Areas\\Admin\\Controllers\\AdminController.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Areas\\Admin\\Controllers\\AdminController.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Areas\\Admin\\Controllers\\AdminController.cs",
+              "ViewState": "AgIAAGABAAAAAAAAAAAcwIkBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-01T10:31:10.871Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 60,
+              "Title": "20251101092405_AddBlockchainReputationFieldsToUser.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Migrations\\20251101092405_AddBlockchainReputationFieldsToUser.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Migrations\\20251101092405_AddBlockchainReputationFieldsToUser.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Migrations\\20251101092405_AddBlockchainReputationFieldsToUser.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Migrations\\20251101092405_AddBlockchainReputationFieldsToUser.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-01T09:24:05.552Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 36,
+              "Title": "ReviewsController.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Areas\\Admin\\Controllers\\ReviewsController.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Areas\\Admin\\Controllers\\ReviewsController.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Areas\\Admin\\Controllers\\ReviewsController.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Areas\\Admin\\Controllers\\ReviewsController.cs",
+              "ViewState": "AgIAACIAAAAAAAAAAAAUwEoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-01T09:01:43.418Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 37,
+              "Title": "Review.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\Review.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Models\\Review.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\Review.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Models\\Review.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAxwCQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-01T08:51:54.77Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 38,
+              "Title": "Order.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\Order.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Models\\Order.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\Order.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Models\\Order.cs",
+              "ViewState": "AgIAADAAAAAAAAAAAAAYwFEAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-01T08:51:38.72Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 35,
+              "Title": "ApplicationUser.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\ApplicationUser.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Models\\ApplicationUser.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\ApplicationUser.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Models\\ApplicationUser.cs",
+              "ViewState": "AgIAABAAAAAAAAAAAAAywCMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-01T08:49:06.603Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 40,
+              "Title": "PaymentTransactionRepository.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Repositories\\PaymentTransactionRepository.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Repositories\\PaymentTransactionRepository.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Repositories\\PaymentTransactionRepository.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Repositories\\PaymentTransactionRepository.cs",
+              "ViewState": "AgIAADcBAAAAUNqDMs8gwFEBAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-26T03:31:29.724Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 41,
+              "Title": "IPaymentTransactionRepository.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Repositories\\Interfaces\\IPaymentTransactionRepository.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Repositories\\Interfaces\\IPaymentTransactionRepository.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Repositories\\Interfaces\\IPaymentTransactionRepository.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Repositories\\Interfaces\\IPaymentTransactionRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABQAAABVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-26T03:31:01.845Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 42,
+              "Title": "IRechargeRepository.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Repositories\\Interfaces\\IRechargeRepository.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Repositories\\Interfaces\\IRechargeRepository.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Repositories\\Interfaces\\IRechargeRepository.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Repositories\\Interfaces\\IRechargeRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-26T03:29:26.472Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 39,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Recharge\\Index.cshtml",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Views\\Recharge\\Index.cshtml",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Recharge\\Index.cshtml",
+              "RelativeToolTip": "EcommerceSecondHand\\Views\\Recharge\\Index.cshtml",
+              "ViewState": "AgIAAGABAAAAAAAAAAAgwHwBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-26T03:26:55.36Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 44,
+              "Title": "PaymentInformationModel.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\PaymentInformationModel.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Models\\PaymentInformationModel.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\PaymentInformationModel.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Models\\PaymentInformationModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-26T03:21:19.966Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 45,
+              "Title": "PaymentResponseModel.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\PaymentResponseModel.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Models\\PaymentResponseModel.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\PaymentResponseModel.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Models\\PaymentResponseModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-26T03:21:17.683Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 43,
+              "Title": "PaymentTransaction.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\PaymentTransaction.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Models\\PaymentTransaction.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\PaymentTransaction.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Models\\PaymentTransaction.cs",
+              "ViewState": "AgIAAB8AAAAAAAAAAAAgwEEAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-26T03:21:14.778Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 46,
+              "Title": "Details.cshtml",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Areas\\Admin\\Views\\Orders\\Details.cshtml",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Areas\\Admin\\Views\\Orders\\Details.cshtml",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Areas\\Admin\\Views\\Orders\\Details.cshtml",
+              "RelativeToolTip": "EcommerceSecondHand\\Areas\\Admin\\Views\\Orders\\Details.cshtml",
+              "ViewState": "AgIAAEkAAAAAAAAAAAAgwGUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-26T03:06:43.715Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 48,
+              "Title": "Products.cshtml",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Vendor\\Products.cshtml",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Views\\Vendor\\Products.cshtml",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Vendor\\Products.cshtml",
+              "RelativeToolTip": "EcommerceSecondHand\\Views\\Vendor\\Products.cshtml",
+              "ViewState": "AgIAAFkAAAAAAAAAAAAcwIIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-26T02:11:15.606Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 49,
+              "Title": "ProductFormViewModel.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\ViewModels\\ProductFormViewModel.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Models\\ViewModels\\ProductFormViewModel.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\ViewModels\\ProductFormViewModel.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Models\\ViewModels\\ProductFormViewModel.cs",
+              "ViewState": "AgIAACQAAAAAAAAAAADwv0oAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-26T01:42:07.565Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 50,
+              "Title": "EditProfileViewModel.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\ViewModels\\EditProfileViewModel.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Models\\ViewModels\\EditProfileViewModel.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\ViewModels\\EditProfileViewModel.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Models\\ViewModels\\EditProfileViewModel.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAQwBgAAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-26T01:38:44.309Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 47,
+              "Title": "EditProduct.cshtml",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Vendor\\EditProduct.cshtml",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Views\\Vendor\\EditProduct.cshtml",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Vendor\\EditProduct.cshtml",
+              "RelativeToolTip": "EcommerceSecondHand\\Views\\Vendor\\EditProduct.cshtml",
+              "ViewState": "AgIAAHYAAAAAAAAAAAAcwJ8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-26T01:32:09.045Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 51,
+              "Title": "ProductDetailsViewModel.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\ViewModels\\ProductDetailsViewModel.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Models\\ViewModels\\ProductDetailsViewModel.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\ViewModels\\ProductDetailsViewModel.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Models\\ViewModels\\ProductDetailsViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-26T01:30:00.475Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 53,
+              "Title": "Product.cs",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\Product.cs",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Models\\Product.cs",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Models\\Product.cs",
+              "RelativeToolTip": "EcommerceSecondHand\\Models\\Product.cs",
+              "ViewState": "AgIAACgAAAAAAAAAAAAAwEcAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-24T12:31:25.681Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 55,
+              "Title": "EcommerceSecondHand",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\EcommerceSecondHand.csproj",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\EcommerceSecondHand.csproj",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\EcommerceSecondHand.csproj",
+              "RelativeToolTip": "EcommerceSecondHand\\EcommerceSecondHand.csproj",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-10-08T08:27:28.105Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 52,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Products\\Index.cshtml",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Views\\Products\\Index.cshtml",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Products\\Index.cshtml",
+              "RelativeToolTip": "EcommerceSecondHand\\Views\\Products\\Index.cshtml",
+              "ViewState": "AgIAAGQBAAAAAAAAAAAcwI0BAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-18T07:56:47.796Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 54,
+              "Title": "launchSettings.json",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Properties\\launchSettings.json",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Properties\\launchSettings.json",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Properties\\launchSettings.json",
+              "RelativeToolTip": "EcommerceSecondHand\\Properties\\launchSettings.json",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAcwC8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-10-08T08:27:33.449Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 59,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\Work-CSharp\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Wallet\\Index.cshtml",
+              "RelativeDocumentMoniker": "..\\..\\..\\Work-CSharp\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Wallet\\Index.cshtml",
+              "ToolTip": "D:\\Work-CSharp\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Wallet\\Index.cshtml",
+              "RelativeToolTip": "..\\..\\..\\Work-CSharp\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Wallet\\Index.cshtml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-18T08:02:32.697Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 58,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\WebNotifications\\Index.cshtml",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Views\\WebNotifications\\Index.cshtml",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\WebNotifications\\Index.cshtml",
+              "RelativeToolTip": "EcommerceSecondHand\\Views\\WebNotifications\\Index.cshtml",
+              "ViewState": "AgIAAMcAAAAAAAAAAOBvwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-18T08:01:21.213Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 57,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Vendor\\Index.cshtml",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Views\\Vendor\\Index.cshtml",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Vendor\\Index.cshtml",
+              "RelativeToolTip": "EcommerceSecondHand\\Views\\Vendor\\Index.cshtml",
+              "ViewState": "AgIAAD8BAAAAAAAAAIBpwAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-18T07:58:40.848Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 56,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Orders\\Index.cshtml",
+              "RelativeDocumentMoniker": "EcommerceSecondHand\\Views\\Orders\\Index.cshtml",
+              "ToolTip": "D:\\Project\\EcommerceSecondHand 29-10\\EcommerceSecondHand\\EcommerceSecondHand\\Views\\Orders\\Index.cshtml",
+              "RelativeToolTip": "EcommerceSecondHand\\Views\\Orders\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-18T07:52:37.142Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

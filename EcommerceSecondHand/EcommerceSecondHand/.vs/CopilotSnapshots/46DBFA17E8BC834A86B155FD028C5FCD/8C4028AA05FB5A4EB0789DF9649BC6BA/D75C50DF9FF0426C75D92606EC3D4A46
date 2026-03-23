@@ -1,0 +1,161 @@
+﻿@page
+@model EcommerceSecondHand.Pages.Admin.IndexModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container-fluid mt-4">
+    <h1>Admin Dashboard</h1>
+    
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <div class="display-4 text-primary mb-2">@Model.TotalUsers</div>
+                    <h5>Total Users</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <div class="display-4 text-success mb-2">@Model.TotalProducts</div>
+                    <h5>Total Products</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <div class="display-4 text-info mb-2">@Model.TotalOrders</div>
+                    <h5>Total Orders</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <div class="display-4 text-warning mb-2">@Model.TotalRevenue.ToString("C")</div>
+                    <h5>Total Revenue</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Recent Orders</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentOrders.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Date</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model.RecentOrders)
+                                    {
+                                        <tr>
+                                            <td>#@order.Id</td>
+                                            <td>@order.User?.FirstName @order.User?.LastName</td>
+                                            <td>@order.OrderDate.ToString("g")</td>
+                                            <td>@order.TotalAmount.ToString("C")</td>
+                                            <td>
+                                                @{
+                                                    string badgeClass = order.Status switch
+                                                    {
+                                                        OrderStatus.Pending => "bg-warning",
+                                                        OrderStatus.Processing => "bg-info",
+                                                        OrderStatus.Shipped => "bg-primary",
+                                                        OrderStatus.Delivered => "bg-success",
+                                                        OrderStatus.Cancelled => "bg-danger",
+                                                        _ => "bg-secondary"
+                                                    };
+                                                }
+                                                <span class="badge @badgeClass">@order.Status.ToString()</span>
+                                            </td>
+                                            <td>
+                                                <a href="/Admin/Orders/Details?id=@order.Id" class="btn btn-sm btn-outline-primary">View</a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-end mt-3">
+                            <a href="/Admin/Orders" class="btn btn-outline-primary">View All Orders</a>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <p class="text-muted">No recent orders found.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">User Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6>User Types</h6>
+                        <div class="progress mb-2" style="height: 20px;">
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: @Model.CustomerPercentage%;" aria-valuenow="@Model.CustomerPercentage" aria-valuemin="0" aria-valuemax="100">
+                                Customers (@Model.TotalCustomers)
+                            </div>
+                            <div class="progress-bar bg-success" role="progressbar" style="width: @Model.VendorPercentage%;" aria-valuenow="@Model.VendorPercentage" aria-valuemin="0" aria-valuemax="100">
+                                Vendors (@Model.TotalVendors)
+                            </div>
+                            <div class="progress-bar bg-danger" role="progressbar" style="width: @Model.AdminPercentage%;" aria-valuenow="@Model.AdminPercentage" aria-valuemin="0" aria-valuemax="100">
+                                Admins (@Model.TotalAdmins)
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6>New Users (Last 30 Days)</h6>
+                        <h3 class="text-success">@Model.NewUsersLast30Days</h3>
+                    </div>
+                    
+                    <div>
+                        <h6>Active Users (Last 30 Days)</h6>
+                        <h3 class="text-primary">@Model.ActiveUsersLast30Days</h3>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="/Admin/Users" class="btn btn-outline-primary w-100">Manage Users</a>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="/Admin/Categories" class="btn btn-outline-primary">Manage Categories</a>
+                        <a href="/Admin/Products" class="btn btn-outline-primary">Manage Products</a>
+                        <a href="/Admin/Reviews" class="btn btn-outline-primary">Manage Reviews</a>
+                        <a href="/Admin/WalletManagement" class="btn btn-outline-primary">Wallet Management</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

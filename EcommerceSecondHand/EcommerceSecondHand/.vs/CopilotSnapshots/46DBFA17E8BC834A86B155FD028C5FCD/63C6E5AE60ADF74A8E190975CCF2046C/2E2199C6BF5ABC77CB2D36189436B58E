@@ -1,0 +1,156 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Authorize]
+    public class MessagesController : Controller
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IMessageRepository _messageRepository;
+
+        public MessagesController(
+            UserManager<ApplicationUser> userManager,
+            IMessageRepository messageRepository)
+        {
+            _userManager = userManager;
+            _messageRepository = messageRepository;
+        }
+
+        public async Task<IActionResult> Index(string contactId = null)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return NotFound();
+            }
+
+            var model = new MessagesViewModel
+            {
+                CurrentUserId = currentUser.Id,
+                Contacts = await _messageRepository.GetUserContactsAsync(currentUser.Id)
+            };
+
+            if (!string.IsNullOrEmpty(contactId))
+            {
+                var contact = await _userManager.FindByIdAsync(contactId);
+                if (contact != null)
+                {
+                    model.SelectedContact = contact;
+                    model.Messages = await _messageRepository.GetConversationAsync(currentUser.Id, contactId);
+                    
+                    // Đánh dấu tin nhắn là đã đọc
+                    await _messageRepository.MarkConversationAsReadAsync(contactId, currentUser.Id);
+                }
+            }
+            else if (model.Contacts.Any())
+            {
+                // Nếu không có contactId được chỉ định, chọn liên hệ đầu tiên
+                var firstContact = model.Contacts.FirstOrDefault();
+                if (firstContact != null)
+                {
+                    model.SelectedContact = firstContact;
+                    model.Messages = await _messageRepository.GetConversationAsync(currentUser.Id, firstContact.Id);
+                    
+                    // Đánh dấu tin nhắn là đã đọc
+                    await _messageRepository.MarkConversationAsReadAsync(firstContact.Id, currentUser.Id);
+                }
+            }
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendMessage(string receiverId, string content)
+        {
+            if (string.IsNullOrEmpty(receiverId) || string.IsNullOrEmpty(content))
+            {
+                return BadRequest();
+            }
+
+            var sender = await _userManager.GetUserAsync(User);
+            if (sender == null)
+            {
+                return NotFound();
+            }
+
+            var receiver = await _userManager.FindByIdAsync(receiverId);
+            if (receiver == null)
+            {
+                return NotFound();
+            }
+
+            var message = new Message
+            {
+                SenderId = sender.Id,
+                ReceiverId = receiverId,
+                Content = content,
+                SentAt = DateTime.UtcNow,
+                IsRead = false
+            };
+
+            await _messageRepository.AddAsync(message);
+            await _messageRepository.SaveAsync();
+
+            return RedirectToAction(nameof(Index), new { contactId = receiverId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> LoadConversation(string contactId)
+        {
+            if (string.IsNullOrEmpty(contactId))
+            {
+                return BadRequest();
+            }
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return NotFound();
+            }
+
+            var contact = await _userManager.FindByIdAsync(contactId);
+            if (contact == null)
+            {
+                return NotFound();
+            }
+
+            var messages = await _messageRepository.GetConversationAsync(currentUser.Id, contactId);
+            
+            // Đánh dấu tin nhắn là đã đọc
+            await _messageRepository.MarkConversationAsReadAsync(contactId, currentUser.Id);
+
+            return PartialView("_ConversationPartial", new ConversationViewModel 
+            { 
+                CurrentUserId = currentUser.Id,
+                Contact = contact,
+                Messages = messages
+            });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteMessage(int messageId)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return NotFound();
+            }
+
+            var message = await _messageRepository.GetByIdAsync(messageId);
+            if (message == null || message.SenderId != currentUser.Id)
+            {
+                return NotFound();
+            }
+
+            await _messageRepository.DeleteAsync(messageId);
+            await _messageRepository.SaveAsync();
+
+            return RedirectToAction(nameof(Index), new { contactId = message.ReceiverId });
+        }
+    }
+}

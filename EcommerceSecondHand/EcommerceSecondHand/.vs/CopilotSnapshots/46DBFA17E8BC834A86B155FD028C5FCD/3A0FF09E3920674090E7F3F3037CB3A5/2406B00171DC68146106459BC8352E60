@@ -1,0 +1,107 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class NotificationsController : ControllerBase
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly INotificationRepository _notificationRepository;
+
+        public NotificationsController(
+            UserManager<ApplicationUser> userManager,
+            INotificationRepository notificationRepository)
+        {
+            _userManager = userManager;
+            _notificationRepository = notificationRepository;
+        }
+
+        [HttpGet("GetUnreadCount")]
+        public async Task<ActionResult<int>> GetUnreadCount()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            int count = await _notificationRepository.GetUnreadCountAsync(user.Id);
+            return Ok(count);
+        }
+
+        [HttpGet("GetRecent")]
+        public async Task<ActionResult<IEnumerable<Notification>>> GetRecent(int count = 5)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var notifications = await _notificationRepository.GetRecentNotificationsAsync(user.Id, count);
+            return Ok(notifications);
+        }
+
+        [HttpPost("MarkAsRead/{id}")]
+        public async Task<IActionResult> MarkAsRead(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var notification = await _notificationRepository.GetByIdAsync(id);
+            if (notification == null || notification.UserId != user.Id)
+            {
+                return NotFound();
+            }
+
+            notification.IsRead = true;
+            await _notificationRepository.UpdateAsync(notification);
+            await _notificationRepository.SaveAsync();
+
+            return Ok();
+        }
+
+        [HttpPost("MarkAllAsRead")]
+        public async Task<IActionResult> MarkAllAsRead()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            await _notificationRepository.MarkAllAsReadAsync(user.Id);
+            return Ok();
+        }
+
+        [HttpDelete("Delete/{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var notification = await _notificationRepository.GetByIdAsync(id);
+            if (notification == null || notification.UserId != user.Id)
+            {
+                return NotFound();
+            }
+
+            await _notificationRepository.DeleteAsync(id);
+            await _notificationRepository.SaveAsync();
+
+            return Ok();
+        }
+    }
+}

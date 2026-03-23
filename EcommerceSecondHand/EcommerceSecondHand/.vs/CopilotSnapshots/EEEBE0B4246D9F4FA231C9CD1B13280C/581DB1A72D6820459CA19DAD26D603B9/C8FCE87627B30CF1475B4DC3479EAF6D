@@ -1,0 +1,39 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Repositories.Interfaces
+{
+    public interface IProductRepository : IRepository<Product>
+    {
+        Task<IEnumerable<Product>> GetProductsByCategoryAsync(int categoryId);
+        Task<IEnumerable<Product>> GetProductsBySellerAsync(string sellerId);
+        Task<IEnumerable<Product>> GetProductsBySellerAsync(string sellerId, string? sortOrder, int page, int pageSize);
+        Task<IEnumerable<Product>> SearchProductsAsync(string searchTerm);
+        Task<IEnumerable<Product>> GetFeaturedProductsAsync(int count);
+        Task<IEnumerable<Product>> GetRecentProductsAsync(int count);
+        Task<IEnumerable<Product>> GetProductsWithFiltersAsync(int? categoryId, decimal? minPrice, decimal? maxPrice, ProductCondition? condition);
+        new Task<IEnumerable<Product>> GetAllAsync();
+        new Task<Product?> GetByIdAsync(int id);
+        Task<Product?> GetProductWithDetailsAsync(int id);
+        Task<IEnumerable<Product>> GetFilteredProductsAsync(int? categoryId, string? searchQuery, string? sortOrder, int page, int pageSize);
+        Task<int> GetFilteredProductsCountAsync(int? categoryId, string? searchQuery);
+        Task<IEnumerable<Product>> GetRelatedProductsAsync(int productId, int count);
+        Task<IEnumerable<Product>> GetVendorProductsAsync(string vendorId, int count);
+        Task<IEnumerable<string>> GetSearchSuggestionsAsync(string term, int count);
+        new Task AddAsync(Product product);
+        Task UpdateAsync(Product product);
+        Task DeleteAsync(int id);
+        new Task SaveAsync();
+        
+        // Missing methods that are being called by controllers
+        Task<IEnumerable<Product>> GetRecentProductsBySellerAsync(string sellerId, int count);
+        Task<IEnumerable<Product>> GetRecentlyViewedProductsAsync(string userId, int count);
+        Task<int> CountProductsBySellerAsync(string sellerId);
+        Task<IEnumerable<Product>> GetFavoriteProductsAsync(string userId, int page, int pageSize);
+        Task<int> CountFavoriteProductsAsync(string userId);
+        Task AddToFavoritesAsync(string userId, int productId);
+        Task RemoveFromFavoritesAsync(string userId, int productId);
+        Task<IEnumerable<Product>> GetViewHistoryAsync(string userId, int page, int pageSize);
+        Task<int> CountViewHistoryAsync(string userId);
+        Task ClearViewHistoryAsync(string userId);
+    }
+}

@@ -1,0 +1,184 @@
+﻿@model WithdrawViewModel
+@{
+    ViewData["Title"] = "Rút ti?n";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h1 class="h5 mb-0">Rút ti?n t? ví</h1>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-controller="Wallet" asp-action="Withdraw">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        
+                        <div class="mb-4">
+                            <label asp-for="Amount" class="form-label">S? ti?n rút</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="Amount" class="form-control" placeholder="Nh?p s? ti?n" />
+                            </div>
+                            <span asp-validation-for="Amount" class="text-danger"></span>
+                            <div class="form-text">S? ti?n t?i thi?u là $10.00. S? d? kh? d?ng: @ViewBag.WalletBalance</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label asp-for="WithdrawalMethod" class="form-label">Ph??ng th?c nh?n ti?n</label>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-check card p-3 mb-2">
+                                        <input class="form-check-input" type="radio" asp-for="WithdrawalMethod" id="bankAccount" value="BankAccount" checked>
+                                        <label class="form-check-label w-100" for="bankAccount">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-bank text-primary me-2" style="font-size: 1.5rem;"></i>
+                                                <div>
+                                                    <span class="d-block">Tài kho?n ngân hàng</span>
+                                                    <small class="text-muted">Chuy?n kho?n</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check card p-3 mb-2">
+                                        <input class="form-check-input" type="radio" asp-for="WithdrawalMethod" id="eWallet" value="EWallet">
+                                        <label class="form-check-label w-100" for="eWallet">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-wallet2 text-primary me-2" style="font-size: 1.5rem;"></i>
+                                                <div>
+                                                    <span class="d-block">Ví ?i?n t?</span>
+                                                    <small class="text-muted">MoMo/ZaloPay</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check card p-3 mb-2">
+                                        <input class="form-check-input" type="radio" asp-for="WithdrawalMethod" id="paypal" value="PayPal">
+                                        <label class="form-check-label w-100" for="paypal">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-paypal text-primary me-2" style="font-size: 1.5rem;"></i>
+                                                <div>
+                                                    <span class="d-block">PayPal</span>
+                                                    <small class="text-muted">Tài kho?n PayPal</small>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <span asp-validation-for="WithdrawalMethod" class="text-danger"></span>
+                        </div>
+                        
+                        <div id="bankAccountForm" class="withdrawal-form mb-4">
+                            <div class="card card-body bg-light">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Tên ngân hàng</label>
+                                        <input type="text" class="form-control" asp-for="BankName" placeholder="Vietcombank, Techcombank, ...">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Chi nhánh</label>
+                                        <input type="text" class="form-control" asp-for="BankBranch" placeholder="Chi nhánh ngân hàng">
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label">S? tài kho?n</label>
+                                        <input type="text" class="form-control" asp-for="AccountNumber" placeholder="S? tài kho?n ngân hàng">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label">Tên ch? tài kho?n</label>
+                                        <input type="text" class="form-control" asp-for="AccountName" placeholder="Tên ch? tài kho?n">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="eWalletForm" class="withdrawal-form mb-4" style="display: none;">
+                            <div class="card card-body bg-light">
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <div class="form-check card p-3">
+                                            <input class="form-check-input" type="radio" name="walletType" id="momo" checked>
+                                            <label class="form-check-label w-100" for="momo">
+                                                <div class="text-center">
+                                                    <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" style="height: 40px;">
+                                                    <span class="d-block mt-2">MoMo</span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check card p-3">
+                                            <input class="form-check-input" type="radio" name="walletType" id="zalopay">
+                                            <label class="form-check-label w-100" for="zalopay">
+                                                <div class="text-center">
+                                                    <img src="https://logosvector.net/wp-content/uploads/2022/03/zalopay-logo-vector.png" alt="ZaloPay" style="height: 40px;">
+                                                    <span class="d-block mt-2">ZaloPay</span>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">S? ?i?n tho?i</label>
+                                    <input type="text" class="form-control" asp-for="PhoneNumber" placeholder="S? ?i?n tho?i ??ng ký ví ?i?n t?">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="paypalForm" class="withdrawal-form mb-4" style="display: none;">
+                            <div class="card card-body bg-light">
+                                <div class="mb-3">
+                                    <label class="form-label">Email PayPal</label>
+                                    <input type="email" class="form-control" asp-for="PayPalEmail" placeholder="Email ??ng ký tài kho?n PayPal">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                                <label class="form-check-label" for="agreeTerms">
+                                    Tôi xác nh?n thông tin rút ti?n là chính xác và ??ng ý v?i <a href="#">?i?u kho?n d?ch v?</a>.
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a asp-controller="Wallet" asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i> Quay l?i
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check me-1"></i> Xác nh?n rút ti?n
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            $('input[name="WithdrawalMethod"]').change(function() {
+                $('.withdrawal-form').hide();
+                
+                var selectedMethod = $('input[name="WithdrawalMethod"]:checked').val();
+                
+                if (selectedMethod === 'BankAccount') {
+                    $('#bankAccountForm').show();
+                } else if (selectedMethod === 'EWallet') {
+                    $('#eWalletForm').show();
+                } else if (selectedMethod === 'PayPal') {
+                    $('#paypalForm').show();
+                }
+            });
+        });
+    </script>
+}

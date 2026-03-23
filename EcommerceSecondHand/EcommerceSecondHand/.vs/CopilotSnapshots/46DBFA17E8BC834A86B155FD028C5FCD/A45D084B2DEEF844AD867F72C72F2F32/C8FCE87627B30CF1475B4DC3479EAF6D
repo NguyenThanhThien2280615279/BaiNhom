@@ -1,0 +1,14 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Repositories.Interfaces
+{
+    public interface IProductRepository : IRepository<Product>
+    {
+        Task<IEnumerable<Product>> GetProductsByCategoryAsync(int categoryId);
+        Task<IEnumerable<Product>> GetProductsBySellerAsync(string sellerId);
+        Task<IEnumerable<Product>> SearchProductsAsync(string searchTerm);
+        Task<IEnumerable<Product>> GetFeaturedProductsAsync(int count);
+        Task<IEnumerable<Product>> GetRecentProductsAsync(int count);
+        Task<IEnumerable<Product>> GetProductsWithFiltersAsync(int? categoryId, decimal? minPrice, decimal? maxPrice, ProductCondition? condition);
+    }
+}

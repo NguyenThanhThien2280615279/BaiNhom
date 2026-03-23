@@ -1,0 +1,204 @@
+﻿@model MessagesViewModel
+@{
+    ViewData["Title"] = "Tin nhắn";
+}
+
+<div class="container-fluid mt-4">
+    <h1>Tin nhắn</h1>
+    
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Liên hệ</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.Contacts.Any())
+                    {
+                        <div class="list-group list-group-flush" id="contactsList">
+                            @foreach (var contact in Model.Contacts)
+                            {
+                                <a href="javascript:void(0);" 
+                                   class="list-group-item list-group-item-action @(Model.SelectedContact?.Id == contact.Id ? "active" : "")"
+                                   onclick="loadConversation('@contact.Id')">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            @if (!string.IsNullOrEmpty(contact.ProfilePicture))
+                                            {
+                                                <img src="@contact.ProfilePicture" class="rounded-circle" alt="@contact.FirstName" style="width: 40px; height: 40px; object-fit: cover;">
+                                            }
+                                            else
+                                            {
+                                                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                                    <i class="bi bi-person"></i>
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-0">@contact.FirstName @contact.LastName</h6>
+                                            <small class="text-muted">@contact.Email</small>
+                                        </div>
+                                    </div>
+                                </a>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <p class="text-muted">Không có liên hệ nào.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <div class="d-flex align-items-center">
+                        @if (Model.SelectedContact != null)
+                        {
+                            <div class="flex-shrink-0">
+                                @if (!string.IsNullOrEmpty(Model.SelectedContact.ProfilePicture))
+                                {
+                                    <img src="@Model.SelectedContact.ProfilePicture" class="rounded-circle" alt="@Model.SelectedContact.FirstName" style="width: 40px; height: 40px; object-fit: cover;">
+                                }
+                                else
+                                {
+                                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        <i class="bi bi-person"></i>
+                                    </div>
+                                }
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h5 class="mb-0">@Model.SelectedContact.FirstName @Model.SelectedContact.LastName</h5>
+                                <small class="text-muted">@Model.SelectedContact.Email</small>
+                            </div>
+                        }
+                        else
+                        {
+                            <h5 class="mb-0">Chọn một liên hệ để bắt đầu trò chuyện</h5>
+                        }
+                    </div>
+                </div>
+                <div class="card-body" id="conversationContainer">
+                    @if (Model.SelectedContact != null)
+                    {
+                        <partial name="_ConversationPartial" model="new ConversationViewModel { CurrentUserId = Model.CurrentUserId, Contact = Model.SelectedContact, Messages = Model.Messages }" />
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <p class="text-muted">Chọn một liên hệ để xem tin nhắn.</p>
+                        </div>
+                    }
+                </div>
+                <div class="card-footer bg-white">
+                    @if (Model.SelectedContact != null)
+                    {
+                        <form method="post" asp-controller="Messages" asp-action="SendMessage" id="messageForm">
+                            <input type="hidden" name="receiverId" value="@Model.SelectedContact.Id" id="receiverId" />
+                            <div class="input-group">
+                                <input type="text" name="content" id="messageContent" class="form-control" placeholder="Nhập tin nhắn..." required>
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="bi bi-send"></i>
+                                </button>
+                            </div>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        // Khởi tạo SignalR hub
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .build();
+
+        // Xử lý khi nhận tin nhắn mới
+        connection.on("ReceiveMessage", (message) => {
+            // Kiểm tra xem tin nhắn có phải là từ/đến người dùng đang được chọn không
+            const selectedContactId = $("#receiverId").val();
+            if ((message.senderId === selectedContactId && message.receiverId === "@Model.CurrentUserId") || 
+                (message.senderId === "@Model.CurrentUserId" && message.receiverId === selectedContactId)) {
+                // Tải lại cuộc trò chuyện
+                loadConversation(selectedContactId);
+            }
+            
+            // Cập nhật UI của danh sách liên hệ nếu cần
+            $("#contactsList a").each(function() {
+                const contactId = $(this).attr("onclick").replace("loadConversation('", "").replace("')", "");
+                if (contactId === message.senderId && !$(this).hasClass("active")) {
+                    $(this).addClass("fw-bold");
+                }
+            });
+        });
+
+        // Kết nối đến hub
+        connection.start().catch(err => console.error(err));
+
+        // Hàm tải cuộc trò chuyện
+        function loadConversation(contactId) {
+            $.ajax({
+                url: '/Messages/LoadConversation',
+                type: 'GET',
+                data: { contactId: contactId },
+                success: function (data) {
+                    $('#conversationContainer').html(data);
+                    $('#receiverId').val(contactId);
+                    
+                    // Đánh dấu liên hệ đang được chọn
+                    $("#contactsList a").removeClass("active fw-bold");
+                    $(`#contactsList a[onclick="loadConversation('${contactId}')"]`).addClass("active");
+                    
+                    // Cuộn xuống tin nhắn mới nhất
+                    const messagesContainer = document.getElementById('messagesContainer');
+                    if (messagesContainer) {
+                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    }
+                }
+            });
+        }
+
+        // Gửi tin nhắn
+        $("#messageForm").submit(function (e) {
+            e.preventDefault();
+            
+            const receiverId = $("#receiverId").val();
+            const content = $("#messageContent").val();
+            
+            if (!receiverId || !content) return;
+            
+            $.ajax({
+                url: '/Messages/SendMessage',
+                type: 'POST',
+                data: {
+                    __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val(),
+                    receiverId: receiverId,
+                    content: content
+                },
+                success: function () {
+                    // Xóa nội dung tin nhắn
+                    $("#messageContent").val("");
+                    
+                    // Tải lại cuộc trò chuyện
+                    loadConversation(receiverId);
+                }
+            });
+        });
+
+        // Cuộn xuống tin nhắn mới nhất khi trang được tải
+        $(document).ready(function () {
+            const messagesContainer = document.getElementById('messagesContainer');
+            if (messagesContainer) {
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+        });
+    </script>
+}

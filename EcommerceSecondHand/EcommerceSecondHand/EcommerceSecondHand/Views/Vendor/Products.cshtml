@@ -1,0 +1,130 @@
+@model EcommerceSecondHand.Models.ViewModels.ProductListViewModel
+
+<div class="container-fluid mt-4">
+    <!-- ===== ALERTS ===== -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    <!-- ===== END ALERTS ===== -->
+
+    <div class="section-header fade-in-up">
+        <div>
+            <h1 class="section-title gradient-text">Sản phẩm của tôi</h1>
+            <p class="section-subtitle">Quản lý danh sách sản phẩm</p>
+        </div>
+        <div class="action-buttons">
+            <a asp-action="AddProduct" class="action-btn success">
+                <i class="bi bi-plus-lg"></i> Thêm sản phẩm
+            </a>
+        </div>
+    </div>
+
+    <ul class="nav nav-pills mb-3">
+        <li class="nav-item">
+            <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Products" ? "active" : "")"
+               asp-action="Products">Đang bán</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "SoldProducts" ? "active" : "")"
+               asp-action="SoldProducts">Đã bán</a>
+        </li>
+    </ul>
+
+    <div class="card-shopee fade-in-up">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-shopee align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Hình ảnh</th>
+                            <th>Tên</th>
+                            <th>Giá</th>
+                            <th>Danh mục</th>
+                            <th>Trạng thái</th>
+                            <th class="text-end">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Products.Any())
+                        {
+                            <tr>
+                                <td colspan="6">
+                                    <div class="empty-state">
+                                        <i class="bi bi-box"></i>
+                                        <p>Chưa có sản phẩm nào</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var p in Model.Products)
+                            {
+                                <tr>
+                                    <td style="width:80px">
+                                        <img src="@(!string.IsNullOrEmpty(p.ImageUrl) ? p.ImageUrl : "/img/placeholder.png")"
+                                             alt="@p.Name" class="img-thumbnail"
+                                             style="width:64px;height:64px;object-fit:cover" />
+                                    </td>
+
+                                    <td>@p.Name</td>
+
+                                    <td>@p.Price.ToString("N0") đ</td>
+
+                                    <td>@p.Category?.Name</td>
+
+                                    <td>
+                                        @if (p.Quantity > 0)
+                                        {
+                                            <span class="badge bg-success" title="Còn @p.Quantity cái">Còn hàng</span>
+                                            <small class="text-muted ms-1">( @p.Quantity )</small>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Hết hàng</span>
+                                        }
+                                    </td>
+
+                                    <td class="text-end">
+                                        <a asp-action="EditProduct" asp-route-id="@p.Id"
+                                           class="btn btn-sm btn-outline-primary" title="Sửa">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <form asp-action="DeleteProduct" asp-route-id="@p.Id"
+                                              method="post" class="d-inline"
+                                              onsubmit="return confirm('Xóa sản phẩm này?');">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Script ẩn thông báo sau 3s ===== -->
+<script>
+    setTimeout(() => {
+        document.querySelectorAll('.alert').forEach(el => {
+            try { new bootstrap.Alert(el).close(); } catch { }
+        });
+    }, 3000);
+</script>

@@ -1,0 +1,445 @@
+﻿@model IEnumerable<EcommerceSecondHand.Models.Category>
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<link rel="stylesheet" href="~/css/theme-store.css" />
+<style>
+    /* Scoped pagination styles for featured products */
+    .pagination .page-link {
+        color: #ff4d2d;
+        border-color: #ffd8d0;
+        background-color: #fff;
+    }
+
+        .pagination .page-link:hover {
+            color: #ff4d2d;
+            background-color: #fff5f2;
+            border-color: #ffc4b6;
+        }
+
+    .pagination .page-item.active .page-link {
+        color: #fff;
+        background-color: #ff4d2d;
+        border-color: #ff4d2d;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        color: #9aa3ab;
+        background-color: #f1f3f5;
+        border-color: #e9ecef;
+    }
+
+    /* === Chatbot styles === */
+    .chatbot-toggle-btn {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        border: none;
+        background: linear-gradient(135deg, #ff4d2d, #ff8a5c);
+        color: #fff;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 999;
+    }
+
+        .chatbot-toggle-btn i {
+            font-size: 1.4rem;
+        }
+
+    .chatbot-window {
+        position: fixed;
+        bottom: 90px;
+        right: 24px;
+        width: 340px;
+        max-height: 450px;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 12px 35px rgba(15, 23, 42, 0.35);
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+        z-index: 998;
+    }
+
+    .chatbot-header {
+        padding: 10px 14px;
+        background: linear-gradient(135deg, #ff4d2d, #ff8a5c);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .chatbot-header-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+
+    .chatbot-header-subtitle {
+        font-size: 0.75rem;
+        opacity: 0.85;
+    }
+
+    .chatbot-close-btn {
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 1.1rem;
+        cursor: pointer;
+    }
+
+    .chatbot-messages {
+        padding: 10px 12px;
+        height: 270px;
+        overflow-y: auto;
+        background: #f8fafc;
+        font-size: 0.85rem;
+    }
+
+    .chat-message {
+        margin-bottom: 8px;
+        display: flex;
+    }
+
+        .chat-message.user {
+            justify-content: flex-end;
+        }
+
+        .chat-message.ai {
+            justify-content: flex-start;
+        }
+
+    .chat-bubble {
+        max-width: 80%;
+        padding: 6px 10px;
+        border-radius: 12px;
+        line-height: 1.4;
+    }
+
+    .chat-message.user .chat-bubble {
+        background: #ffede7;
+        color: #111827;
+        border-bottom-right-radius: 2px;
+    }
+
+    .chat-message.ai .chat-bubble {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        color: #111827;
+        border-bottom-left-radius: 2px;
+    }
+
+    .chatbot-input-area {
+        padding: 8px;
+        border-top: 1px solid #e5e7eb;
+        background: #fff;
+        display: flex;
+        gap: 6px;
+        align-items: center;
+    }
+
+        .chatbot-input-area textarea {
+            flex: 1;
+            resize: none;
+            border-radius: 10px;
+            border: 1px solid #e5e7eb;
+            padding: 6px 8px;
+            font-size: 0.85rem;
+            max-height: 70px;
+        }
+
+    .chatbot-send-btn {
+        border: none;
+        border-radius: 999px;
+        padding: 6px 10px;
+        background: #ff4d2d;
+        color: #fff;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+    }
+
+        .chatbot-send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+</style>
+
+<div class="container-fluid">
+    <!-- Danh mục sản phẩm -->
+    <div class="container mb-5 mt-4">
+        <div class="section-header fade-in-up">
+            <div>
+                <h2 class="section-title gradient-text">Danh mục sản phẩm</h2>
+                <p class="section-subtitle">Khám phá các danh mục sản phẩm đa dạng</p>
+            </div>
+        </div>
+
+        <div class="categories-grid">
+            @foreach (var category in Model)
+            {
+                <a asp-controller="Products" asp-action="Index" asp-route-categoryId="@category.Id" class="category-item">
+                    <div class="category-icon">
+                        @{
+                            var iconClass = GetCategoryIcon(category.Name);
+                        }
+                        <i class="@iconClass"></i>
+                    </div>
+                    <div class="category-name">@category.Name</div>
+                </a>
+            }
+
+            <!-- Xem tất cả danh mục -->
+            <a asp-controller="Products" asp-action="Index" class="category-item view-all">
+                <div class="category-icon">
+                    <i class="bi bi-grid-3x3-gap"></i>
+                </div>
+                <div class="category-name">Tất cả danh mục</div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Sản phẩm nổi bật: 20 sản phẩm đăng trong 10 ngày gần nhất -->
+    <div class="container mb-5">
+        <div class="section-header fade-in-up">
+            <div>
+                <h2 class="section-title gradient-text">Sản phẩm nổi bật</h2>
+                <p class="section-subtitle">Những sản phẩm mới trong 10 ngày gần đây</p>
+            </div>
+            <div class="action-buttons">
+                <a asp-controller="Products" asp-action="Index" class="action-btn primary">
+                    <i class="bi bi-grid-3x3-gap me-1"></i>Xem tất cả
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            @if (ViewBag.FeaturedProducts != null)
+            {
+                foreach (var p in (IEnumerable<EcommerceSecondHand.Models.Product>)ViewBag.FeaturedProducts)
+                {
+                    <div class="col-lg-3 col-md-6">
+                        <div class="product-card fade-in-up">
+                            <a asp-controller="Products" asp-action="Details" asp-route-id="@p.Id" class="text-decoration-none">
+                                @if (!string.IsNullOrEmpty(p.ImageUrl))
+                                {
+                                    <img src="@p.ImageUrl" class="w-100 product-card-image" alt="@p.Name" />
+                                }
+                                else
+                                {
+                                    <div class="product-card-image-placeholder"><i class="bi bi-image"></i></div>
+                                }
+                            </a>
+                            <div class="product-card-body">
+                                <h6 class="product-card-title">@p.Name</h6>
+                                <div class="product-card-price">@p.Price.ToString("N0") đ</div>
+                                <div class="product-card-meta">
+                                    <span class="product-card-condition">@GetConditionText(p.Condition)</span>
+                                </div>
+                            </div>
+                            <div class="product-card-footer">
+                                <a asp-controller="Products" asp-action="Details" asp-route-id="@p.Id" class="btn-card-primary">
+                                    <i class="bi bi-eye"></i>
+                                    <span>Xem chi tiết</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+        @{
+            int currentPage = ViewBag.FeaturedPage != null ? (int)ViewBag.FeaturedPage : 1;
+            int pageSize = ViewBag.FeaturedPageSize != null ? (int)ViewBag.FeaturedPageSize : 8;
+            int total = ViewBag.FeaturedTotal != null ? (int)ViewBag.FeaturedTotal : 0;
+            int totalPages = (int)Math.Ceiling((double)total / pageSize);
+        }
+        @if (totalPages > 1)
+        {
+            <nav aria-label="Featured pagination" class="mt-4 d-flex justify-content-center">
+                <ul class="pagination">
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" asp-controller="Home" asp-action="Index"
+                           asp-route-page="@(currentPage - 1)">Trước</a>
+                    </li>
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            <a class="page-link" asp-controller="Home" asp-action="Index" asp-route-page="@i">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                        <a class="page-link" asp-controller="Home" asp-action="Index"
+                           asp-route-page="@(currentPage + 1)">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    </div>
+</div>
+
+<!-- 🔸 Nút mở chatbot -->
+<button type="button" class="chatbot-toggle-btn" id="chatbotToggleBtn">
+    <i class="bi bi-chat-dots"></i>
+</button>
+
+<!-- 🔸 Cửa sổ chatbot -->
+<div class="chatbot-window" id="chatbotWindow">
+    <div class="chatbot-header">
+        <div>
+            <div class="chatbot-header-title">Hỗ trợ AI</div>
+            <div class="chatbot-header-subtitle">Hỏi về sản phẩm, mua bán, kiến thức...</div>
+        </div>
+        <button class="chatbot-close-btn" id="chatbotCloseBtn">&times;</button>
+    </div>
+    <div class="chatbot-messages" id="chatbotMessages">
+        <div class="chat-message ai">
+            <div class="chat-bubble">
+                Xin chào 👋, mình là trợ lý AI của SecondHand.<br />
+                Bạn cần hỗ trợ gì hôm nay?
+            </div>
+        </div>
+    </div>
+    <div class="chatbot-input-area">
+        <textarea id="chatbotInput" rows="1" placeholder="Nhập câu hỏi của bạn..."></textarea>
+        <button class="chatbot-send-btn" id="chatbotSendBtn">
+            <i class="bi bi-send"></i>
+            <span>Gửi</span>
+        </button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // ===== Effect cũ =====
+        const fadeElements = document.querySelectorAll('.fade-in-up');
+        fadeElements.forEach((element, index) => {
+            element.style.animationDelay = `${index * 0.1}s`;
+        });
+
+        const cards = document.querySelectorAll('.product-card, .stat-item');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function () {
+                this.style.transform = 'translateY(-8px)';
+            });
+            card.addEventListener('mouseleave', function () {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // ===== Chatbot =====
+        const toggleBtn = document.getElementById('chatbotToggleBtn');
+        const chatWindow = document.getElementById('chatbotWindow');
+        const closeBtn = document.getElementById('chatbotCloseBtn');
+        const messagesEl = document.getElementById('chatbotMessages');
+        const inputEl = document.getElementById('chatbotInput');
+        const sendBtn = document.getElementById('chatbotSendBtn');
+
+        toggleBtn.addEventListener('click', () => {
+            chatWindow.style.display = 'flex';
+        });
+
+        closeBtn.addEventListener('click', () => {
+            chatWindow.style.display = 'none';
+        });
+
+        function appendMessage(text, isUser) {
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('chat-message', isUser ? 'user' : 'ai');
+
+            const bubble = document.createElement('div');
+            bubble.classList.add('chat-bubble');
+            bubble.innerText = text;
+
+            wrapper.appendChild(bubble);
+            messagesEl.appendChild(wrapper);
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const msg = inputEl.value.trim();
+            if (!msg) return;
+
+            appendMessage(msg, true);
+            inputEl.value = '';
+            inputEl.focus();
+            sendBtn.disabled = true;
+
+            try {
+                const res = await fetch('@Url.Action("Ask", "Chatbot")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+                    },
+                    body: 'message=' + encodeURIComponent(msg)
+                });
+
+                if (!res.ok) {
+                    appendMessage('Xin lỗi, hiện không kết nối được tới máy chủ.', false);
+                } else {
+                    const data = await res.json();
+                    appendMessage(data.reply || 'Xin lỗi, mình chưa hiểu câu hỏi này.', false);
+                }
+            } catch (e) {
+                appendMessage('Đã xảy ra lỗi khi gửi câu hỏi. Bạn thử lại sau nhé.', false);
+            } finally {
+                sendBtn.disabled = false;
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        inputEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+    });
+</script>
+
+@functions {
+    string GetConditionText(EcommerceSecondHand.Models.ProductCondition condition)
+    {
+        return condition switch
+        {
+            EcommerceSecondHand.Models.ProductCondition.New => "Mới",
+            EcommerceSecondHand.Models.ProductCondition.LikeNew => "Như mới",
+            EcommerceSecondHand.Models.ProductCondition.Good => "Tốt",
+            EcommerceSecondHand.Models.ProductCondition.Fair => "Khá",
+            EcommerceSecondHand.Models.ProductCondition.Poor => "Kém",
+            _ => condition.ToString()
+        };
+    }
+    string GetCategoryIcon(string categoryName)
+    {
+        return categoryName.ToLower() switch
+        {
+            "điện tử" or "electronics" => "bi bi-laptop",
+            "thời trang" or "fashion" => "bi bi-handbag",
+            "nội thất" or "furniture" => "bi bi-house-door",
+            "giải trí" or "entertainment" => "bi bi-controller",
+            "thể thao" or "sports" => "bi bi-trophy",
+            "sách" or "books" => "bi bi-book",
+            "đồ chơi" or "toys" => "bi bi-joystick",
+            "mỹ phẩm" or "cosmetics" => "bi bi-palette",
+            "thực phẩm" or "food" => "bi bi-cup-hot",
+            "đồ gia dụng" or "home appliances" => "bi bi-house-gear",
+            "xe cộ" or "vehicles" => "bi bi-car-front",
+            "bất động sản" or "real estate" => "bi bi-building",
+            "thú cưng" or "pets" => "bi bi-heart",
+            "việc làm" or "jobs" => "bi bi-briefcase",
+            "dịch vụ" or "services" => "bi bi-tools",
+            "cho tặng" or "free" => "bi bi-gift",
+            _ => "bi bi-grid"
+        };
+    }
+}

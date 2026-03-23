@@ -1,0 +1,43 @@
+﻿@model Order
+@{
+    ViewData["Title"] = "Đặt hàng thành công";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body text-center p-5">
+                    <div class="mb-4">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+                    </div>
+                    <h1 class="mb-4">Đặt hàng thành công!</h1>
+                    <p class="lead mb-4">
+                        Cảm ơn bạn đã đặt hàng. Đơn hàng của bạn đã được xác nhận và đang được xử lý.
+                    </p>
+                    <div class="alert alert-info">
+                        <div class="d-flex align-items-center">
+                            <div>
+                                <strong>Mã đơn hàng:</strong> #@Model.Id<br />
+                                <strong>Ngày đặt:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")<br />
+                                <strong>Tổng thanh toán:</strong> @Model.TotalAmount.ToString("C")
+                            </div>
+                        </div>
+                    </div>
+                    <p class="mb-4">
+                        Chúng tôi đã gửi thông tin đơn hàng qua email và thông báo trong hệ thống. 
+                        Bạn có thể theo dõi trạng thái đơn hàng trong trang "Đơn hàng của tôi".
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a asp-controller="Orders" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-primary">
+                            <i class="bi bi-bag-check me-1"></i> Xem chi tiết đơn hàng
+                        </a>
+                        <a asp-controller="Products" asp-action="Index" class="btn btn-outline-primary">
+                            <i class="bi bi-cart me-1"></i> Tiếp tục mua sắm
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,19 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace EcommerceSecondHand.Models.ViewModels
+{
+    public class DepositViewModel
+    {
+        [Required(ErrorMessage = "Vui lòng nhập số tiền.")]
+        [Range(10000, 100000000, ErrorMessage = "Số tiền phải từ 10,000 đến 100,000,000.")]
+        [Display(Name = "Số tiền")]
+        public decimal Amount { get; set; }
+        
+        [Required(ErrorMessage = "Vui lòng chọn phương thức thanh toán.")]
+        [Display(Name = "Phương thức thanh toán")]
+        public string PaymentMethod { get; set; } = string.Empty;
+        
+        [Display(Name = "Ghi chú")]
+        public string? Note { get; set; }
+    }
+}

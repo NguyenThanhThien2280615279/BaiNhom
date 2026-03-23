@@ -1,0 +1,90 @@
+﻿using EcommerceSecondHand.Data;
+using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace EcommerceSecondHand.Repositories
+{
+    public class ProductRepository : Repository<Product>, IProductRepository
+    {
+        public ProductRepository(ApplicationDbContext context) : base(context)
+        {
+        }
+
+        public async Task<IEnumerable<Product>> GetProductsByCategoryAsync(int categoryId)
+        {
+            return await _dbSet
+                .Where(p => p.CategoryId == categoryId)
+                .Include(p => p.Category)
+                .Include(p => p.Seller)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetProductsBySellerAsync(string sellerId)
+        {
+            return await _dbSet
+                .Where(p => p.SellerId == sellerId)
+                .Include(p => p.Category)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> SearchProductsAsync(string searchTerm)
+        {
+            return await _dbSet
+                .Where(p => p.Name.Contains(searchTerm) || p.Description!.Contains(searchTerm))
+                .Include(p => p.Category)
+                .Include(p => p.Seller)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetFeaturedProductsAsync(int count)
+        {
+            return await _dbSet
+                .OrderByDescending(p => p.Reviews!.Count)
+                .Include(p => p.Category)
+                .Include(p => p.Seller)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetRecentProductsAsync(int count)
+        {
+            return await _dbSet
+                .OrderByDescending(p => p.DateCreated)
+                .Include(p => p.Category)
+                .Include(p => p.Seller)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetProductsWithFiltersAsync(int? categoryId, decimal? minPrice, decimal? maxPrice, ProductCondition? condition)
+        {
+            var query = _dbSet.AsQueryable();
+
+            if (categoryId.HasValue)
+            {
+                query = query.Where(p => p.CategoryId == categoryId.Value);
+            }
+
+            if (minPrice.HasValue)
+            {
+                query = query.Where(p => p.Price >= minPrice.Value);
+            }
+
+            if (maxPrice.HasValue)
+            {
+                query = query.Where(p => p.Price <= maxPrice.Value);
+            }
+
+            if (condition.HasValue)
+            {
+                query = query.Where(p => p.Condition == condition.Value);
+            }
+
+            return await query
+                .Include(p => p.Category)
+                .Include(p => p.Seller)
+                .ToListAsync();
+        }
+    }
+}

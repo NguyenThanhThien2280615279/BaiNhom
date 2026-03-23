@@ -1,0 +1,562 @@
+@model ProductDetailsViewModel
+@{
+    ViewData["Title"] = Model.Product?.Name ?? "Chi tiết sản phẩm";
+}
+
+<link rel="stylesheet" href="~/css/theme-store.css" />
+
+<div class="container mt-4">
+    @if (Model.Product != null)
+    {
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a asp-controller="Products" asp-action="Index">Sản phẩm</a></li>
+                <li class="breadcrumb-item">
+                    <a asp-controller="Products"
+                       asp-action="Index"
+                       asp-route-categoryId="@Model.Product.CategoryId">
+                        @Model.Product.Category?.Name
+                    </a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.Product.Name</li>
+            </ol>
+        </nav>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card shp-soft">
+                    <div class="card-body p-0">
+                        @if (!string.IsNullOrEmpty(Model.Product.ImageUrl))
+                        {
+                            <img src="@Model.Product.ImageUrl" class="img-fluid" alt="@Model.Product.Name">
+                        }
+                        else
+                        {
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 400px;">
+                                <i class="bi bi-image text-muted" style="font-size: 4rem;"></i>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card shp-soft">
+                    <div class="card-body">
+                        <h1 class="card-title">@Model.Product.Name</h1>
+
+                        <div class="mb-3">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="bi bi-star@(i <= Model.AverageRating ? "-fill" : "") text-warning"></i>
+                            }
+                            <span class="ms-2">
+                                @Model.AverageRating.ToString("0.0")
+                                (@Model.Reviews.Count() đánh giá)
+                            </span>
+                        </div>
+
+                        <h3 class="mb-3" style="color: var(--shp-primary);">
+                            @Model.Product.Price.ToString("N0") đ
+                        </h3>
+
+                        <p class="mb-1"><strong>Tình trạng:</strong> @GetConditionText(Model.Product.Condition)</p>
+
+                        <p class="mb-1">
+                            <strong>Danh mục:</strong>
+                            <a class="text-decoration-none"
+                               asp-controller="Products"
+                               asp-action="Index"
+                               asp-route-categoryId="@Model.Product.CategoryId">
+                                @Model.Product.Category?.Name
+                            </a>
+                        </p>
+
+                        <div class="mb-2">
+                            <strong>Người bán:</strong>
+                            @Model.Product.Seller?.FirstName @Model.Product.Seller?.LastName
+
+                            @* BLOCK UY TÍN ON-CHAIN (CHẾ ĐỘ DEMO) *@
+                            @if (Model.Product.Seller != null && !string.IsNullOrEmpty(Model.Product.Seller.BlockchainAddress))
+                            {
+                                <div class="mt-2 p-2 border rounded"
+                                     style="font-size:13px; background:#f8fff8; border-color:#a6e3a1; max-width:600px;">
+                                    <div class="d-flex flex-column flex-md-row align-items-md-start gap-3 w-100">
+
+                                        <div class="flex-grow-1">
+                                            <div class="fw-semibold">
+                                                Uy tín on-chain (Chế độ demo)
+                                                <span class="badge bg-success text-light ms-2" style="font-size:11px;">
+                                                    ĐÃ XÁC THỰC ✅
+                                                </span>
+                                            </div>
+
+                                            <div class="text-muted" style="font-size:12px; line-height:1.4;">
+                                                Hệ thống đang chạy ở chế độ mô phỏng.
+                                                Uy tín được đồng bộ tạm thời dựa trên giao dịch/đánh giá,
+                                                giống như sẽ ghi lên blockchain thật.
+                                            </div>
+
+                                            <div class="mt-2" style="font-size:12.5px;">
+                                                <div>
+                                                    <span class="text-muted">Huy hiệu:</span>
+                                                    <strong class="ms-1">
+                                                        @GetBadgeName(Model.Product.Seller.OnChainBadgeLevel)
+                                                    </strong>
+                                                </div>
+
+                                                <div>
+                                                    <span class="text-muted">Đơn giao thành công:</span>
+                                                    <strong class="ms-1">
+                                                        @Model.Product.Seller.OnChainSuccessfulSales
+                                                    </strong>
+                                                </div>
+
+                                                <div>
+                                                    <span class="text-muted">Điểm đánh giá TB:</span>
+                                                    <strong class="ms-1">
+                                                        @Model.Product.Seller.OnChainAverageRating.ToString("0.00")
+                                                    </strong>
+                                                    <span class="text-warning ms-1">★</span>
+                                                </div>
+
+                                                <div>
+                                                    <span class="text-muted">Trạng thái:</span>
+                                                    <strong class="ms-1 text-success">
+                                                        Đang xây dựng hồ sơ uy tín
+                                                    </strong>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div style="font-size:12px; min-width:180px;">
+                                            <a asp-controller="OnChain"
+                                               asp-action="Index"
+                                               asp-route-address="@Model.Product.Seller.BlockchainAddress"
+                                               target="_blank"
+                                               class="text-decoration-none d-block">
+                                                Xem ví blockchain (demo)
+                                            </a>
+                                            <span class="text-muted fst-italic" style="font-size:11px; line-height:1.3;">
+                                                (chế độ mô phỏng, chưa ghi giao dịch thật)
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div style="font-size:13px; color:#888;">Chưa xác thực on-chain</div>
+                            }
+                        </div>
+
+                        <p class="mb-1">
+                            <strong>Số lượng còn lại:</strong> @Model.Product.Quantity
+                        </p>
+
+                        <p class="mb-3">
+                            <strong>Ngày đăng:</strong> @Model.Product.DateListed.ToString("dd/MM/yyyy")
+                        </p>
+
+                        <hr class="my-3" />
+
+                        <div class="mb-3">
+                            <h5>Mô tả</h5>
+                            <p>@Model.Product.Description</p>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            @if (!Model.IsOwner)
+                            {
+                                <form id="addToCartForm" method="post" action="/api/Cart/AddToCart">
+                                    <input type="hidden" name="productId" value="@Model.Product.Id" />
+                                    <input type="hidden" name="quantity" value="1" />
+                                    <button type="submit"
+                                            class="btn btn-primary w-100 mb-2"
+                                    @(Model.Product.Quantity <= 0 ? "disabled" : "")>
+                                        <i class="bi bi-cart-plus me-1"></i> Thêm vào giỏ hàng
+                                    </button>
+                                </form>
+                            }
+
+                            @if (!Model.IsOwner)
+                            {
+                                <a href="#"
+                                   class="btn btn-outline-primary"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#messageModal">
+                                    <i class="bi bi-chat-dots me-1"></i> Nhắn tin cho người bán
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Phần đánh giá -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card shp-soft">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">Đánh giá sản phẩm</h5>
+                    </div>
+                    <div class="card-body">
+
+                        @* 🔔 THÔNG BÁO LỖI / THÀNH CÔNG TỪ TempData *@
+                        @if (TempData["ErrorMessage"] != null)
+                        {
+                            <div class="alert alert-danger">
+                                @TempData["ErrorMessage"]
+                            </div>
+                        }
+                        @if (TempData["SuccessMessage"] != null)
+                        {
+                            <div class="alert alert-success">
+                                @TempData["SuccessMessage"]
+                            </div>
+                        }
+
+                        @* Form viết đánh giá: chỉ hiện nếu đã đăng nhập, chưa đánh giá và không phải chủ sản phẩm
+                           Còn chuyện "đã mua chưa" thì controller check,
+                           nếu chưa mua sẽ set TempData["ErrorMessage"] = "Bạn chỉ có thể đánh giá sau khi đã mua sản phẩm này."
+                           và redirect về đây, alert bên trên sẽ hiển thị. *@
+                        @if (User.Identity?.IsAuthenticated == true && !Model.HasUserReviewed && !Model.IsOwner)
+                        {
+                            <div class="mb-4">
+                                <h6>Viết đánh giá của bạn</h6>
+                                <form method="post" asp-controller="Products" asp-action="AddReview">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="ProductId" value="@Model.Product.Id" />
+                                    <div class="mb-3">
+                                        <label class="form-label">Đánh giá</label>
+                                        <div>
+                                            <div class="rating">
+                                                <input type="radio" id="star5" name="Rating" value="5" required />
+                                                <label for="star5" title="5 sao"></label>
+                                                <input type="radio" id="star4" name="Rating" value="4" />
+                                                <label for="star4" title="4 sao"></label>
+                                                <input type="radio" id="star3" name="Rating" value="3" />
+                                                <label for="star3" title="3 sao"></label>
+                                                <input type="radio" id="star2" name="Rating" value="2" />
+                                                <label for="star2" title="2 sao"></label>
+                                                <input type="radio" id="star1" name="Rating" value="1" />
+                                                <label for="star1" title="1 sao"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Nhận xét</label>
+                                        <textarea name="Comment"
+                                                  class="form-control"
+                                                  rows="3"
+                                                  placeholder="Nhập nhận xét của bạn..."></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
+                                </form>
+                            </div>
+                        }
+
+                        <h6>Tất cả đánh giá (@Model.Reviews.Count())</h6>
+
+                        @if (Model.Reviews.Any())
+                        {
+                            <div class="list-group">
+                                @foreach (var review in Model.Reviews)
+                                {
+                                    <div class="list-group-item list-group-item-action">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">
+                                                @review.User?.FirstName @review.User?.LastName
+                                            </h6>
+                                            <small>@review.DateCreated.ToString("dd/MM/yyyy")</small>
+                                        </div>
+                                        <div class="mb-2">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <i class="bi bi-star@(i <= review.Rating ? "-fill" : "") text-warning"></i>
+                                            }
+                                        </div>
+                                        <p class="mb-1">@review.Comment</p>
+                                    </div>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center py-4">
+                                <p class="text-muted">
+                                    Chưa có đánh giá nào. Hãy trở thành người đầu tiên đánh giá sản phẩm này!
+                                </p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sản phẩm liên quan -->
+        @if (Model.RelatedProducts.Any())
+        {
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card shp-soft">
+                        <div class="card-header bg-white">
+                            <h5 class="mb-0">Sản phẩm liên quan</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+                                @foreach (var relatedProduct in Model.RelatedProducts)
+                                {
+                                    <div class="col">
+                                        <div class="card h-100 product-card shp-soft">
+                                            <a asp-controller="Products"
+                                               asp-action="Details"
+                                               asp-route-id="@relatedProduct.Id"
+                                               class="text-decoration-none">
+                                                @if (!string.IsNullOrEmpty(relatedProduct.ImageUrl))
+                                                {
+                                                    <img src="@relatedProduct.ImageUrl"
+                                                         class="card-img-top"
+                                                         alt="@relatedProduct.Name"
+                                                         style="height: 150px; object-fit: cover;">
+                                                }
+                                                else
+                                                {
+                                                    <div class="bg-light d-flex align-items-center justify-content-center"
+                                                         style="height: 150px;">
+                                                        <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
+                                                    </div>
+                                                }
+                                            </a>
+                                            <div class="card-body">
+                                                <h6 class="card-title">
+                                                    <a asp-controller="Products"
+                                                       asp-action="Details"
+                                                       asp-route-id="@relatedProduct.Id"
+                                                       class="text-decoration-none text-dark">
+                                                        @relatedProduct.Name
+                                                    </a>
+                                                </h6>
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span class="fw-bold"
+                                                          style="color: var(--shp-primary);">
+                                                        @relatedProduct.Price.ToString("N0") đ
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Modal nhắn tin cho người bán -->
+        <div class="modal fade"
+             id="messageModal"
+             tabindex="-1"
+             aria-labelledby="messageModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="messageModalLabel">Nhắn tin cho người bán</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <form method="post" asp-controller="Messages" asp-action="SendMessage">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="recipientId" value="@Model.Product.SellerId" />
+                                <div class="mb-3">
+                                    <label class="form-label">Nội dung</label>
+                                    <textarea name="content"
+                                              class="form-control"
+                                              rows="4"
+                                              required
+                                              placeholder="Nhập tin nhắn của bạn..."></textarea>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">Gửi tin nhắn</button>
+                                </div>
+                            </form>
+                        }
+                        else
+                        {
+                            <div class="text-center py-3">
+                                <p>Bạn cần đăng nhập để gửi tin nhắn cho người bán.</p>
+                                <a asp-controller="Account"
+                                   asp-action="Login"
+                                   class="btn btn-primary">
+                                    Đăng nhập
+                                </a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-danger" role="alert">
+            Không tìm thấy sản phẩm.
+        </div>
+    }
+</div>
+
+@section Styles {
+    <style>
+        .rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+
+            .rating:not(:checked) > input {
+                position: absolute;
+                appearance: none;
+            }
+
+            .rating:not(:checked) > label {
+                float: right;
+                cursor: pointer;
+                font-size: 30px;
+                color: #ccc;
+            }
+
+                .rating:not(:checked) > label:before {
+                    content: '★';
+                }
+
+            .rating > input:checked ~ label {
+                color: #ffc700;
+            }
+
+            .rating:not(:checked) > label:hover,
+            .rating:not(:checked) > label:hover ~ label {
+                color: #ffc700;
+            }
+
+            .rating > input:checked + label:hover,
+            .rating > input:checked + label:hover ~ label,
+            .rating > input:checked ~ label:hover,
+            .rating > input:checked ~ label:hover ~ label,
+            .rating > label:hover ~ input:checked ~ label {
+                color: #ffc700;
+            }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addToCartForm = document.getElementById('addToCartForm');
+            if (addToCartForm) {
+                addToCartForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+
+                    const formData = new FormData(this);
+                    const button = this.querySelector('button[type="submit"]');
+                    const originalText = button.innerHTML;
+
+                    button.disabled = true;
+                    button.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Đang thêm...';
+
+                    try {
+                        const response = await fetch('/api/Cart/AddToCart', {
+                            method: 'POST',
+                            body: formData,
+                            credentials: 'same-origin'
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            showNotification('success', result.message);
+                            updateCartCount();
+                        } else {
+                            showNotification('error', result.message || 'Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng.');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        showNotification('error', 'Có lỗi xảy ra khi thêm sản phẩm vào giỏ hàng.');
+                    } finally {
+                        button.disabled = false;
+                        button.innerHTML = originalText;
+                    }
+                });
+            }
+        });
+
+        function showNotification(type, message) {
+            const notification = document.createElement('div');
+            notification.className =
+                `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+            notification.style.cssText =
+                'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        function updateCartCount() {
+            fetch('/api/Cart/ItemsCount', { credentials: 'same-origin' })
+                .then(response => response.json())
+                .then(count => {
+                    const badge = document.getElementById('cart-badge');
+                    if (badge) {
+                        if (count > 0) {
+                            badge.textContent = count > 99 ? '99+' : count;
+                            badge.style.display = 'block';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+                })
+                .catch(error => console.error('Error updating cart count:', error));
+        }
+    </script>
+}
+
+@functions {
+    public string GetConditionText(ProductCondition condition)
+    {
+        return condition switch
+        {
+            ProductCondition.New => "Mới",
+            ProductCondition.LikeNew => "Như mới",
+            ProductCondition.Good => "Tốt",
+            ProductCondition.Fair => "Khá",
+            ProductCondition.Poor => "Kém",
+            _ => condition.ToString()
+        };
+    }
+
+    public string GetBadgeName(byte badgeLevel)
+    {
+        return badgeLevel switch
+        {
+            3 => "Gold 🥇",
+            2 => "Silver 🥈",
+            1 => "Bronze 🥉",
+            _ => "Chưa có huy hiệu"
+        };
+    }
+}

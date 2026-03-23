@@ -1,0 +1,27 @@
+@model EcommerceSecondHand.Models.Review
+
+<div class="container mt-4">
+    <h3>Chi tiết đánh giá</h3>
+    <div class="card">
+        <div class="card-body">
+            <div class="mb-2"><strong>Sản phẩm:</strong> @Model.Product?.Name</div>
+            <div class="mb-2"><strong>Khách hàng:</strong> @Model.User?.FirstName @Model.User?.LastName</div>
+            <div class="mb-2"><strong>Đánh giá:</strong>
+                @for (int i = 1; i <= 5; i++)
+                {
+                    <i class="bi bi-star@(i <= Model.Rating ? "-fill" : "") text-warning"></i>
+                }
+            </div>
+            <div class="mb-2"><strong>Ngày:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+            @if (!string.IsNullOrWhiteSpace(Model.Comment))
+            {
+                <div class="mb-2"><strong>Nội dung:</strong><div class="border rounded p-2">@Model.Comment</div></div>
+            }
+        </div>
+    </div>
+    <div class="mt-3">
+        <a asp-action="Reviews" class="btn btn-outline-secondary">Quay lại</a>
+    </div>
+</div>
+
+

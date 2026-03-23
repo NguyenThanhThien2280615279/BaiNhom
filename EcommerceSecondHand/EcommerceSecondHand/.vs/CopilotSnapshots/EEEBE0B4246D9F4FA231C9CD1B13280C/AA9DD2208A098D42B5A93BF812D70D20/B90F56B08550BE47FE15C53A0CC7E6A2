@@ -1,0 +1,14 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Models.ViewModels
+{
+    public class ProductDetailsViewModel
+    {
+        public Product? Product { get; set; }
+        public IEnumerable<Review> Reviews { get; set; } = new List<Review>();
+        public IEnumerable<Product> RelatedProducts { get; set; } = new List<Product>();
+        public bool IsFavorite { get; set; }
+        public bool IsOwner { get; set; }
+        public ReviewViewModel? ReviewForm { get; set; }
+    }
+}

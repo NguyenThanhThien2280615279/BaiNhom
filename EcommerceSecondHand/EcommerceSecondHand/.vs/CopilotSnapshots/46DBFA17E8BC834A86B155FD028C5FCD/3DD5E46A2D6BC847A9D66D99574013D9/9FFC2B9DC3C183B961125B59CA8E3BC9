@@ -1,0 +1,71 @@
+﻿using EcommerceSecondHand.Models;
+using System.ComponentModel.DataAnnotations;
+
+namespace EcommerceSecondHand.Models.ViewModels
+{
+    public class ProfileViewModel
+    {
+        public ApplicationUser? User { get; set; }
+        public IEnumerable<string> Roles { get; set; } = new List<string>();
+        public UserStatistics? UserStatistics { get; set; }
+    }
+    
+    public class EditProfileViewModel
+    {
+        [Required(ErrorMessage = "Vui lòng nh?p tên.")]
+        [Display(Name = "Tên")]
+        public string FirstName { get; set; } = string.Empty;
+        
+        [Required(ErrorMessage = "Vui lòng nh?p h?.")]
+        [Display(Name = "H?")]
+        public string LastName { get; set; } = string.Empty;
+        
+        [EmailAddress]
+        [Display(Name = "Email")]
+        public string? Email { get; set; }
+        
+        [Phone]
+        [Display(Name = "S? ?i?n tho?i")]
+        public string? PhoneNumber { get; set; }
+        
+        [Display(Name = "??a ch?")]
+        public string? Address { get; set; }
+        
+        [Display(Name = "Thành ph?")]
+        public string? City { get; set; }
+        
+        [Display(Name = "Qu?c gia")]
+        public string? Country { get; set; }
+        
+        [Display(Name = "Mã b?u ?i?n")]
+        public string? PostalCode { get; set; }
+        
+        [Display(Name = "Gi?i thi?u")]
+        public string? Bio { get; set; }
+        
+        [Display(Name = "?nh ??i di?n hi?n t?i")]
+        public string? ProfilePicture { get; set; }
+        
+        [Display(Name = "T?i lên ?nh ??i di?n m?i")]
+        public IFormFile? ProfilePictureFile { get; set; }
+    }
+    
+    public class ChangePasswordViewModel
+    {
+        [Required(ErrorMessage = "Vui lòng nh?p m?t kh?u hi?n t?i.")]
+        [DataType(DataType.Password)]
+        [Display(Name = "M?t kh?u hi?n t?i")]
+        public string CurrentPassword { get; set; } = string.Empty;
+        
+        [Required(ErrorMessage = "Vui lòng nh?p m?t kh?u m?i.")]
+        [StringLength(100, ErrorMessage = "{0} ph?i có ít nh?t {2} và nhi?u nh?t {1} ký t?.", MinimumLength = 6)]
+        [DataType(DataType.Password)]
+        [Display(Name = "M?t kh?u m?i")]
+        public string NewPassword { get; set; } = string.Empty;
+        
+        [DataType(DataType.Password)]
+        [Display(Name = "Xác nh?n m?t kh?u m?i")]
+        [Compare("NewPassword", ErrorMessage = "M?t kh?u m?i và xác nh?n m?t kh?u không kh?p.")]
+        public string ConfirmPassword { get; set; } = string.Empty;
+    }
+}

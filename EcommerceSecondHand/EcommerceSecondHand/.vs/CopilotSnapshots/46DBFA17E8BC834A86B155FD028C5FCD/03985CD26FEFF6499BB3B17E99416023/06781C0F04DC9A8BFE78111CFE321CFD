@@ -1,0 +1,107 @@
+﻿using EcommerceSecondHand.Data;
+using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace EcommerceSecondHand.Repositories
+{
+    public class CartRepository : ICartRepository
+    {
+        private readonly ApplicationDbContext _context;
+
+        public CartRepository(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        public async Task<IEnumerable<CartItem>> GetCartItemsAsync(string userId)
+        {
+            return await _context.CartItems
+                .Where(ci => ci.UserId == userId)
+                .Include(ci => ci.Product)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<CartItem>> GetCartItemsByUserAsync(string userId)
+        {
+            // Alias for GetCartItemsAsync
+            return await GetCartItemsAsync(userId);
+        }
+
+        public async Task<CartItem?> GetCartItemAsync(string userId, int productId)
+        {
+            return await _context.CartItems
+                .FirstOrDefaultAsync(ci => ci.UserId == userId && ci.ProductId == productId);
+        }
+
+        public async Task<CartItem?> GetByIdAsync(int id)
+        {
+            return await _context.CartItems
+                .Include(ci => ci.Product)
+                .FirstOrDefaultAsync(ci => ci.Id == id);
+        }
+
+        public async Task<int> GetCartItemsCountAsync(string userId)
+        {
+            return await _context.CartItems
+                .CountAsync(ci => ci.UserId == userId);
+        }
+
+        public async Task AddAsync(CartItem cartItem)
+        {
+            await _context.CartItems.AddAsync(cartItem);
+            await SaveAsync();
+        }
+
+        public async Task UpdateAsync(CartItem cartItem)
+        {
+            _context.Entry(cartItem).State = EntityState.Modified;
+            await SaveAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var cartItem = await _context.CartItems.FindAsync(id);
+            if (cartItem != null)
+            {
+                _context.CartItems.Remove(cartItem);
+                await SaveAsync();
+            }
+        }
+
+        public async Task ClearCartAsync(string userId)
+        {
+            var cartItems = await _context.CartItems
+                .Where(ci => ci.UserId == userId)
+                .ToListAsync();
+
+            _context.CartItems.RemoveRange(cartItems);
+            await SaveAsync();
+        }
+
+        public async Task SaveAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
+
+        // Các phương thức bổ sung có thể giữ lại để sử dụng
+        public async Task<decimal> GetCartTotalAsync(string userId)
+        {
+            return await _context.CartItems
+                .Where(ci => ci.UserId == userId)
+                .Include(ci => ci.Product)
+                .SumAsync(ci => ci.Product!.Price * ci.Quantity);
+        }
+
+        public async Task UpdateCartItemQuantityAsync(int cartItemId, int quantity)
+        {
+            var cartItem = await _context.CartItems.FindAsync(cartItemId);
+            if (cartItem != null)
+            {
+                cartItem.Quantity = quantity;
+                _context.Entry(cartItem).State = EntityState.Modified;
+                await SaveAsync();
+            }
+        }
+    }
+}

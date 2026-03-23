@@ -1,0 +1,295 @@
+﻿@model SearchResultViewModel
+@{
+    ViewData["Title"] = "Tìm kiếm sản phẩm";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Bộ lọc</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" id="filterForm">
+                        <input type="hidden" name="query" value="@Model.Query" />
+                        <input type="hidden" name="sortOrder" value="@Model.SortOrder" id="sortOrderInput" />
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Danh mục</label>
+                            <select name="categoryId" class="form-select" onchange="document.getElementById('filterForm').submit();">
+                                <option value="">Tất cả danh mục</option>
+                                @foreach (var category in Model.Categories)
+                                {
+                                    <option value="@category.Id" selected="@(category.Id.ToString() == Model.CategoryId)">@category.Name</option>
+                                }
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Khoảng giá</label>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="input-group">
+                                        <span class="input-group-text">₫</span>
+                                        <input type="number" class="form-control" placeholder="Từ" name="minPrice" value="@Model.MinPrice">
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="input-group">
+                                        <span class="input-group-text">₫</span>
+                                        <input type="number" class="form-control" placeholder="Đến" name="maxPrice" value="@Model.MaxPrice">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Tình trạng sản phẩm</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="condition" id="conditionAll" value="" @(Model.Condition == null ? "checked" : "")>
+                                <label class="form-check-label" for="conditionAll">
+                                    Tất cả
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="condition" id="conditionNew" value="New" @(Model.Condition == ProductCondition.New ? "checked" : "")>
+                                <label class="form-check-label" for="conditionNew">
+                                    Mới
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="condition" id="conditionLikeNew" value="LikeNew" @(Model.Condition == ProductCondition.LikeNew ? "checked" : "")>
+                                <label class="form-check-label" for="conditionLikeNew">
+                                    Như mới
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="condition" id="conditionGood" value="Good" @(Model.Condition == ProductCondition.Good ? "checked" : "")>
+                                <label class="form-check-label" for="conditionGood">
+                                    Tốt
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="condition" id="conditionFair" value="Fair" @(Model.Condition == ProductCondition.Fair ? "checked" : "")>
+                                <label class="form-check-label" for="conditionFair">
+                                    Khá
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-filter"></i> Lọc sản phẩm
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-9">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            @if (!string.IsNullOrEmpty(Model.Query))
+                            {
+                                <span>Kết quả tìm kiếm cho: "@Model.Query"</span>
+                            }
+                            else
+                            {
+                                <span>Tất cả sản phẩm</span>
+                            }
+                        </h5>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                @GetSortText(Model.SortOrder)
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="sortDropdown">
+                                <li><a class="dropdown-item @(Model.SortOrder == "newest" ? "active" : "")" href="javascript:void(0);" onclick="setSort('newest')">Mới nhất</a></li>
+                                <li><a class="dropdown-item @(Model.SortOrder == "oldest" ? "active" : "")" href="javascript:void(0);" onclick="setSort('oldest')">Cũ nhất</a></li>
+                                <li><a class="dropdown-item @(Model.SortOrder == "priceAsc" ? "active" : "")" href="javascript:void(0);" onclick="setSort('priceAsc')">Giá tăng dần</a></li>
+                                <li><a class="dropdown-item @(Model.SortOrder == "priceDesc" ? "active" : "")" href="javascript:void(0);" onclick="setSort('priceDesc')">Giá giảm dần</a></li>
+                                <li><a class="dropdown-item @(Model.SortOrder == "nameAsc" ? "active" : "")" href="javascript:void(0);" onclick="setSort('nameAsc')">Tên A-Z</a></li>
+                                <li><a class="dropdown-item @(Model.SortOrder == "nameDesc" ? "active" : "")" href="javascript:void(0);" onclick="setSort('nameDesc')">Tên Z-A</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model.Products.Any())
+                    {
+                        <div class="row">
+                            @foreach (var product in Model.Products)
+                            {
+                                <div class="col-md-4 mb-4">
+                                    <div class="card h-100">
+                                        @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                        {
+                                            <img src="@product.ImageUrl" class="card-img-top" alt="@product.Name" style="height: 200px; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                                <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                            </div>
+                                        }
+                                        <div class="card-body">
+                                            <h5 class="card-title text-truncate">@product.Name</h5>
+                                            <p class="card-text text-primary fw-bold">@product.Price.ToString("C")</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge @GetProductConditionBadgeClass(product.Condition)">
+                                                    @GetProductConditionText(product.Condition)
+                                                </span>
+                                                <small class="text-muted">@GetTimeAgo(product.CreatedAt)</small>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer bg-transparent">
+                                            <a href="/Products/Details/@product.Id" class="btn btn-sm btn-primary w-100">Xem chi tiết</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        
+                        @if (Model.TotalPages > 1)
+                        {
+                            <div class="d-flex justify-content-center mt-4">
+                                <nav>
+                                    <ul class="pagination">
+                                        @for (int i = 1; i <= Model.TotalPages; i++)
+                                        {
+                                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                                <a class="page-link" href="@GetPageUrl(i)">@i</a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </nav>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <div class="mb-4">
+                                <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
+                            </div>
+                            <h3>Không tìm thấy sản phẩm nào</h3>
+                            <p class="text-muted">Vui lòng thử lại với từ khóa khác hoặc điều chỉnh bộ lọc.</p>
+                            <a href="/Products" class="btn btn-primary mt-3">Xem tất cả sản phẩm</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function setSort(sortOrder) {
+            document.getElementById('sortOrderInput').value = sortOrder;
+            document.getElementById('filterForm').submit();
+        }
+    </script>
+}
+
+@functions {
+    public string GetSortText(string sortOrder)
+    {
+        return sortOrder switch
+        {
+            "newest" => "Mới nhất",
+            "oldest" => "Cũ nhất",
+            "priceAsc" => "Giá tăng dần",
+            "priceDesc" => "Giá giảm dần",
+            "nameAsc" => "Tên A-Z",
+            "nameDesc" => "Tên Z-A",
+            _ => "Mới nhất"
+        };
+    }
+    
+    public string GetProductConditionBadgeClass(ProductCondition condition)
+    {
+        return condition switch
+        {
+            ProductCondition.New => "bg-success",
+            ProductCondition.LikeNew => "bg-info",
+            ProductCondition.Good => "bg-primary",
+            ProductCondition.Fair => "bg-warning text-dark",
+            _ => "bg-secondary"
+        };
+    }
+    
+    public string GetProductConditionText(ProductCondition condition)
+    {
+        return condition switch
+        {
+            ProductCondition.New => "Mới",
+            ProductCondition.LikeNew => "Như mới",
+            ProductCondition.Good => "Tốt",
+            ProductCondition.Fair => "Khá",
+            _ => condition.ToString()
+        };
+    }
+    
+    public string GetTimeAgo(DateTime date)
+    {
+        var span = DateTime.Now - date;
+        
+        if (span.TotalDays > 30)
+        {
+            return date.ToString("dd/MM/yyyy");
+        }
+        if (span.TotalDays > 1)
+        {
+            return $"{(int)span.TotalDays} ngày trước";
+        }
+        if (span.TotalHours > 1)
+        {
+            return $"{(int)span.TotalHours} giờ trước";
+        }
+        if (span.TotalMinutes > 1)
+        {
+            return $"{(int)span.TotalMinutes} phút trước";
+        }
+        
+        return "Vừa đăng";
+    }
+    
+    public string GetPageUrl(int page)
+    {
+        var url = $"/Search?page={page}";
+        
+        if (!string.IsNullOrEmpty(Model.Query))
+        {
+            url += $"&query={Uri.EscapeDataString(Model.Query)}";
+        }
+        
+        if (!string.IsNullOrEmpty(Model.CategoryId))
+        {
+            url += $"&categoryId={Model.CategoryId}";
+        }
+        
+        if (Model.MinPrice.HasValue)
+        {
+            url += $"&minPrice={Model.MinPrice.Value}";
+        }
+        
+        if (Model.MaxPrice.HasValue)
+        {
+            url += $"&maxPrice={Model.MaxPrice.Value}";
+        }
+        
+        if (Model.Condition.HasValue)
+        {
+            url += $"&condition={Model.Condition.Value}";
+        }
+        
+        if (!string.IsNullOrEmpty(Model.SortOrder))
+        {
+            url += $"&sortOrder={Model.SortOrder}";
+        }
+        
+        return url;
+    }
+}

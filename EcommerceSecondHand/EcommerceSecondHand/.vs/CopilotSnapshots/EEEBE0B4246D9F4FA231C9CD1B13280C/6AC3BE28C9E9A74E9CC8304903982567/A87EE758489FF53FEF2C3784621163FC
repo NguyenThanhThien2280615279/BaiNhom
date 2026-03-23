@@ -1,0 +1,225 @@
+﻿using EcommerceSecondHand.Data;
+using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace EcommerceSecondHand.Repositories
+{
+    public class OrderRepository : Repository<Order>, IOrderRepository
+    {
+        public OrderRepository(ApplicationDbContext context) : base(context)
+        {
+        }
+
+        public async Task<Order?> GetOrderWithDetailsAsync(int id)
+        {
+            return await _dbSet
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .Include(o => o.User)
+                .Include(o => o.Seller)
+                .FirstOrDefaultAsync(o => o.Id == id);
+        }
+
+        public async Task<IEnumerable<Order>> GetUserOrdersAsync(string userId)
+        {
+            return await _dbSet
+                .Where(o => o.UserId == userId)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+        }
+
+        public async Task<int> GetUserOrdersCountAsync(string userId)
+        {
+            return await _dbSet
+                .Where(o => o.UserId == userId)
+                .CountAsync();
+        }
+
+        public async Task<IEnumerable<Order>> GetVendorRecentOrdersAsync(string vendorId, int count)
+        {
+            return await _dbSet
+                .Where(o => o.SellerId == vendorId)
+                .OrderByDescending(o => o.OrderDate)
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Order>> GetRecentOrdersByUserAsync(string userId, int count)
+        {
+            return await _dbSet
+                .Where(o => o.UserId == userId)
+                .OrderByDescending(o => o.OrderDate)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Order>> GetRecentOrdersByVendorAsync(string vendorId, int count)
+        {
+            return await _dbSet
+                .Where(o => o.SellerId == vendorId)
+                .OrderByDescending(o => o.OrderDate)
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<int> CountPendingOrdersByUserAsync(string userId)
+        {
+            return await _dbSet
+                .Where(o => o.UserId == userId && o.Status == OrderStatus.Pending)
+                .CountAsync();
+        }
+
+        public async Task<int> CountOrdersByUserAndStatusAsync(string userId, OrderStatus status)
+        {
+            return await _dbSet
+                .Where(o => o.UserId == userId && o.Status == status)
+                .CountAsync();
+        }
+
+        public async Task<decimal> GetTotalSpentByUserAsync(string userId)
+        {
+            return await _dbSet
+                .Where(o => o.UserId == userId && o.PaymentStatus == PaymentStatus.Paid)
+                .SumAsync(o => o.TotalAmount);
+        }
+
+        public async Task<int> CountOrdersByVendorAsync(string vendorId)
+        {
+            return await _dbSet
+                .Where(o => o.SellerId == vendorId)
+                .CountAsync();
+        }
+
+        public async Task<int> CountOrdersByVendorAsync(string vendorId, OrderStatus? status)
+        {
+            var query = _dbSet.Where(o => o.SellerId == vendorId);
+            
+            if (status.HasValue)
+            {
+                query = query.Where(o => o.Status == status.Value);
+            }
+            
+            return await query.CountAsync();
+        }
+
+        public async Task<decimal> GetTotalRevenueByVendorAsync(string vendorId)
+        {
+            return await _dbSet
+                .Where(o => o.SellerId == vendorId && o.PaymentStatus == PaymentStatus.Paid)
+                .SumAsync(o => o.TotalAmount);
+        }
+
+        public async Task<int> CountPendingOrdersByVendorAsync(string vendorId)
+        {
+            return await _dbSet
+                .Where(o => o.SellerId == vendorId && o.Status == OrderStatus.Pending)
+                .CountAsync();
+        }
+
+        public async Task<IEnumerable<Order>> GetOrdersByVendorAsync(string vendorId, OrderStatus? status, string? sortOrder, int page, int pageSize)
+        {
+            var query = _dbSet.Where(o => o.SellerId == vendorId);
+
+            if (status.HasValue)
+            {
+                query = query.Where(o => o.Status == status.Value);
+            }
+
+            // Apply sorting
+            query = sortOrder switch
+            {
+                "oldest" => query.OrderBy(o => o.OrderDate),
+                "status" => query.OrderBy(o => o.Status),
+                "amount" => query.OrderByDescending(o => o.TotalAmount),
+                _ => query.OrderByDescending(o => o.OrderDate) // "newest" is default
+            };
+
+            return await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Order>> GetOrdersByUserAsync(string userId)
+        {
+            return await _dbSet
+                .Where(o => o.UserId == userId)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+        }
+
+        public async Task<Order?> GetOrderWithItemsAsync(int orderId)
+        {
+            return await _dbSet
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .Include(o => o.User)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+        }
+
+        public async Task<IEnumerable<Order>> GetRecentOrdersAsync(int count)
+        {
+            return await _dbSet
+                .OrderByDescending(o => o.OrderDate)
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Order>> GetOrdersByStatusAsync(OrderStatus status)
+        {
+            return await _dbSet
+                .Where(o => o.Status == status)
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Order>> GetOrdersWithProductAsync(int productId)
+        {
+            return await _dbSet
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .Include(o => o.User)
+                .Where(o => o.OrderItems!.Any(oi => oi.ProductId == productId))
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+        }
+
+        public async Task UpdateAsync(Order order)
+        {
+            _context.Entry(order).State = EntityState.Modified;
+            await SaveAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var order = await GetByIdAsync(id);
+            if (order != null)
+            {
+                _dbSet.Remove(order);
+                await SaveAsync();
+            }
+        }
+    }
+}

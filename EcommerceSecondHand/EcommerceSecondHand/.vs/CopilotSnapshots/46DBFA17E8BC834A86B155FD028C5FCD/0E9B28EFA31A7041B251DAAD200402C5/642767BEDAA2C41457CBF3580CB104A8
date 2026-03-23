@@ -1,0 +1,11 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace EcommerceSecondHand.Models
+{
+    public class DepositViewModel
+    {
+        [Required(ErrorMessage = "Vui lòng nhập số tiền")]
+        [Range(1, 10000, ErrorMessage = "Số tiền phải từ 1 đến 10,000")]
+        public decimal Amount { get; set; }
+    }
+}

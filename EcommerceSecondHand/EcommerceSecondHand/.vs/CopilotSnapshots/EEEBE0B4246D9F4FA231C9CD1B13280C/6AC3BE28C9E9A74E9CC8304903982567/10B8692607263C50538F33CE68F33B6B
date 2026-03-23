@@ -1,0 +1,201 @@
+﻿using EcommerceSecondHand.Data;
+using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace EcommerceSecondHand.Repositories
+{
+    public class ReviewRepository : Repository<Review>, IReviewRepository
+    {
+        public ReviewRepository(ApplicationDbContext context) : base(context)
+        {
+        }
+
+        public async Task<IEnumerable<Review>> GetReviewsByProductAsync(int productId)
+        {
+            return await _dbSet
+                .Where(r => r.ProductId == productId && r.IsApproved)
+                .Include(r => r.User)
+                .OrderByDescending(r => r.DateCreated)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Review>> GetReviewsByUserAsync(string userId)
+        {
+            return await _dbSet
+                .Where(r => r.UserId == userId)
+                .Include(r => r.Product)
+                .OrderByDescending(r => r.DateCreated)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Review>> GetPendingReviewsAsync()
+        {
+            return await _dbSet
+                .Where(r => !r.IsApproved)
+                .Include(r => r.User)
+                .Include(r => r.Product)
+                .OrderByDescending(r => r.DateCreated)
+                .ToListAsync();
+        }
+
+        public async Task<double> GetAverageRatingForProductAsync(int productId)
+        {
+            var reviews = await _dbSet
+                .Where(r => r.ProductId == productId && r.IsApproved)
+                .ToListAsync();
+
+            if (!reviews.Any())
+            {
+                return 0;
+            }
+
+            return reviews.Average(r => r.Rating);
+        }
+
+        public async Task<bool> HasUserReviewedProductAsync(string userId, int productId)
+        {
+            return await _dbSet.AnyAsync(r => r.UserId == userId && r.ProductId == productId);
+        }
+
+        public async Task<int> GetUserReviewsCountAsync(string userId)
+        {
+            return await _dbSet
+                .Where(r => r.UserId == userId)
+                .CountAsync();
+        }
+
+        public async Task<IEnumerable<Review>> GetRecentUserReviewsAsync(string userId, int count)
+        {
+            return await _dbSet
+                .Where(r => r.UserId == userId)
+                .Include(r => r.Product)
+                .OrderByDescending(r => r.DateCreated)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Review>> GetVendorRecentReviewsAsync(string vendorId, int count)
+        {
+            return await _dbSet
+                .Where(r => r.Product != null && r.Product.SellerId == vendorId)
+                .Include(r => r.User)
+                .Include(r => r.Product)
+                .OrderByDescending(r => r.DateCreated)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task UpdateAsync(Review review)
+        {
+            _context.Entry(review).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var review = await _dbSet.FindAsync(id);
+            if (review != null)
+            {
+                _dbSet.Remove(review);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task ApproveReviewAsync(int reviewId)
+        {
+            var review = await _dbSet.FindAsync(reviewId);
+            if (review != null)
+            {
+                review.IsApproved = true;
+                _context.Entry(review).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task RejectReviewAsync(int reviewId)
+        {
+            var review = await _dbSet.FindAsync(reviewId);
+            if (review != null)
+            {
+                _dbSet.Remove(review);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<double> GetAverageRatingByProductAsync(int productId)
+        {
+            var reviews = await _dbSet
+                .Where(r => r.ProductId == productId && r.IsApproved)
+                .ToListAsync();
+
+            if (!reviews.Any())
+            {
+                return 0;
+            }
+
+            return reviews.Average(r => r.Rating);
+        }
+
+        public async Task<int> GetReviewCountByProductAsync(int productId)
+        {
+            return await _dbSet
+                .Where(r => r.ProductId == productId && r.IsApproved)
+                .CountAsync();
+        }
+
+        public async Task<IEnumerable<Review>> GetRecentReviewsByUserAsync(string userId, int count)
+        {
+            return await _dbSet
+                .Where(r => r.UserId == userId)
+                .Include(r => r.Product)
+                .OrderByDescending(r => r.DateCreated)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Review>> GetRecentReviewsBySellerAsync(string sellerId, int count)
+        {
+            return await _dbSet
+                .Where(r => r.Product != null && r.Product.SellerId == sellerId)
+                .Include(r => r.User)
+                .Include(r => r.Product)
+                .OrderByDescending(r => r.DateCreated)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<double> GetAverageRatingBySellerAsync(string sellerId)
+        {
+            var reviews = await _dbSet
+                .Where(r => r.Product != null && r.Product.SellerId == sellerId && r.IsApproved)
+                .ToListAsync();
+
+            if (!reviews.Any())
+            {
+                return 0;
+            }
+
+            return reviews.Average(r => r.Rating);
+        }
+
+        public async Task<IEnumerable<Review>> GetReviewsBySellerAsync(string sellerId, int page, int pageSize)
+        {
+            return await _dbSet
+                .Where(r => r.Product != null && r.Product.SellerId == sellerId)
+                .Include(r => r.User)
+                .Include(r => r.Product)
+                .OrderByDescending(r => r.DateCreated)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+
+        public async Task<int> CountReviewsBySellerAsync(string sellerId)
+        {
+            return await _dbSet
+                .Where(r => r.Product != null && r.Product.SellerId == sellerId)
+                .CountAsync();
+        }
+    }
+}

@@ -1,0 +1,16 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Models
+{
+    public class VendorDashboardViewModel
+    {
+        public int TotalProductsListed { get; set; }
+        public int TotalProductsSold { get; set; }
+        public decimal TotalSalesAmount { get; set; }
+        public double AverageRating { get; set; }
+        
+        public IEnumerable<Product> Products { get; set; } = new List<Product>();
+        public IEnumerable<Order> RecentOrders { get; set; } = new List<Order>();
+        public IEnumerable<Review> RecentReviews { get; set; } = new List<Review>();
+    }
+}

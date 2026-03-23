@@ -1,0 +1,149 @@
+@model CheckoutViewModel
+@{
+    ViewData["Title"] = "Thanh toán";
+}
+
+<div class="container mt-4">
+    <h1>Thanh toán</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card shp-soft mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Thông tin giao hàng</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-controller="Checkout" asp-action="PlaceOrder">
+                        <div class="mb-3">
+                            <label asp-for="ShippingAddress" class="form-label">Địa chỉ</label>
+                            <input asp-for="ShippingAddress" class="form-control" required>
+                            <span asp-validation-for="ShippingAddress" class="text-danger"></span>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label asp-for="ShippingCity" class="form-label">Thành phố</label>
+                                <input asp-for="ShippingCity" class="form-control" required>
+                                <span asp-validation-for="ShippingCity" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="ShippingCountry" class="form-label">Quốc gia</label>
+                                <input asp-for="ShippingCountry" class="form-control" required>
+                                <span asp-validation-for="ShippingCountry" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="ShippingPostalCode" class="form-label">Mã bưu điện</label>
+                                <input asp-for="ShippingPostalCode" class="form-control" required>
+                                <span asp-validation-for="ShippingPostalCode" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <h5>Phương thức thanh toán</h5>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="form-check card p-3 mb-2">
+                                    <input class="form-check-input" type="radio" asp-for="PaymentMethod" id="wallet"
+                                        value="Wallet" checked>
+                                    <label class="form-check-label w-100" for="wallet">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-wallet2 text-primary me-2" style="font-size: 1.5rem;"></i>
+                                            <div>
+                                                <span class="d-block">Ví điện tử</span>
+                                                <small class="text-muted">Thanh toán bằng số dư trong ví</small>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check card p-3 mb-2">
+                                    <input class="form-check-input" type="radio" asp-for="PaymentMethod" id="cod"
+                                        value="COD">
+                                    <label class="form-check-label w-100" for="cod">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-cash text-primary me-2" style="font-size: 1.5rem;"></i>
+                                            <div>
+                                                <span class="d-block">Thanh toán khi nhận hàng</span>
+                                                <small class="text-muted">Thanh toán bằng tiền mặt</small>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg">Đặt hàng</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shp-soft mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Tóm tắt đơn hàng</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tạm tính</span>
+                        <span>@Model.Subtotal.ToString("N0") đ</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Phí vận chuyển</span>
+                        <span>@(Model.ShippingFee > 0 ? Model.ShippingFee.ToString("N0") + " đ" : "Miễn phí")</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="fw-bold">Tổng cộng</span>
+                        <span class="text-primary fw-bold">@Model.Total.ToString("N0") đ</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shp-soft">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Sản phẩm (@Model.CartItems.Count())</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        @foreach (var item in Model.CartItems)
+                        {
+                            <div class="list-group-item">
+                                <div class="d-flex">
+                                    <div class="flex-shrink-0">
+                                        @if (!string.IsNullOrEmpty(item.Product?.ImageUrl))
+                                        {
+                                            <img src="@item.Product.ImageUrl" alt="@item.Product.Name" class="img-fluid rounded"
+                                                style="width: 60px; height: 60px; object-fit: cover;">
+                                        }
+                                        else
+                                        {
+                                            <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded"
+                                                style="width: 60px; height: 60px;">
+                                                <i class="bi bi-image"></i>
+                                            </div>
+                                        }
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h6 class="mb-0">@item.Product?.Name</h6>
+                                        <div class="d-flex justify-content-between">
+                                            <small class="text-muted">@item.Quantity x
+                                                @item.Product?.Price.ToString("N0") đ</small>
+                                            <span>@((item.Quantity * (item.Product?.Price ?? 0)).ToString("N0")) đ</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

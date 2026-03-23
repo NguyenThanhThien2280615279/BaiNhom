@@ -1,0 +1,339 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Models.ViewModels;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Authorize(Roles = "Vendor")]
+    public class VendorController : Controller
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IProductRepository _productRepository;
+        private readonly IOrderRepository _orderRepository;
+        private readonly IReviewRepository _reviewRepository;
+        private readonly IPaymentTransactionRepository _transactionRepository;
+        private readonly IUserStatisticsRepository _userStatisticsRepository;
+
+        public VendorController(
+            UserManager<ApplicationUser> userManager,
+            IProductRepository productRepository,
+            IOrderRepository orderRepository,
+            IReviewRepository reviewRepository,
+            IPaymentTransactionRepository transactionRepository,
+            IUserStatisticsRepository userStatisticsRepository)
+        {
+            _userManager = userManager;
+            _productRepository = productRepository;
+            _orderRepository = orderRepository;
+            _reviewRepository = reviewRepository;
+            _transactionRepository = transactionRepository;
+            _userStatisticsRepository = userStatisticsRepository;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var statistics = await _userStatisticsRepository.GetByUserIdAsync(user.Id);
+            
+            // Lấy danh sách sản phẩm gần đây của người bán
+            var recentProducts = await _productRepository.GetRecentProductsBySellerAsync(user.Id, 5);
+            
+            // Lấy danh sách đơn hàng gần đây của người bán
+            var recentOrders = await _orderRepository.GetRecentOrdersByVendorAsync(user.Id, 5);
+            
+            // Lấy danh sách đánh giá gần đây cho sản phẩm của người bán
+            var recentReviews = await _reviewRepository.GetRecentReviewsBySellerAsync(user.Id, 5);
+            
+            // Lấy danh sách giao dịch gần đây của người bán
+            var recentTransactions = await _transactionRepository.GetRecentTransactionsByUserAsync(user.Id, 5);
+            
+            // Đếm số lượng sản phẩm
+            var totalProducts = await _productRepository.CountProductsBySellerAsync(user.Id);
+            
+            // Đếm số lượng đơn hàng đã bán
+            var totalSales = await _orderRepository.CountOrdersByVendorAsync(user.Id);
+            
+            // Tính tổng doanh thu
+            var totalRevenue = await _orderRepository.GetTotalRevenueByVendorAsync(user.Id);
+            
+            // Tính điểm đánh giá trung bình
+            var averageRating = await _reviewRepository.GetAverageRatingBySellerAsync(user.Id);
+            
+            // Đếm số lượng đơn hàng đang chờ xử lý
+            var pendingOrders = await _orderRepository.CountPendingOrdersByVendorAsync(user.Id);
+
+            var model = new VendorDashboardViewModel
+            {
+                User = user,
+                Statistics = statistics,
+                RecentProducts = recentProducts,
+                RecentOrders = recentOrders,
+                RecentReviews = recentReviews,
+                RecentTransactions = recentTransactions,
+                TotalProducts = totalProducts,
+                TotalSales = totalSales,
+                TotalRevenue = totalRevenue,
+                AverageRating = averageRating,
+                PendingOrders = pendingOrders
+            };
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> Products(string sortOrder = "newest", int page = 1)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            const int pageSize = 10;
+            
+            // Lấy danh sách sản phẩm của người bán có phân trang và sắp xếp
+            var products = await _productRepository.GetProductsBySellerAsync(user.Id, sortOrder, page, pageSize);
+            
+            // Đếm tổng số sản phẩm của người bán
+            var totalCount = await _productRepository.CountProductsBySellerAsync(user.Id);
+
+            var model = new ProductListViewModel
+            {
+                Products = products,
+                SortOrder = sortOrder,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> Orders(OrderStatus? status = null, string sortOrder = "newest", int page = 1)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            const int pageSize = 10;
+            
+            // Lấy danh sách đơn hàng của người bán có phân trang, lọc và sắp xếp
+            var orders = await _orderRepository.GetOrdersByVendorAsync(user.Id, status, sortOrder, page, pageSize);
+            
+            // Đếm tổng số đơn hàng của người bán thỏa mãn điều kiện lọc
+            var totalCount = await _orderRepository.CountOrdersByVendorAsync(user.Id, status);
+
+            var model = new OrderListViewModel
+            {
+                Orders = orders,
+                Status = status,
+                SortOrder = sortOrder,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> Reviews(int page = 1)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            const int pageSize = 10;
+            
+            // Lấy danh sách đánh giá cho sản phẩm của người bán có phân trang
+            var reviews = await _reviewRepository.GetReviewsBySellerAsync(user.Id, page, pageSize);
+            
+            // Đếm tổng số đánh giá cho sản phẩm của người bán
+            var totalCount = await _reviewRepository.CountReviewsBySellerAsync(user.Id);
+
+            var model = new ReviewListViewModel
+            {
+                Reviews = reviews,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
+
+            return View(model);
+        }
+
+        public IActionResult AddProduct()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddProduct(AddProductViewModel model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            // Xử lý hình ảnh sản phẩm
+            string imageUrl = null;
+            if (model.ImageFile != null && model.ImageFile.Length > 0)
+            {
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(model.ImageFile.FileName)}";
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "products", fileName);
+                
+                // Đảm bảo thư mục tồn tại
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath) ?? string.Empty);
+                
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.ImageFile.CopyToAsync(stream);
+                }
+                
+                imageUrl = $"/uploads/products/{fileName}";
+            }
+
+            // Tạo sản phẩm mới
+            var product = new Product
+            {
+                Name = model.Name,
+                Description = model.Description,
+                Price = model.Price,
+                CategoryId = model.CategoryId,
+                Condition = model.Condition,
+                SellerId = user.Id,
+                ImageUrl = imageUrl,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                IsAvailable = true
+            };
+
+            await _productRepository.AddAsync(product);
+            await _productRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = "Sản phẩm đã được thêm thành công.";
+            return RedirectToAction(nameof(Products));
+        }
+
+        public async Task<IActionResult> EditProduct(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _productRepository.GetByIdAsync(id);
+            if (product == null || product.SellerId != user.Id)
+            {
+                return NotFound();
+            }
+
+            var model = new EditProductViewModel
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                Price = product.Price,
+                CategoryId = product.CategoryId,
+                Condition = product.Condition,
+                IsAvailable = product.IsAvailable,
+                CurrentImageUrl = product.ImageUrl
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditProduct(EditProductViewModel model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _productRepository.GetByIdAsync(model.Id);
+            if (product == null || product.SellerId != user.Id)
+            {
+                return NotFound();
+            }
+
+            if (!ModelState.IsValid)
+            {
+                model.CurrentImageUrl = product.ImageUrl;
+                return View(model);
+            }
+
+            // Xử lý hình ảnh sản phẩm
+            if (model.ImageFile != null && model.ImageFile.Length > 0)
+            {
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(model.ImageFile.FileName)}";
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "products", fileName);
+                
+                // Đảm bảo thư mục tồn tại
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath) ?? string.Empty);
+                
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.ImageFile.CopyToAsync(stream);
+                }
+                
+                product.ImageUrl = $"/uploads/products/{fileName}";
+            }
+
+            // Cập nhật thông tin sản phẩm
+            product.Name = model.Name;
+            product.Description = model.Description;
+            product.Price = model.Price;
+            product.CategoryId = model.CategoryId;
+            product.Condition = model.Condition;
+            product.IsAvailable = model.IsAvailable;
+            product.UpdatedAt = DateTime.UtcNow;
+
+            await _productRepository.UpdateAsync(product);
+            await _productRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = "Sản phẩm đã được cập nhật thành công.";
+            return RedirectToAction(nameof(Products));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteProduct(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _productRepository.GetByIdAsync(id);
+            if (product == null || product.SellerId != user.Id)
+            {
+                return NotFound();
+            }
+
+            await _productRepository.DeleteAsync(id);
+            await _productRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = "Sản phẩm đã được xóa thành công.";
+            return RedirectToAction(nameof(Products));
+        }
+    }
+}

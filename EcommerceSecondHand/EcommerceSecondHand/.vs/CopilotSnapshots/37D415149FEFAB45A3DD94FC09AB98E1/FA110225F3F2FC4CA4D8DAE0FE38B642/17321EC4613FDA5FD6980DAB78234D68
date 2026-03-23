@@ -1,0 +1,337 @@
+﻿@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<div class="container">
+    <!-- Banner chính -->
+    <div id="mainCarousel" class="carousel slide shadow-sm mb-4" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#mainCarousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#mainCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#mainCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+        </div>
+        <div class="carousel-inner rounded">
+            <div class="carousel-item active">
+                <img src="https://via.placeholder.com/1200x400?text=Sale+Up+To+50%" class="d-block w-100" alt="?u ?ãi ??c bi?t">
+                <div class="carousel-caption d-none d-md-block">
+                    <h2>?u ?ãi ??c bi?t lên ??n 50%</h2>
+                    <p>Khám phá các s?n ph?m gi?m giá ??c bi?t hôm nay</p>
+                    <a asp-controller="Products" asp-action="Index" class="btn btn-light">Mua ngay</a>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <img src="https://via.placeholder.com/1200x400?text=Electronic+Deals" class="d-block w-100" alt="S?n ph?m ?i?n t?">
+                <div class="carousel-caption d-none d-md-block">
+                    <h2>Th? gi?i ?i?n t? c?</h2>
+                    <p>Các s?n ph?m ?i?n t? ch?t l??ng v?i giá ?u ?ãi</p>
+                    <a asp-controller="Products" asp-action="Index" asp-route-categoryId="1" class="btn btn-light">Xem ngay</a>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <img src="https://via.placeholder.com/1200x400?text=Fashion+Collection" class="d-block w-100" alt="Th?i trang">
+                <div class="carousel-caption d-none d-md-block">
+                    <h2>Th?i trang secondhand</h2>
+                    <p>Phong cách b?n v?ng cho môi tr??ng</p>
+                    <a asp-controller="Products" asp-action="Index" asp-route-categoryId="2" class="btn btn-light">Khám phá</a>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#mainCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Tr??c</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#mainCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Ti?p</span>
+        </button>
+    </div>
+    
+    <!-- Danh m?c s?n ph?m -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-4">Danh m?c s?n ph?m</h2>
+        </div>
+        <div class="col-md-3 mb-4">
+            <a asp-controller="Products" asp-action="Index" asp-route-categoryId="1" class="text-decoration-none">
+                <div class="card shadow-sm text-center">
+                    <div class="card-body">
+                        <i class="bi bi-laptop fs-1 text-primary mb-3"></i>
+                        <h5 class="card-title">?i?n t?</h5>
+                        <p class="card-text">Laptop, ?i?n tho?i, máy tính b?ng và ph? ki?n</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 mb-4">
+            <a asp-controller="Products" asp-action="Index" asp-route-categoryId="2" class="text-decoration-none">
+                <div class="card shadow-sm text-center">
+                    <div class="card-body">
+                        <i class="bi bi-handbag fs-1 text-danger mb-3"></i>
+                        <h5 class="card-title">Th?i trang</h5>
+                        <p class="card-text">Qu?n áo, giày dép, túi xách và ph? ki?n</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 mb-4">
+            <a asp-controller="Products" asp-action="Index" asp-route-categoryId="3" class="text-decoration-none">
+                <div class="card shadow-sm text-center">
+                    <div class="card-body">
+                        <i class="bi bi-house-door fs-1 text-success mb-3"></i>
+                        <h5 class="card-title">N?i th?t</h5>
+                        <p class="card-text">Bàn gh?, t?, gi??ng và ?? trang trí</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 mb-4">
+            <a asp-controller="Products" asp-action="Index" asp-route-categoryId="4" class="text-decoration-none">
+                <div class="card shadow-sm text-center">
+                    <div class="card-body">
+                        <i class="bi bi-controller fs-1 text-warning mb-3"></i>
+                        <h5 class="card-title">Gi?i trí</h5>
+                        <p class="card-text">Sách, ??a, trò ch?i và nh?c c?</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+    
+    <!-- S?n ph?m n?i b?t -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>S?n ph?m n?i b?t</h2>
+                <a asp-controller="Products" asp-action="Index" class="btn btn-outline-primary">Xem t?t c?</a>
+            </div>
+        </div>
+        
+        <!-- Placeholder cho các s?n ph?m n?i b?t -->
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm h-100">
+                <img src="https://via.placeholder.com/300x200?text=Featured+Product" class="card-img-top" alt="S?n ph?m n?i b?t">
+                <div class="card-body">
+                    <h5 class="card-title">Laptop ThinkPad X1 Carbon</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-primary fw-bold">$800.00</span>
+                        <span class="badge bg-success">Nh? m?i</span>
+                    </div>
+                    <div class="mt-2">
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-half text-warning"></i>
+                        <small class="text-muted ms-1">(24)</small>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-grid">
+                        <a asp-controller="Products" asp-action="Details" asp-route-id="1" class="btn btn-outline-primary">
+                            <i class="bi bi-eye me-1"></i> Xem chi ti?t
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm h-100">
+                <img src="https://via.placeholder.com/300x200?text=Featured+Product" class="card-img-top" alt="S?n ph?m n?i b?t">
+                <div class="card-body">
+                    <h5 class="card-title">iPhone 12 Pro Max</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-primary fw-bold">$650.00</span>
+                        <span class="badge bg-primary">T?t</span>
+                    </div>
+                    <div class="mt-2">
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star text-warning"></i>
+                        <small class="text-muted ms-1">(18)</small>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-grid">
+                        <a asp-controller="Products" asp-action="Details" asp-route-id="2" class="btn btn-outline-primary">
+                            <i class="bi bi-eye me-1"></i> Xem chi ti?t
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm h-100">
+                <img src="https://via.placeholder.com/300x200?text=Featured+Product" class="card-img-top" alt="S?n ph?m n?i b?t">
+                <div class="card-body">
+                    <h5 class="card-title">Áo khoác Denim Vintage</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-primary fw-bold">$45.00</span>
+                        <span class="badge bg-primary">T?t</span>
+                    </div>
+                    <div class="mt-2">
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star text-warning"></i>
+                        <i class="bi bi-star text-warning"></i>
+                        <small class="text-muted ms-1">(9)</small>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-grid">
+                        <a asp-controller="Products" asp-action="Details" asp-route-id="3" class="btn btn-outline-primary">
+                            <i class="bi bi-eye me-1"></i> Xem chi ti?t
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm h-100">
+                <img src="https://via.placeholder.com/300x200?text=Featured+Product" class="card-img-top" alt="S?n ph?m n?i b?t">
+                <div class="card-body">
+                    <h5 class="card-title">Bàn làm vi?c g?</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-primary fw-bold">$120.00</span>
+                        <span class="badge bg-success">Nh? m?i</span>
+                    </div>
+                    <div class="mt-2">
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <i class="bi bi-star-fill text-warning"></i>
+                        <small class="text-muted ms-1">(32)</small>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-grid">
+                        <a asp-controller="Products" asp-action="Details" asp-route-id="4" class="btn btn-outline-primary">
+                            <i class="bi bi-eye me-1"></i> Xem chi ti?t
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gi?i thi?u v? n?n t?ng -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h2>V? EcommerceSecondHand</h2>
+                            <p class="lead">N?n t?ng mua bán hàng ?ã qua s? d?ng uy tín và ch?t l??ng.</p>
+                            <p>Chúng tôi k?t n?i ng??i mua và ng??i bán v?i nhau ?? t?o ra m?t c?ng ??ng trao ??i hàng hóa ?ã qua s? d?ng. Mua s?m trên EcommerceSecondHand không ch? giúp b?n ti?t ki?m chi phí mà còn góp ph?n b?o v? môi tr??ng.</p>
+                            <div class="row mt-4">
+                                <div class="col-md-4 text-center mb-3">
+                                    <i class="bi bi-shield-check fs-1 text-primary"></i>
+                                    <h5>An toàn</h5>
+                                    <p class="small">??m b?o giao d?ch an toàn</p>
+                                </div>
+                                <div class="col-md-4 text-center mb-3">
+                                    <i class="bi bi-cash-coin fs-1 text-primary"></i>
+                                    <h5>Ti?t ki?m</h5>
+                                    <p class="small">Giá c? h?p lý cho m?i ng??i</p>
+                                </div>
+                                <div class="col-md-4 text-center mb-3">
+                                    <i class="bi bi-recycle fs-1 text-primary"></i>
+                                    <h5>B?n v?ng</h5>
+                                    <p class="small">Góp ph?n b?o v? môi tr??ng</p>
+                                </div>
+                            </div>
+                            <a asp-controller="Home" asp-action="Privacy" class="btn btn-primary mt-3">Tìm hi?u thêm</a>
+                        </div>
+                        <div class="col-md-6 d-none d-md-block">
+                            <img src="https://via.placeholder.com/600x400?text=About+Us" class="img-fluid rounded" alt="V? chúng tôi">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Các b??c s? d?ng n?n t?ng -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="text-center mb-4">Cách th?c ho?t ??ng</h2>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center mb-4">
+                <div class="card-body">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-person-plus fs-1"></i>
+                    </div>
+                    <h5 class="card-title">??ng ký</h5>
+                    <p class="card-text">T?o tài kho?n mi?n phí ?? b?t ??u mua s?m ho?c bán hàng trên n?n t?ng c?a chúng tôi.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center mb-4">
+                <div class="card-body">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-search fs-1"></i>
+                    </div>
+                    <h5 class="card-title">Tìm ki?m</h5>
+                    <p class="card-text">D? dàng tìm ki?m các s?n ph?m ?ã qua s? d?ng v?i ch?t l??ng ??m b?o.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center mb-4">
+                <div class="card-body">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-cart-check fs-1"></i>
+                    </div>
+                    <h5 class="card-title">Mua s?m</h5>
+                    <p class="card-text">Thanh toán an toàn và nh?n s?n ph?m t?i nhà v?i d?ch v? giao hàng nhanh chóng.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm text-center mb-4">
+                <div class="card-body">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-star fs-1"></i>
+                    </div>
+                    <h5 class="card-title">?ánh giá</h5>
+                    <p class="card-text">Chia s? tr?i nghi?m c?a b?n và xây d?ng c?ng ??ng mua bán tin c?y.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ??ng ký nh?n thông báo -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm bg-primary text-white">
+                <div class="card-body py-5">
+                    <div class="row align-items-center">
+                        <div class="col-md-7">
+                            <h2>??ng ký nh?n thông báo</h2>
+                            <p>Nh?n thông tin v? các s?n ph?m m?i và ?u ?ãi ??c bi?t qua email c?a b?n.</p>
+                        </div>
+                        <div class="col-md-5">
+                            <form class="row g-3">
+                                <div class="col-md-8">
+                                    <input type="email" class="form-control form-control-lg" placeholder="Email c?a b?n">
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" class="btn btn-light btn-lg w-100">??ng ký</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

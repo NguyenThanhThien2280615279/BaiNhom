@@ -1,0 +1,146 @@
+﻿@model WalletViewModel
+@using EcommerceSecondHand.Models
+@{
+    ViewData["Title"] = "Ví của tôi";
+}
+
+<div class="container mt-4">
+    <h1>Ví của tôi</h1>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Số dư hiện tại</h5>
+                    <h2 class="text-primary">@Model.CurrentBalance.ToString("C")</h2>
+                    <p class="text-muted">Cập nhật lần cuối: @DateTime.Now.ToString("g")</p>
+                    
+                    <div class="d-flex mt-3">
+                        <a asp-controller="Wallet" asp-action="Deposit" class="btn btn-primary me-2">Nạp tiền</a>
+                        <a asp-controller="Wallet" asp-action="Withdraw" class="btn btn-outline-secondary">Rút tiền</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Thống kê nhanh</h5>
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="text-muted mb-1">Tổng tiền nạp</p>
+                            <h4>@Model.TotalDeposits.ToString("C")</h4>
+                        </div>
+                        <div class="col-6">
+                            <p class="text-muted mb-1">Tổng tiền rút</p>
+                            <h4>@Model.TotalWithdrawals.ToString("C")</h4>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-6">
+                            <p class="text-muted mb-1">Tổng chi tiêu</p>
+                            <h4>@Model.TotalPurchases.ToString("C")</h4>
+                        </div>
+                        <div class="col-6">
+                            <p class="text-muted mb-1">Tổng thu nhập</p>
+                            <h4>@Model.TotalSales.ToString("C")</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Lịch sử giao dịch</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Transactions.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Ngày</th>
+                                        <th>Loại</th>
+                                        <th>Mô tả</th>
+                                        <th>Số tiền</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var transaction in Model.Transactions)
+                                    {
+                                        <tr>
+                                            <td>@transaction.CreatedAt.ToString("g")</td>
+                                            <td>
+                                                <span class="badge @(transaction.Type == TransactionType.Deposit || transaction.Type == TransactionType.Sale ? "bg-success" : "bg-primary")">
+                                                    @GetTransactionTypeText(transaction.Type)
+                                                </span>
+                                            </td>
+                                            <td>@transaction.Description</td>
+                                            <td class="@(transaction.Type == TransactionType.Deposit || transaction.Type == TransactionType.Sale ? "text-success" : "text-primary")">
+                                                @(transaction.Type == TransactionType.Deposit || transaction.Type == TransactionType.Sale ? "+" : "-")@transaction.Amount.ToString("C")
+                                            </td>
+                                            <td>
+                                                @{
+                                                    string badgeClass = transaction.Status switch
+                                                    {
+                                                        TransactionStatus.Completed => "bg-success",
+                                                        TransactionStatus.Pending => "bg-warning",
+                                                        TransactionStatus.Failed => "bg-danger",
+                                                        TransactionStatus.Cancelled => "bg-secondary",
+                                                        _ => "bg-secondary"
+                                                    };
+                                                }
+                                                <span class="badge @badgeClass">@GetTransactionStatusText(transaction.Status)</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <p class="text-muted">Không tìm thấy giao dịch nào.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    public string GetTransactionTypeText(TransactionType type)
+    {
+        return type switch
+        {
+            TransactionType.Deposit => "Nạp tiền",
+            TransactionType.Withdrawal => "Rút tiền",
+            TransactionType.Purchase => "Mua hàng",
+            TransactionType.Sale => "Bán hàng",
+            TransactionType.Refund => "Hoàn tiền",
+            TransactionType.AdminAdjustment => "Điều chỉnh",
+            _ => type.ToString()
+        };
+    }
+    
+    public string GetTransactionStatusText(TransactionStatus status)
+    {
+        return status switch
+        {
+            TransactionStatus.Completed => "Hoàn thành",
+            TransactionStatus.Pending => "Đang xử lý",
+            TransactionStatus.Failed => "Thất bại",
+            TransactionStatus.Cancelled => "Đã hủy",
+            _ => status.ToString()
+        };
+    }
+}

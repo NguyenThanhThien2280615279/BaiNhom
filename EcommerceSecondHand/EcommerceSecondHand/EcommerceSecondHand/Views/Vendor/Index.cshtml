@@ -1,0 +1,332 @@
+@model VendorDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard người bán";
+}
+
+<link rel="stylesheet" href="~/css/theme-store.css" />
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="section-title gradient-text mb-0">Bảng điều khiển</h1>
+            <small class="text-muted">Tổng quan nhanh tình hình cửa hàng</small>
+                        </div>
+        <div class="action-buttons">
+            <a href="/Vendor/AddProduct" class="action-btn primary">
+                <i class="bi bi-plus-lg"></i> Thêm sản phẩm
+            </a>
+            <a href="/Vendor/Products" class="action-btn secondary">
+                <i class="bi bi-shop"></i> Quản lý sản phẩm
+            </a>
+                        </div>
+                    </div>
+
+    <!-- Stats (compact) -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stats-card fade-in-up">
+                <div class="stats-card-icon primary">
+                    <i class="bi bi-box-seam"></i>
+                </div>
+                <div class="stats-card-number">@Model.TotalProducts</div>
+                <div class="stats-card-label">Tổng sản phẩm</div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stats-card fade-in-up">
+                <div class="stats-card-icon success">
+                    <i class="bi bi-currency-dollar"></i>
+                        </div>
+                <div class="stats-card-number">@Model.TotalRevenue.ToString("N0") đ</div>
+                <div class="stats-card-label">Tổng doanh thu</div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stats-card fade-in-up">
+                <div class="stats-card-icon info">
+                    <i class="bi bi-receipt"></i>
+                        </div>
+                <div class="stats-card-number">@Model.TotalSales</div>
+                <div class="stats-card-label">Đơn hàng đã bán</div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="stats-card fade-in-up">
+                <div class="stats-card-icon warning">
+                    <i class="bi bi-star"></i>
+                </div>
+                <div class="stats-card-number">
+                                @if (Model.AverageRating > 0)
+                                {
+                        <span>@Model.AverageRating.ToString("0.0")</span>
+                                        }
+                                        else
+                                        {
+                        <span>0.0</span>
+                                }
+                            </div>
+                <div class="stats-card-label">Đánh giá trung bình</div>
+                        </div>
+                    </div>
+                </div>
+    <!-- Two-column simple layout: Recent Orders | Recent Products -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card-shopee fade-in-up">
+                <div class="card-shopee-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Đơn hàng gần đây</h6>
+                    <a href="/Vendor/Orders" class="btn btn-sm btn-light">Xem tất cả</a>
+            </div>
+                <div class="card-shopee-body">
+                    @if (Model.RecentOrders.Any())
+                    {
+                    <div class="table-responsive">
+                            <table class="table table-shopee mb-0">
+                            <thead>
+                                <tr>
+                                        <th>Mã đơn</th>
+                                        <th>Khách hàng</th>
+                                        <th>Tổng</th>
+                                    <th>Trạng thái</th>
+                                        <th>Ngày</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                    @foreach (var order in Model.RecentOrders.Take(5))
+                                    {
+                                        <tr>
+                                            <td><a href="@Url.Action("OrderDetails","Vendor", new { id = order.Id })"><code class="text-primary">#@order.OrderNumber</code></a></td>
+                                            <td>@(order.User?.FirstName ?? "") @(order.User?.LastName ?? "")</td>
+                                            <td class="fw-bold text-success">@order.TotalAmount.ToString("N0") đ</td>
+                                            <td><span class="status-indicator @GetOrderStatusClass(order.Status)">@GetOrderStatusText(order.Status)</span></td>
+                                            <td><small class="text-muted">@order.OrderDate.ToString("dd/MM/yyyy")</small></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state"><div class="empty-state-icon"><i class="bi bi-cart-x"></i></div><div class="empty-state-title">Chưa có đơn hàng</div></div>
+                    }
+            </div>
+        </div>
+    </div>
+
+        <div class="col-lg-6">
+            <div class="card-shopee fade-in-up">
+                <div class="card-shopee-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Sản phẩm mới</h6>
+                    <a href="/Vendor/Products" class="btn btn-sm btn-light">Xem tất cả</a>
+                </div>
+                <div class="card-shopee-body">
+                    @if (Model.RecentProducts.Any())
+                    {
+                    <div class="table-responsive">
+                            <table class="table table-shopee mb-0">
+                            <thead>
+                                <tr>
+                                        <th>Sản phẩm</th>
+                                        <th>Giá</th>
+                                    <th>Trạng thái</th>
+                                        <th>Ngày</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                    @foreach (var product in Model.RecentProducts.Take(5))
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a href="/Products/Details/@product.Id" class="text-decoration-none">@product.Name</a>
+                                            </td>
+                                            <td class="fw-bold text-success">@product.Price.ToString("N0") đ</td>
+                                            <td><span class="status-indicator @(product.IsAvailable ? "active" : "inactive")">@(product.IsAvailable ? "Còn hàng" : "Hết hàng")</span></td>
+                                            <td><small class="text-muted">@product.CreatedAt.ToString("dd/MM/yyyy")</small></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-state"><div class="empty-state-icon"><i class="bi bi-box-seam"></i></div><div class="empty-state-title">Chưa có sản phẩm</div></div>
+                    }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <!-- Recent Reviews (optional, compact) -->
+    <div class="card-shopee fade-in-up mb-4">
+        <div class="card-shopee-header d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">Đánh giá gần đây</h6>
+            <a href="/Vendor/Reviews" class="btn btn-sm btn-light">Xem tất cả</a>
+                </div>
+        <div class="card-shopee-body">
+            @if (Model.RecentReviews.Any())
+            {
+                    <div class="table-responsive">
+                    <table class="table table-shopee mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th>Khách hàng</th>
+                                    <th>Đánh giá</th>
+                                <th>Ngày</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var review in Model.RecentReviews.Take(5))
+                                    {
+                                        <tr>
+                                    <td><a href="/Products/Details/@review.ProductId" class="text-decoration-none">@review.Product?.Name</a></td>
+                                            <td>@(review.User?.FirstName ?? "") @(review.User?.LastName ?? "")</td>
+                                            <td>
+                                        <div class="d-flex">
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                <i class="bi bi-star@(i <= review.Rating ? "-fill" : "") text-warning me-1"></i>
+                                            }
+                                        </div>
+                                            </td>
+                                    <td><small class="text-muted">@review.CreatedAt.ToString("dd/MM/yyyy")</small></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+            }
+            else
+            {
+                <div class="empty-state"><div class="empty-state-icon"><i class="bi bi-star"></i></div><div class="empty-state-title">Chưa có đánh giá</div></div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Biểu đồ doanh thu với phong cách Shopee
+        var ctx = document.getElementById('revenueChart').getContext('2d');
+        var revenueChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'],
+                datasets: [{
+                    label: 'Doanh thu',
+                    data: [
+                                @Model.Statistics?.MonthlyRevenue[0],
+                                @Model.Statistics?.MonthlyRevenue[1],
+                                @Model.Statistics?.MonthlyRevenue[2],
+                                @Model.Statistics?.MonthlyRevenue[3],
+                                @Model.Statistics?.MonthlyRevenue[4],
+                                @Model.Statistics?.MonthlyRevenue[5],
+                                @Model.Statistics?.MonthlyRevenue[6],
+                                @Model.Statistics?.MonthlyRevenue[7],
+                                @Model.Statistics?.MonthlyRevenue[8],
+                                @Model.Statistics?.MonthlyRevenue[9],
+                                @Model.Statistics?.MonthlyRevenue[10],
+                        @Model.Statistics?.MonthlyRevenue[11]
+                    ],
+                    backgroundColor: 'rgba(46, 213, 115, 0.1)',
+                    borderColor: '#2ed573',
+                    pointBackgroundColor: '#2ed573',
+                    pointBorderColor: '#2ed573',
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0,0,0,0.1)'
+                        },
+                        ticks: {
+                            callback: function (value) {
+                                return value.toLocaleString() + ' đ';
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                elements: {
+                    point: {
+                        hoverBackgroundColor: '#00d2d3'
+                    }
+                }
+            }
+        });
+    </script>
+}
+
+@functions {
+    public string GetProductConditionClass(ProductCondition condition)
+    {
+        return condition switch
+        {
+            ProductCondition.New => "bg-success",
+            ProductCondition.LikeNew => "bg-info",
+            ProductCondition.Good => "bg-primary",
+            ProductCondition.Fair => "bg-warning text-dark",
+            _ => "bg-secondary"
+        };
+    }
+
+    public string GetProductConditionText(ProductCondition condition)
+    {
+        return condition switch
+        {
+            ProductCondition.New => "Mới",
+            ProductCondition.LikeNew => "Như mới",
+            ProductCondition.Good => "Tốt",
+            ProductCondition.Fair => "Khá",
+            _ => condition.ToString()
+        };
+    }
+
+    public string GetOrderStatusClass(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "pending",
+            OrderStatus.Accepted => "active",
+            OrderStatus.Canceled => "inactive",
+            OrderStatus.Refunded => "inactive",
+            _ => "inactive"
+        };
+    }
+
+    public string GetOrderStatusText(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "Chờ xử lý",
+            OrderStatus.Accepted => "Đã chấp nhận",
+            OrderStatus.Canceled => "Đã hủy",
+            OrderStatus.Refunded => "Đã hoàn tiền",
+            _ => status.ToString()
+        };
+    }
+}

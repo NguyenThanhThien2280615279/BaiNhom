@@ -1,0 +1,167 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class CartController : ControllerBase
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ICartRepository _cartRepository;
+        private readonly IProductRepository _productRepository;
+
+        public CartController(
+            UserManager<ApplicationUser> userManager,
+            ICartRepository cartRepository,
+            IProductRepository productRepository)
+        {
+            _userManager = userManager;
+            _cartRepository = cartRepository;
+            _productRepository = productRepository;
+        }
+
+        [HttpGet("ItemsCount")]
+        public async Task<ActionResult<int>> GetItemsCount()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var count = await _cartRepository.GetCartItemsCountAsync(user.Id);
+            return Ok(count);
+        }
+
+        [HttpPost("Add")]
+        public async Task<IActionResult> AddToCart(int productId, int quantity = 1)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var product = await _productRepository.GetByIdAsync(productId);
+            if (product == null)
+            {
+                return NotFound("Sản phẩm không tồn tại");
+            }
+
+            // Kiểm tra số lượng sản phẩm
+            if (quantity <= 0)
+            {
+                return BadRequest("Số lượng phải lớn hơn 0");
+            }
+
+            if (product.Quantity < quantity)
+            {
+                return BadRequest("Số lượng sản phẩm không đủ");
+            }
+
+            // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
+            var existingItem = await _cartRepository.GetCartItemAsync(user.Id, productId);
+            if (existingItem != null)
+            {
+                // Cập nhật số lượng
+                existingItem.Quantity += quantity;
+                await _cartRepository.UpdateAsync(existingItem);
+            }
+            else
+            {
+                // Thêm mới vào giỏ hàng
+                var cartItem = new CartItem
+                {
+                    UserId = user.Id,
+                    ProductId = productId,
+                    Quantity = quantity,
+                    DateAdded = DateTime.UtcNow
+                };
+                await _cartRepository.AddAsync(cartItem);
+            }
+
+            await _cartRepository.SaveAsync();
+
+            return Ok(new { success = true, message = "Sản phẩm đã được thêm vào giỏ hàng" });
+        }
+
+        [HttpPost("Update")]
+        public async Task<IActionResult> UpdateCartItem(int cartItemId, int quantity)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var cartItem = await _cartRepository.GetByIdAsync(cartItemId);
+            if (cartItem == null || cartItem.UserId != user.Id)
+            {
+                return NotFound("Sản phẩm không tồn tại trong giỏ hàng");
+            }
+
+            if (quantity <= 0)
+            {
+                // Xóa sản phẩm khỏi giỏ hàng
+                await _cartRepository.DeleteAsync(cartItemId);
+            }
+            else
+            {
+                // Kiểm tra số lượng sản phẩm có đủ không
+                var product = await _productRepository.GetByIdAsync(cartItem.ProductId);
+                if (product != null && product.Quantity < quantity)
+                {
+                    return BadRequest("Số lượng sản phẩm không đủ");
+                }
+
+                // Cập nhật số lượng
+                cartItem.Quantity = quantity;
+                await _cartRepository.UpdateAsync(cartItem);
+            }
+
+            await _cartRepository.SaveAsync();
+
+            return Ok(new { success = true, message = "Giỏ hàng đã được cập nhật" });
+        }
+
+        [HttpDelete("Remove/{cartItemId}")]
+        public async Task<IActionResult> RemoveFromCart(int cartItemId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var cartItem = await _cartRepository.GetByIdAsync(cartItemId);
+            if (cartItem == null || cartItem.UserId != user.Id)
+            {
+                return NotFound("Sản phẩm không tồn tại trong giỏ hàng");
+            }
+
+            await _cartRepository.DeleteAsync(cartItemId);
+            await _cartRepository.SaveAsync();
+
+            return Ok(new { success = true, message = "Sản phẩm đã được xóa khỏi giỏ hàng" });
+        }
+
+        [HttpPost("Clear")]
+        public async Task<IActionResult> ClearCart()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            await _cartRepository.ClearCartAsync(user.Id);
+
+            return Ok(new { success = true, message = "Giỏ hàng đã được xóa" });
+        }
+    }
+}

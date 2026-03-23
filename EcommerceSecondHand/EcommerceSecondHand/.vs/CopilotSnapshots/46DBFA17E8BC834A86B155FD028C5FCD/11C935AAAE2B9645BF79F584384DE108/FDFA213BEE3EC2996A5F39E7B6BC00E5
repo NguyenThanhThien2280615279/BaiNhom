@@ -1,0 +1,11 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Models
+{
+    public class NotificationsViewModel
+    {
+        public IEnumerable<Notification> Notifications { get; set; } = new List<Notification>();
+        public int CurrentPage { get; set; }
+        public int TotalPages { get; set; }
+    }
+}

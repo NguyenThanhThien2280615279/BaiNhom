@@ -1,0 +1,211 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - EcommerceSecondHand</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/EcommerceSecondHand.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">EcommerceSecondHand</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index">Products</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Categories" asp-action="Index">Categories</a>
+                        </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Admin
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Admin" asp-action="Index">Dashboard</a></li>
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Admin" asp-action="Users">Users</a></li>
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Admin" asp-action="Orders">Orders</a></li>
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Admin" asp-action="Products">Products</a></li>
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Admin" asp-action="Categories">Categories</a></li>
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Admin" asp-action="Reviews">Reviews</a></li>
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Admin" asp-action="WalletManagement">Wallet Management</a></li>
+                                    </ul>
+                                </li>
+                            }
+                            @if (User.IsInRole("Vendor"))
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" id="vendorDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Vendor
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="vendorDropdown">
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Vendor" asp-action="Index">Dashboard</a></li>
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Vendor" asp-action="Products">My Products</a></li>
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Vendor" asp-action="Orders">Orders</a></li>
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Vendor" asp-action="Reviews">Reviews</a></li>
+                                    </ul>
+                                </li>
+                            }
+                        }
+                    </ul>
+                    <ul class="navbar-nav">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark position-relative" asp-area="" asp-controller="Cart" asp-action="Index">
+                                    <i class="bi bi-cart"></i>
+                                    <span id="cartCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        0
+                                    </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark position-relative" asp-area="" asp-controller="Notifications" asp-action="Index">
+                                    <i class="bi bi-bell"></i>
+                                    <span id="notificationCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        0
+                                    </span>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark position-relative" asp-area="" asp-controller="Messages" asp-action="Index">
+                                    <i class="bi bi-envelope"></i>
+                                    <span id="messageCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        0
+                                    </span>
+                                </a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-circle"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Customer" asp-action="Index">My Dashboard</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Orders" asp-action="Index">My Orders</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Wallet" asp-action="Index">My Wallet</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Profile">My Profile</a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form class="form-inline" asp-area="Identity" asp-controller="Account" asp-action="Logout" method="post">
+                                            <button type="submit" class="dropdown-item">Logout</button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="Identity" asp-controller="Account" asp-action="Register">Register</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="Identity" asp-controller="Account" asp-action="Login">Login</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="container mt-3">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    }
+    
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="container mt-3">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    }
+    
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2025 - EcommerceSecondHand - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <script>
+            $(document).ready(function() {
+                // Load counts for cart, notifications, and messages
+                $.ajax({
+                    url: '/api/Notifications/UnreadCount',
+                    method: 'GET',
+                    success: function(data) {
+                        if (data > 0) {
+                            $('#notificationCount').text(data);
+                        } else {
+                            $('#notificationCount').hide();
+                        }
+                    }
+                });
+                
+                $.ajax({
+                    url: '/api/Messages/UnreadCount',
+                    method: 'GET',
+                    success: function(data) {
+                        if (data > 0) {
+                            $('#messageCount').text(data);
+                        } else {
+                            $('#messageCount').hide();
+                        }
+                    }
+                });
+                
+                $.ajax({
+                    url: '/api/Cart/ItemsCount',
+                    method: 'GET',
+                    success: function(data) {
+                        if (data > 0) {
+                            $('#cartCount').text(data);
+                        } else {
+                            $('#cartCount').hide();
+                        }
+                    }
+                });
+            });
+        </script>
+    }
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

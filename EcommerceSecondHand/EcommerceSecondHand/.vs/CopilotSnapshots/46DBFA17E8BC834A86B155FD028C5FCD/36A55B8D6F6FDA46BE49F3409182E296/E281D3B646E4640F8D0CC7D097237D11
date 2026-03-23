@@ -1,0 +1,18 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Repositories.Interfaces
+{
+    public interface IOrderRepository
+    {
+        Task<IEnumerable<Order>> GetAllAsync();
+        Task<Order?> GetByIdAsync(int id);
+        Task<Order?> GetOrderWithDetailsAsync(int id);
+        Task<IEnumerable<Order>> GetUserOrdersAsync(string userId);
+        Task<int> GetUserOrdersCountAsync(string userId);
+        Task<IEnumerable<Order>> GetVendorRecentOrdersAsync(string vendorId, int count);
+        Task AddAsync(Order order);
+        Task UpdateAsync(Order order);
+        Task DeleteAsync(int id);
+        Task SaveAsync();
+    }
+}

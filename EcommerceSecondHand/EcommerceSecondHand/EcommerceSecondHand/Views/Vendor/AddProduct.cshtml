@@ -1,0 +1,89 @@
+@model EcommerceSecondHand.Models.ViewModels.AddProductViewModel
+
+<div class="container mt-4">
+    <div class="section-header fade-in-up">
+        <div>
+            <h1 class="section-title gradient-text">Thêm sản phẩm</h1>
+            <p class="section-subtitle">Đăng bán sản phẩm mới của bạn</p>
+        </div>
+    </div>
+
+    <div class="card shp-soft">
+        <div class="card-body">
+            <form asp-action="AddProduct" asp-controller="Vendor" method="post" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row g-3">
+                    <div class="col-lg-8">
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Price" class="form-label"></label>
+                                <input asp-for="Price" class="form-control" />
+                                <span asp-validation-for="Price" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Quantity" class="form-label"></label>
+                                <input asp-for="Quantity" class="form-control" />
+                                <span asp-validation-for="Quantity" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="CategoryId" class="form-label"></label>
+                                <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.Categories">
+                                    <option value="">-- Chọn danh mục --</option>
+                                </select>
+                                <span asp-validation-for="CategoryId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Condition" class="form-label"></label>
+                            <select asp-for="Condition" class="form-select"
+                                asp-items="Html.GetEnumSelectList<EcommerceSecondHand.Models.ProductCondition>()"></select>
+                            <span asp-validation-for="Condition" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ImageFile" class="form-label"></label>
+                            <input asp-for="ImageFile" type="file" class="form-control" />
+                            <span asp-validation-for="ImageFile" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card shp-soft h-100">
+                            <div class="card-body d-flex flex-column justify-content-between">
+                                <div>
+                                    <h5 class="mb-3">Hành động</h5>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Lưu sản
+                                        phẩm</button>
+                                    <a asp-action="Products" class="btn btn-outline-secondary">Hủy</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

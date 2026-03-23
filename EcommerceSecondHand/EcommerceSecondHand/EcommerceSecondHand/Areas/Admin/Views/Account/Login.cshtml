@@ -1,0 +1,65 @@
+@model EcommerceSecondHand.Models.ViewModels.AdminLoginViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Admin Login";
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin - EcommerceSecondHand</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
+</head>
+
+<body class="d-flex align-items-center" style="min-height: 100vh; background: var(--shp-bg);">
+    <div class="container" style="max-width: 480px;">
+        <div class="card shp-soft">
+            <div class="card-header bg-white text-center">
+                <h4 class="mb-0">Đăng nhập Quản trị</h4>
+            </div>
+            <div class="card-body">
+                <form asp-area="Admin" asp-controller="Account" asp-action="Login" method="post">
+                    <input type="hidden" asp-for="ReturnUrl" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label"></label>
+                        <input asp-for="Email" class="form-control" autocomplete="username" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label"></label>
+                        <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input asp-for="RememberMe" class="form-check-input" />
+                        <label asp-for="RememberMe" class="form-check-label"></label>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Đăng nhập</button>
+                        <a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">Về
+                            trang
+                            chủ</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="text-center text-muted mt-3">
+            <small>© @DateTime.Now.Year EcommerceSecondHand</small>
+        </div>
+    </div>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <partial name="_ValidationScriptsPartial" />
+</body>
+
+</html>

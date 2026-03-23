@@ -1,0 +1,23 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace EcommerceSecondHand.Models
+{
+    public class ChangePasswordViewModel
+    {
+        [Required(ErrorMessage = "M?t kh?u hi?n t?i là b?t bu?c")]
+        [DataType(DataType.Password)]
+        [Display(Name = "M?t kh?u hi?n t?i")]
+        public string CurrentPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "M?t kh?u m?i là b?t bu?c")]
+        [StringLength(100, ErrorMessage = "{0} ph?i có ít nh?t {2} và t?i ?a {1} ký t?.", MinimumLength = 6)]
+        [DataType(DataType.Password)]
+        [Display(Name = "M?t kh?u m?i")]
+        public string NewPassword { get; set; } = string.Empty;
+
+        [DataType(DataType.Password)]
+        [Display(Name = "Xác nh?n m?t kh?u m?i")]
+        [Compare("NewPassword", ErrorMessage = "M?t kh?u m?i và xác nh?n m?t kh?u không kh?p.")]
+        public string ConfirmPassword { get; set; } = string.Empty;
+    }
+}

@@ -1,0 +1,398 @@
+@model ProductListViewModel
+@{
+    ViewData["Title"] = "Sản phẩm";
+}
+
+<link rel="stylesheet" href="~/css/theme-store.css" />
+<style>
+    /* Scoped pagination styles for products page */
+    .pagination .page-link { color: #ff4d2d; border-color: #ffd8d0; background-color: #fff; }
+    .pagination .page-link:hover { color: #ff4d2d; background-color: #fff5f2; border-color: #ffc4b6; }
+    .pagination .page-item.active .page-link { color: #fff; background-color: #ff4d2d; border-color: #ff4d2d; }
+    .pagination .page-item.disabled .page-link { color: #9aa3ab; background-color: #f1f3f5; border-color: #e9ecef; }
+    .pagination { border-radius: 8px; overflow: hidden; }
+</style>
+
+<div class="container mt-4">
+    <h1 class="mb-3">Sản phẩm</h1>
+    
+    <div class="category-bar card shp-soft mb-3">
+        <div class="category-bar-inner">
+            <button type="button" class="cat-nav-btn cat-nav-prev" aria-label="Prev">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <div class="cat-scroll" id="catScroll">
+                <a asp-controller="Products" asp-action="Index" 
+                   asp-route-searchQuery="@Model.SearchQuery" 
+                   asp-route-sortOrder="@Model.SortOrder"
+                   asp-route-minPrice="@Model.MinPrice"
+                   asp-route-maxPrice="@Model.MaxPrice"
+                   asp-route-condition="@Model.Condition"
+                   class="cat-chip @(Model.CurrentCategoryId == null ? "active" : "")">
+                    <span class="cat-icon"><i class="bi bi-grid"></i></span>
+                    <span class="cat-name">Tất cả</span>
+                </a>
+                @foreach (var category in Model.Categories)
+                {
+                    <a asp-controller="Products" asp-action="Index" 
+                       asp-route-categoryId="@category.Id" 
+                       asp-route-searchQuery="@Model.SearchQuery" 
+                       asp-route-sortOrder="@Model.SortOrder"
+                       asp-route-minPrice="@Model.MinPrice"
+                       asp-route-maxPrice="@Model.MaxPrice"
+                       asp-route-condition="@Model.Condition"
+                       class="cat-chip @(Model.CurrentCategoryId == category.Id ? "active" : "")">
+                        <span class="cat-icon"><i class="@GetCategoryIcon(category.Name)"></i></span>
+                        <span class="cat-name">@category.Name</span>
+                    </a>
+                }
+            </div>
+            <button type="button" class="cat-nav-btn cat-nav-next" aria-label="Next">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+
+    <div class="filter-bar card shp-soft mb-3">
+        <div class="p-2 d-flex align-items-center gap-2 flex-wrap">
+            <button class="filter-chip" type="button" data-bs-toggle="offcanvas" data-bs-target="#filtersOffcanvas" aria-controls="filtersOffcanvas">
+                <i class="bi bi-sliders"></i>
+                <span>Lọc</span>
+            </button>
+
+            <div class="dropdown">
+                <button class="filter-chip dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-ui-checks-grid"></i>
+                    <span>Danh mục</span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a class="dropdown-item @(Model.CurrentCategoryId == null ? "active" : "")" 
+                           asp-controller="Products" asp-action="Index" 
+                           asp-route-searchQuery="@Model.SearchQuery" 
+                           asp-route-sortOrder="@Model.SortOrder"
+                           asp-route-minPrice="@Model.MinPrice"
+                           asp-route-maxPrice="@Model.MaxPrice"
+                           asp-route-condition="@Model.Condition">Tất cả</a>
+                    </li>
+                    @foreach (var category in Model.Categories)
+                    {
+                        <li>
+                            <a class="dropdown-item @(Model.CurrentCategoryId == category.Id ? "active" : "")" 
+                               asp-controller="Products" asp-action="Index" 
+                               asp-route-categoryId="@category.Id" 
+                               asp-route-searchQuery="@Model.SearchQuery" 
+                               asp-route-sortOrder="@Model.SortOrder"
+                               asp-route-minPrice="@Model.MinPrice"
+                               asp-route-maxPrice="@Model.MaxPrice"
+                               asp-route-condition="@Model.Condition">@category.Name</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            <div class="dropdown">
+                <button class="filter-chip dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-sort-down"></i>
+                    <span>Giá/Sắp xếp</span>
+                </button>
+                <ul class="dropdown-menu">
+                    @foreach (var option in Model.SortOptions)
+                    {
+                        <li>
+                            <a class="dropdown-item @(option.Selected ? "active" : "")" 
+                               asp-controller="Products" asp-action="Index" 
+                               asp-route-categoryId="@Model.CurrentCategoryId" 
+                               asp-route-searchQuery="@Model.SearchQuery" 
+                               asp-route-sortOrder="@option.Value"
+                               asp-route-minPrice="@Model.MinPrice"
+                               asp-route-maxPrice="@Model.MaxPrice"
+                               asp-route-condition="@Model.Condition">@option.Text</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+
+            @if (Model.MinPrice.HasValue || Model.MaxPrice.HasValue)
+            {
+                <div class="filter-chip">
+                    <i class="bi bi-currency-dollar"></i>
+                    <span>Giá: @(Model.MinPrice?.ToString("N0") ?? "0") - @(Model.MaxPrice?.ToString("N0") ?? "∞") ₫</span>
+                </div>
+            }
+
+            @if (Model.Condition.HasValue)
+            {
+                <div class="filter-chip">
+                    <i class="bi bi-check-circle"></i>
+                    <span>Tình trạng: @GetConditionText(Model.Condition.Value)</span>
+                </div>
+            }
+
+            <a class="filter-chip text-decoration-none" asp-controller="Products" asp-action="Index">
+                <i class="bi bi-x-circle"></i>
+                <span>Xóa lọc</span>
+            </a>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shp-soft mb-4">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            @if (Model.CurrentCategoryId.HasValue)
+                            {
+                                var categoryName = Model.Categories.FirstOrDefault(c => c.Id == Model.CurrentCategoryId)?.Name;
+                                <span>@categoryName</span>
+                            }
+                            else
+                            {
+                                <span>Tất cả sản phẩm</span>
+                            }
+                            
+                            @if (!string.IsNullOrEmpty(Model.SearchQuery))
+                            {
+                                <small class="text-muted ms-2">Kết quả tìm kiếm cho: "@Model.SearchQuery"</small>
+                            }
+                        </h5>
+                        
+                        <span class="text-muted">Hiển thị @Model.Products.Count() sản phẩm</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model.Products.Any())
+                    {
+                        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                            @foreach (var product in Model.Products)
+                            {
+                                <div class="col">
+                                    <div class="card h-100 product-card shp-soft">
+                                        <a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none">
+                                            @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                            {
+                                                <img src="@product.ImageUrl" class="card-img-top" alt="@product.Name" style="height: 200px; object-fit: cover;">
+                                            }
+                                            else
+                                            {
+                                                <div class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                                </div>
+                                            }
+                                        </a>
+                                        <div class="card-body">
+                                            <h5 class="card-title">
+                                                <a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id" class="text-decoration-none text-dark">
+                                                    @product.Name
+                                                </a>
+                                            </h5>
+                                            <p class="card-text text-truncate">@product.Description</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="fw-bold" style="color: var(--shp-primary);">@product.Price.ToString("N0") đ</span>
+                                                <span class="text-muted">
+                                                    @if (product.AverageRating > 0)
+                                                    {
+                                                        for (int i = 1; i <= 5; i++)
+                                                        {
+                                                            <i class="bi bi-star@(i <= Math.Round(product.AverageRating) ? "-fill" : "") text-warning"></i>
+                                                        }
+                                                        <small class="text-muted ms-1">(@(Model.ProductReviewCounts.ContainsKey(product.Id) ? Model.ProductReviewCounts[product.Id] : 0))</small>
+                                                    }
+                                                    else
+                                                    {
+                                                        <small class="text-muted">Chưa có đánh giá</small>
+                                                    }
+                                                </span>
+                                            </div>
+                                            
+                                        </div>
+                                        <div class="card-footer bg-white">
+                                            <div class="d-grid gap-2">
+                                                <a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id" class="btn btn-outline-primary">
+                                                    <i class="bi bi-eye me-1"></i> Xem chi tiết
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        
+                        @if (Model.TotalPages > 1)
+                        {
+                            <div class="d-flex justify-content-center mt-4">
+                                <nav aria-label="Products pagination">
+                                    <ul class="pagination">
+                                        <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                                            <a class="page-link"
+                                               asp-controller="Products" asp-action="Index"
+                                               asp-route-categoryId="@Model.CurrentCategoryId"
+                                               asp-route-searchQuery="@Model.SearchQuery"
+                                               asp-route-sortOrder="@Model.SortOrder"
+                                               asp-route-minPrice="@Model.MinPrice"
+                                               asp-route-maxPrice="@Model.MaxPrice"
+                                               asp-route-condition="@Model.Condition"
+                                               asp-route-page="@(Model.CurrentPage - 1)">Trước</a>
+                                        </li>
+                                        @for (int i = 1; i <= Model.TotalPages; i++)
+                                        {
+                                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                                <a class="page-link"
+                                                   asp-controller="Products" asp-action="Index"
+                                                   asp-route-categoryId="@Model.CurrentCategoryId"
+                                                   asp-route-searchQuery="@Model.SearchQuery"
+                                                   asp-route-sortOrder="@Model.SortOrder"
+                                                   asp-route-minPrice="@Model.MinPrice"
+                                                   asp-route-maxPrice="@Model.MaxPrice"
+                                                   asp-route-condition="@Model.Condition"
+                                                   asp-route-page="@i">@i</a>
+                                            </li>
+                                        }
+                                        <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                                            <a class="page-link"
+                                               asp-controller="Products" asp-action="Index"
+                                               asp-route-categoryId="@Model.CurrentCategoryId"
+                                               asp-route-searchQuery="@Model.SearchQuery"
+                                               asp-route-sortOrder="@Model.SortOrder"
+                                               asp-route-minPrice="@Model.MinPrice"
+                                               asp-route-maxPrice="@Model.MaxPrice"
+                                               asp-route-condition="@Model.Condition"
+                                               asp-route-page="@(Model.CurrentPage + 1)">Sau</a>
+                                        </li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <p class="text-muted">Không tìm thấy sản phẩm nào.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Offcanvas Filters (mobile and advanced) -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="filtersOffcanvasLabel">Bộ lọc</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form method="get" asp-controller="Products" asp-action="Index">
+            @if (Model.CurrentCategoryId.HasValue)
+            {
+                <input type="hidden" name="categoryId" value="@Model.CurrentCategoryId" />
+            }
+            
+            <div class="mb-3">
+                <label class="form-label">Tìm kiếm</label>
+                <input type="text" name="searchQuery" class="form-control" placeholder="Nhập từ khóa..." value="@Model.SearchQuery">
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Khoảng giá</label>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="input-group">
+                            <span class="input-group-text">₫</span>
+                            <input type="number" class="form-control" placeholder="Từ" name="minPrice" value="@Model.MinPrice">
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="input-group">
+                            <span class="input-group-text">₫</span>
+                            <input type="number" class="form-control" placeholder="Đến" name="maxPrice" value="@Model.MaxPrice">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Tình trạng sản phẩm</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="condition" id="conditionAll" value="" @(Model.Condition == null ? "checked" : "")>
+                    <label class="form-check-label" for="conditionAll">Tất cả</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="condition" id="conditionNew" value="New" @(Model.Condition == ProductCondition.New ? "checked" : "")>
+                    <label class="form-check-label" for="conditionNew">Mới</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="condition" id="conditionLikeNew" value="LikeNew" @(Model.Condition == ProductCondition.LikeNew ? "checked" : "")>
+                    <label class="form-check-label" for="conditionLikeNew">Như mới</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="condition" id="conditionGood" value="Good" @(Model.Condition == ProductCondition.Good ? "checked" : "")>
+                    <label class="form-check-label" for="conditionGood">Tốt</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="condition" id="conditionFair" value="Fair" @(Model.Condition == ProductCondition.Fair ? "checked" : "")>
+                    <label class="form-check-label" for="conditionFair">Khá</label>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Sắp xếp theo</label>
+                <select name="sortOrder" class="form-select" asp-items="Model.SortOptions"></select>
+            </div>
+            
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check2 me-1"></i>Áp dụng</button>
+                <a asp-controller="Products" asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-x-circle me-1"></i>Xóa lọc</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@functions {
+    string GetCategoryIcon(string name)
+    {
+        var key = (name ?? string.Empty).ToLower();
+        return key switch
+        {
+            "điện tử" or "do dien tu" or "electronics" => "bi bi-phone",
+            "xe cộ" or "xe co" or "vehicles" => "bi bi-car-front",
+            "thú cưng" or "thu cung" or "pets" => "bi bi-heart",
+            "tủ lạnh" or "tu lanh" or "máy lạnh" or "may lanh" => "bi bi-snow",
+            "đồ gia dụng" or "do gia dung" or "home" => "bi bi-house-gear",
+            "đồ dùng văn phòng" or "do dung van phong" => "bi bi-printer",
+            "giải trí" or "giai tri" or "thể thao" or "the thao" => "bi bi-controller",
+            "thời trang" or "thoi trang" => "bi bi-bag",
+            "mẹ và bé" or "me va be" => "bi bi-baby",
+            "đồ ăn" or "do an" or "thực phẩm" or "thuc pham" => "bi bi-egg-fried",
+            "dịch vụ" or "dich vu" => "bi bi-briefcase",
+            _ => "bi bi-tag"
+        };
+    }
+    
+    string GetConditionText(ProductCondition condition)
+    {
+        return condition switch
+        {
+            ProductCondition.New => "Mới",
+            ProductCondition.LikeNew => "Như mới",
+            ProductCondition.Good => "Tốt",
+            ProductCondition.Fair => "Khá",
+            _ => condition.ToString()
+        };
+    }
+}
+
+<script>
+    (function () {
+        const scroll = document.getElementById('catScroll');
+        if (!scroll) return;
+        const prev = document.querySelector('.cat-nav-prev');
+        const next = document.querySelector('.cat-nav-next');
+        const step = 280;
+        prev?.addEventListener('click', () => scroll.scrollBy({ left: -step, behavior: 'smooth' }));
+        next?.addEventListener('click', () => scroll.scrollBy({ left: step, behavior: 'smooth' }));
+    })();
+</script>

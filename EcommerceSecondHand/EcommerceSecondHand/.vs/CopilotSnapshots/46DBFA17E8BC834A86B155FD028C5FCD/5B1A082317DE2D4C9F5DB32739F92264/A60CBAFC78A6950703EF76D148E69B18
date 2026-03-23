@@ -1,0 +1,252 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Authorize(Policy = "RequireAdminRole")]
+    public class AdminController : Controller
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IOrderRepository _orderRepository;
+        private readonly ISystemStatisticsRepository _systemStatsRepository;
+
+        public AdminController(
+            UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole> roleManager,
+            IOrderRepository orderRepository,
+            ISystemStatisticsRepository systemStatsRepository)
+        {
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _orderRepository = orderRepository;
+            _systemStatsRepository = systemStatsRepository;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            // Cập nhật thống kê hệ thống
+            await _systemStatsRepository.UpdateSystemStatisticsAsync();
+            
+            // Lấy thống kê mới nhất
+            var stats = await _systemStatsRepository.GetCurrentStatisticsAsync();
+            
+            // Khởi tạo dữ liệu cho view
+            var model = new AdminDashboardViewModel
+            {
+                TotalUsers = stats.TotalUsers,
+                TotalProducts = stats.TotalProducts,
+                TotalOrders = stats.TotalOrders,
+                TotalRevenue = stats.TotalRevenue,
+                TotalCustomers = stats.TotalCustomers,
+                TotalVendors = stats.TotalVendors,
+                NewUsersLast30Days = stats.NewUsersLast30Days,
+                ActiveUsersLast30Days = stats.ActiveUsersLast30Days,
+                RecentOrders = await _orderRepository.GetRecentOrdersAsync(5)
+            };
+            
+            // Tính toán phần trăm
+            if (model.TotalUsers > 0)
+            {
+                model.TotalAdmins = model.TotalUsers - model.TotalCustomers - model.TotalVendors;
+                model.CustomerPercentage = Math.Round((double)model.TotalCustomers / model.TotalUsers * 100, 1);
+                model.VendorPercentage = Math.Round((double)model.TotalVendors / model.TotalUsers * 100, 1);
+                model.AdminPercentage = Math.Round((double)model.TotalAdmins / model.TotalUsers * 100, 1);
+            }
+            
+            return View(model);
+        }
+
+        public IActionResult Users()
+        {
+            return View();
+        }
+
+        public IActionResult Orders()
+        {
+            return View();
+        }
+
+        public IActionResult Products()
+        {
+            return View();
+        }
+
+        public IActionResult Categories()
+        {
+            return View();
+        }
+
+        public IActionResult Reviews()
+        {
+            return View();
+        }
+
+        public async Task<IActionResult> WalletManagement()
+        {
+            var model = new WalletManagementViewModel
+            {
+                RecentTransactions = await _paymentTransactionRepository.GetRecentTransactionsAsync(20)
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddFunds(WalletManagementViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.RecentTransactions = await _paymentTransactionRepository.GetRecentTransactionsAsync(20);
+                return View("WalletManagement", model);
+            }
+
+            // Tìm người dùng
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                ModelState.AddModelError("Email", "Không tìm thấy người dùng.");
+                model.RecentTransactions = await _paymentTransactionRepository.GetRecentTransactionsAsync(20);
+                return View("WalletManagement", model);
+            }
+
+            // Tạo mã giao dịch
+            string transactionReference = $"ADM-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
+
+            // Tạo bản ghi giao dịch
+            var transaction = new PaymentTransaction
+            {
+                UserId = user.Id,
+                Amount = model.Amount,
+                Type = TransactionType.AdminAdjustment,
+                Status = TransactionStatus.Completed,
+                TransactionReference = transactionReference,
+                Description = string.IsNullOrEmpty(model.Description) 
+                    ? $"Admin thêm tiền: {model.Amount:C}" 
+                    : model.Description,
+                CreatedAt = DateTime.UtcNow,
+                CompletedAt = DateTime.UtcNow
+            };
+
+            await _paymentTransactionRepository.AddAsync(transaction);
+            await _paymentTransactionRepository.SaveAsync();
+
+            // Cập nhật số dư ví của người dùng
+            user.WalletBalance += model.Amount;
+            await _userManager.UpdateAsync(user);
+
+            // Tạo thông báo
+            var notification = new Notification
+            {
+                UserId = user.Id,
+                Title = "Đã thêm tiền",
+                Message = $"Quản trị viên đã thêm {model.Amount:C} vào ví của bạn. {(string.IsNullOrEmpty(model.Description) ? "" : $"Lý do: {model.Description}")}",
+                Type = NotificationType.Payment,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+                RelatedEntityId = transaction.Id.ToString(),
+                ActionUrl = "/Wallet"
+            };
+
+            await _notificationRepository.AddAsync(notification);
+            await _notificationRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = $"Đã thêm thành công {model.Amount:C} vào ví của {user.Email}.";
+            return RedirectToAction(nameof(WalletManagement));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveFunds(WalletManagementViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.RecentTransactions = await _paymentTransactionRepository.GetRecentTransactionsAsync(20);
+                return View("WalletManagement", model);
+            }
+
+            // Tìm người dùng
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                ModelState.AddModelError("Email", "Không tìm thấy người dùng.");
+                model.RecentTransactions = await _paymentTransactionRepository.GetRecentTransactionsAsync(20);
+                return View("WalletManagement", model);
+            }
+
+            // Kiểm tra số dư
+            if (user.WalletBalance < model.Amount)
+            {
+                ModelState.AddModelError("Amount", "Người dùng không có đủ số dư.");
+                model.RecentTransactions = await _paymentTransactionRepository.GetRecentTransactionsAsync(20);
+                return View("WalletManagement", model);
+            }
+
+            // Tạo mã giao dịch
+            string transactionReference = $"ADM-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}";
+
+            // Tạo bản ghi giao dịch
+            var transaction = new PaymentTransaction
+            {
+                UserId = user.Id,
+                Amount = model.Amount,
+                Type = TransactionType.AdminAdjustment,
+                Status = TransactionStatus.Completed,
+                TransactionReference = transactionReference,
+                Description = string.IsNullOrEmpty(model.Description) 
+                    ? $"Admin rút tiền: {model.Amount:C}" 
+                    : model.Description,
+                CreatedAt = DateTime.UtcNow,
+                CompletedAt = DateTime.UtcNow
+            };
+
+            await _paymentTransactionRepository.AddAsync(transaction);
+            await _paymentTransactionRepository.SaveAsync();
+
+            // Cập nhật số dư ví của người dùng
+            user.WalletBalance -= model.Amount;
+            await _userManager.UpdateAsync(user);
+
+            // Tạo thông báo
+            var notification = new Notification
+            {
+                UserId = user.Id,
+                Title = "Đã rút tiền",
+                Message = $"Quản trị viên đã rút {model.Amount:C} từ ví của bạn. {(string.IsNullOrEmpty(model.Description) ? "" : $"Lý do: {model.Description}")}",
+                Type = NotificationType.Payment,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+                RelatedEntityId = transaction.Id.ToString(),
+                ActionUrl = "/Wallet"
+            };
+
+            await _notificationRepository.AddAsync(notification);
+            await _notificationRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = $"Đã rút thành công {model.Amount:C} từ ví của {user.Email}.";
+            return RedirectToAction(nameof(WalletManagement));
+        }
+
+        private readonly IPaymentTransactionRepository _paymentTransactionRepository;
+        private readonly INotificationRepository _notificationRepository;
+
+        public AdminController(
+            UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole> roleManager,
+            IOrderRepository orderRepository,
+            ISystemStatisticsRepository systemStatsRepository,
+            IPaymentTransactionRepository paymentTransactionRepository,
+            INotificationRepository notificationRepository)
+        {
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _orderRepository = orderRepository;
+            _systemStatsRepository = systemStatsRepository;
+            _paymentTransactionRepository = paymentTransactionRepository;
+            _notificationRepository = notificationRepository;
+        }
+    }
+}

@@ -1,0 +1,139 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
+
+namespace EcommerceSecondHand.Hubs
+{
+    [Authorize]
+    public class ChatHub : Hub
+    {
+        private readonly IMessageRepository _messageRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly INotificationRepository _notificationRepository;
+        private static readonly Dictionary<string, string> _userConnections = new();
+
+        public ChatHub(
+            IMessageRepository messageRepository,
+            UserManager<ApplicationUser> userManager,
+            INotificationRepository notificationRepository)
+        {
+            _messageRepository = messageRepository;
+            _userManager = userManager;
+            _notificationRepository = notificationRepository;
+        }
+
+        public override async Task OnConnectedAsync()
+        {
+            var userId = Context.User?.Identity?.Name;
+            if (!string.IsNullOrEmpty(userId))
+            {
+                _userConnections[userId] = Context.ConnectionId;
+            }
+            await base.OnConnectedAsync();
+        }
+
+        public override async Task OnDisconnectedAsync(Exception? exception)
+        {
+            var userId = Context.User?.Identity?.Name;
+            if (!string.IsNullOrEmpty(userId) && _userConnections.ContainsKey(userId))
+            {
+                _userConnections.Remove(userId);
+            }
+            await base.OnDisconnectedAsync(exception);
+        }
+
+        public async Task SendMessage(string receiverId, string message)
+        {
+            var senderId = Context.User?.Identity?.Name;
+            if (string.IsNullOrEmpty(senderId) || string.IsNullOrEmpty(receiverId))
+            {
+                return;
+            }
+
+            var sender = await _userManager.FindByNameAsync(senderId);
+            var receiver = await _userManager.FindByIdAsync(receiverId);
+
+            if (sender == null || receiver == null)
+            {
+                return;
+            }
+
+            // Save message to database
+            var newMessage = new Message
+            {
+                SenderId = sender.Id,
+                ReceiverId = receiver.Id,
+                Content = message,
+                SentAt = DateTime.UtcNow,
+                IsRead = false
+            };
+
+            await _messageRepository.AddAsync(newMessage);
+            await _messageRepository.SaveAsync();
+
+            // Create notification for receiver
+            var notification = new Notification
+            {
+                UserId = receiver.Id,
+                Title = "New Message",
+                Message = $"You have a new message from {sender.FirstName} {sender.LastName}",
+                Type = NotificationType.Chat,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+                RelatedEntityId = newMessage.Id.ToString(),
+                ActionUrl = $"/Messages/Conversation?userId={sender.Id}"
+            };
+
+            await _notificationRepository.AddAsync(notification);
+            await _notificationRepository.SaveAsync();
+
+            // Send to specific user if online
+            if (_userConnections.TryGetValue(receiver.UserName!, out var connectionId))
+            {
+                await Clients.Client(connectionId).SendAsync("ReceiveMessage", 
+                    new { 
+                        messageId = newMessage.Id,
+                        senderId = sender.Id,
+                        senderName = $"{sender.FirstName} {sender.LastName}",
+                        senderProfilePicture = sender.ProfilePicture,
+                        message = message,
+                        sentAt = newMessage.SentAt.ToString("yyyy-MM-dd HH:mm:ss")
+                    });
+                
+                await Clients.Client(connectionId).SendAsync("ReceiveNotification", 
+                    new { 
+                        notificationId = notification.Id,
+                        title = notification.Title,
+                        message = notification.Message,
+                        type = notification.Type.ToString(),
+                        createdAt = notification.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"),
+                        actionUrl = notification.ActionUrl
+                    });
+            }
+
+            // Also send back to sender to update their UI
+            await Clients.Caller.SendAsync("MessageSent", 
+                new { 
+                    messageId = newMessage.Id,
+                    receiverId = receiver.Id,
+                    receiverName = $"{receiver.FirstName} {receiver.LastName}",
+                    message = message,
+                    sentAt = newMessage.SentAt.ToString("yyyy-MM-dd HH:mm:ss")
+                });
+        }
+
+        public async Task MarkMessageAsRead(int messageId)
+        {
+            await _messageRepository.MarkAsReadAsync(messageId);
+            
+            // Get the message to notify the sender
+            var message = await _messageRepository.GetByIdAsync(messageId);
+            if (message != null && _userConnections.TryGetValue(message.Sender?.UserName!, out var senderConnectionId))
+            {
+                await Clients.Client(senderConnectionId).SendAsync("MessageRead", messageId);
+            }
+        }
+    }
+}

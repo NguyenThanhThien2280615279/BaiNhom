@@ -1,0 +1,59 @@
+@model IEnumerable<Review>
+@{
+    ViewData["Title"] = "Đánh giá";
+}
+
+<h2 class="mb-3">Đánh giá</h2>
+
+<div class="card shp-soft admin-table">
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Sản phẩm</th>
+                    <th>Người dùng</th>
+                    <th>Điểm</th>
+                    <th>Nội dung</th>
+                    <th>Trạng thái</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model)
+                {
+                    <tr>
+                        <td>@r.Id</td>
+                        <td>@r.ProductId</td>
+                        <td>@r.UserId</td>
+                        <td>@r.Rating</td>
+                        <td>@r.Comment</td>
+                        <td>
+                            @if (r.IsApproved)
+                            {
+                                <span class="badge text-bg-success">Đã duyệt</span>
+                            }
+                            else
+                            {
+                                <span class="badge text-bg-warning">Chờ duyệt</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            @if (!r.IsApproved)
+                            {
+                                <form asp-action="Approve" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@r.Id" />
+                                    <button class="btn btn-sm btn-success" type="submit">Duyệt</button>
+                                </form>
+                            }
+                            <form asp-action="Delete" method="post" class="d-inline ms-1">
+                                <input type="hidden" name="id" value="@r.Id" />
+                                <button class="btn btn-sm btn-outline-danger" type="submit">Xoá</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

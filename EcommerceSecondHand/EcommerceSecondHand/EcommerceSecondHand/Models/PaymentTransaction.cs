@@ -1,0 +1,66 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace EcommerceSecondHand.Models
+{
+    public class PaymentTransaction
+    {
+        [Key]
+        public int Id { get; set; }
+        
+        [Required]
+        public string UserId { get; set; } = string.Empty;
+        
+        [Required]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal Amount { get; set; }
+        
+        [Required]
+        public TransactionType Type { get; set; }
+        
+        public TransactionStatus Status { get; set; } = TransactionStatus.Pending;
+        
+        [StringLength(100)]
+        public string? TransactionReference { get; set; }
+        
+        [StringLength(500)]
+        public string? Description { get; set; }
+        
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        
+        public DateTime? CompletedAt { get; set; }
+        
+        public DateTime? ProcessedAt { get; set; }
+        
+        public int? OrderId { get; set; }
+        
+        [StringLength(100)]
+        public string? PaymentMethod { get; set; }
+        
+        [ForeignKey("UserId")]
+        public ApplicationUser? User { get; set; }
+        
+        [ForeignKey("OrderId")]
+        public Order? Order { get; set; }
+    }
+    
+    public enum TransactionType
+    {
+        Deposit,
+        Withdrawal,
+        Purchase,
+        Sale,
+        Refund,
+        AdminAdjustment,
+        Withdraw  // Duplicate of Withdrawal but needed for views/controllers
+    }
+    
+    public enum TransactionStatus
+    {
+        Pending,
+        Completed,
+        Failed,
+        Cancelled,
+        Rejected  // Added for views/controllers
+    }
+}

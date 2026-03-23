@@ -1,0 +1,66 @@
+﻿using EcommerceSecondHand.Data;
+using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+
+namespace EcommerceSecondHand.Repositories
+{
+    public class OrderRepository : Repository<Order>, IOrderRepository
+    {
+        public OrderRepository(ApplicationDbContext context) : base(context)
+        {
+        }
+
+        public async Task<IEnumerable<Order>> GetOrdersByUserAsync(string userId)
+        {
+            return await _dbSet
+                .Where(o => o.UserId == userId)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+        }
+
+        public async Task<Order?> GetOrderWithItemsAsync(int orderId)
+        {
+            return await _dbSet
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .Include(o => o.User)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+        }
+
+        public async Task<IEnumerable<Order>> GetRecentOrdersAsync(int count)
+        {
+            return await _dbSet
+                .OrderByDescending(o => o.OrderDate)
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .Take(count)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Order>> GetOrdersByStatusAsync(OrderStatus status)
+        {
+            return await _dbSet
+                .Where(o => o.Status == status)
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Order>> GetOrdersWithProductAsync(int productId)
+        {
+            return await _dbSet
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .Include(o => o.User)
+                .Where(o => o.OrderItems!.Any(oi => oi.ProductId == productId))
+                .OrderByDescending(o => o.OrderDate)
+                .ToListAsync();
+        }
+    }
+}

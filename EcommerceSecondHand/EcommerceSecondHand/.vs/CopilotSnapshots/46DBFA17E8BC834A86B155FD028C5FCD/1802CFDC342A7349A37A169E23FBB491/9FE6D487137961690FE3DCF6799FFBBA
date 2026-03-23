@@ -1,0 +1,15 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Repositories.Interfaces
+{
+    public interface IReviewRepository : IRepository<Review>
+    {
+        Task<IEnumerable<Review>> GetReviewsByProductAsync(int productId);
+        Task<IEnumerable<Review>> GetReviewsByUserAsync(string userId);
+        Task<IEnumerable<Review>> GetPendingReviewsAsync();
+        Task<double> GetAverageRatingForProductAsync(int productId);
+        Task<bool> HasUserReviewedProductAsync(string userId, int productId);
+        Task ApproveReviewAsync(int reviewId);
+        Task RejectReviewAsync(int reviewId);
+    }
+}

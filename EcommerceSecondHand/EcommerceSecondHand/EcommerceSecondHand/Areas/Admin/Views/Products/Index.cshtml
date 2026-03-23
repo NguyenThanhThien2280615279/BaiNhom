@@ -1,0 +1,104 @@
+@model IEnumerable<Product>
+@{
+    ViewData["Title"] = "Sản phẩm";
+}
+
+<h2 class="mb-3">Sản phẩm</h2>
+
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+        <a class="nav-link active" aria-current="page" asp-action="Index">Tất cả</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" asp-action="Sold">Đã giao dịch</a>
+    </li>
+</ul>
+
+<form method="get" class="row g-2 mb-3">
+    <div class="col-auto">
+        <select class="form-select" name="categoryId">
+            <option value="">Tất cả danh mục</option>
+            @foreach (var c in (IEnumerable<Category>)ViewBag.Categories)
+            {
+                <option value="@c.Id" selected="@(ViewBag.CurrentCategoryId == c.Id)">@c.Name</option>
+            }
+        </select>
+    </div>
+    <div class="col-auto">
+        <input class="form-control" name="searchQuery" value="@ViewBag.SearchQuery" placeholder="Tìm kiếm..." />
+    </div>
+    <div class="col-auto">
+        <select class="form-select" name="sortOrder">
+            <option value="">Mặc định</option>
+            <option value="price_asc" selected="@(ViewBag.SortOrder == "price_asc")">Giá tăng</option>
+            <option value="price_desc" selected="@(ViewBag.SortOrder == "price_desc")">Giá giảm</option>
+            <option value="newest" selected="@(ViewBag.SortOrder == "newest")">Mới nhất</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-primary" type="submit">Lọc</button>
+    </div>
+</form>
+
+<div class="card shp-soft admin-table">
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên</th>
+                    <th>Giá</th>
+                    <th>Số lượng</th>
+                    <th>Trạng thái</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr>
+                        <td>@p.Id</td>
+                        <td>@p.Name</td>
+                        <td>@p.Price.ToString("N0") đ</td>
+                        <td>@p.Quantity</td>
+                        <td>
+                            @if (p.IsActive)
+                            {
+                                <span class="badge text-bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge text-bg-secondary">Inactive</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@p.Id">Chi tiết</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@{
+    int page = ViewBag.Page;
+    int totalPages = ViewBag.TotalPages;
+}
+
+@if (totalPages > 1)
+{
+    <nav class="mt-3">
+        <ul class="pagination justify-content-center">
+            <li class="page-item @(page <= 1 ? "disabled" : null)">
+                <a class="page-link"
+                    href="?page=@(page - 1)&categoryId=@ViewBag.CurrentCategoryId&searchQuery=@ViewBag.SearchQuery&sortOrder=@ViewBag.SortOrder">Trước</a>
+            </li>
+            <li class="page-item disabled"><span class="page-link">Trang @(page) / @(totalPages)</span></li>
+            <li class="page-item @(page >= totalPages ? "disabled" : null)">
+                <a class="page-link"
+                    href="?page=@(page + 1)&categoryId=@ViewBag.CurrentCategoryId&searchQuery=@ViewBag.SearchQuery&sortOrder=@ViewBag.SortOrder">Sau</a>
+            </li>
+        </ul>
+    </nav>
+}

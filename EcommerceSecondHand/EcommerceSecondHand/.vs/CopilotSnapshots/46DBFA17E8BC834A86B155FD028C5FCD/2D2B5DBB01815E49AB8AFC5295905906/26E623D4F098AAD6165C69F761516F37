@@ -1,0 +1,196 @@
+﻿@model WalletViewModel
+@{
+    ViewData["Title"] = "Ví c?a tôi";
+    
+    string GetTransactionStatusBadgeClass(TransactionStatus status) => status switch
+    {
+        TransactionStatus.Pending => "bg-warning",
+        TransactionStatus.Completed => "bg-success",
+        TransactionStatus.Failed => "bg-danger",
+        TransactionStatus.Cancelled => "bg-secondary",
+        _ => "bg-secondary"
+    };
+    
+    string GetTransactionStatusText(TransactionStatus status) => status switch
+    {
+        TransactionStatus.Pending => "?ang x? lý",
+        TransactionStatus.Completed => "?ã hoàn thành",
+        TransactionStatus.Failed => "Th?t b?i",
+        TransactionStatus.Cancelled => "?ã h?y",
+        _ => status.ToString()
+    };
+    
+    string GetTransactionTypeText(TransactionType type) => type switch
+    {
+        TransactionType.Deposit => "N?p ti?n",
+        TransactionType.Withdrawal => "Rút ti?n",
+        TransactionType.Purchase => "Mua hàng",
+        TransactionType.Sale => "Bán hàng",
+        TransactionType.Refund => "Hoàn ti?n",
+        _ => type.ToString()
+    };
+    
+    string GetTransactionTypeIcon(TransactionType type) => type switch
+    {
+        TransactionType.Deposit => "bi-wallet-fill text-success",
+        TransactionType.Withdrawal => "bi-cash-stack text-danger",
+        TransactionType.Purchase => "bi-cart-fill text-primary",
+        TransactionType.Sale => "bi-tag-fill text-info",
+        TransactionType.Refund => "bi-arrow-counterclockwise text-warning",
+        _ => "bi-credit-card"
+    };
+}
+
+<div class="container mt-4">
+    <h1>Ví c?a tôi</h1>
+    
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Thông tin ví</h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-wallet2 text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h3 class="text-primary mb-3">@Model.WalletBalance.ToString("C")</h3>
+                    <p class="text-muted">S? d? kh? d?ng</p>
+                </div>
+                <div class="card-footer bg-white">
+                    <div class="d-grid gap-2">
+                        <a asp-controller="Wallet" asp-action="Deposit" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i> N?p ti?n
+                        </a>
+                        <a asp-controller="Wallet" asp-action="Withdraw" class="btn btn-outline-primary">
+                            <i class="bi bi-dash-circle me-1"></i> Rút ti?n
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Ph??ng th?c thanh toán</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3">
+                            <i class="bi bi-credit-card text-primary" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Th? tín d?ng/ghi n?</h6>
+                            <small class="text-muted">VISA/MasterCard/JCB</small>
+                        </div>
+                        <div class="ms-auto">
+                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-plus"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3">
+                            <i class="bi bi-bank2 text-primary" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Ngân hàng</h6>
+                            <small class="text-muted">Chuy?n kho?n ngân hàng</small>
+                        </div>
+                        <div class="ms-auto">
+                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-plus"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex align-items-center">
+                        <div class="me-3">
+                            <i class="bi bi-cash-coin text-primary" style="font-size: 1.5rem;"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-0">Ví ?i?n t?</h6>
+                            <small class="text-muted">MoMo/ZaloPay/VNPay</small>
+                        </div>
+                        <div class="ms-auto">
+                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-plus"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">L?ch s? giao d?ch</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Transactions.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Mã giao d?ch</th>
+                                        <th>Lo?i</th>
+                                        <th>S? ti?n</th>
+                                        <th>Ngày</th>
+                                        <th>Tr?ng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var transaction in Model.Transactions)
+                                    {
+                                        <tr>
+                                            <td>@transaction.TransactionReference</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi @GetTransactionTypeIcon(transaction.Type) me-2"></i>
+                                                    @GetTransactionTypeText(transaction.Type)
+                                                </div>
+                                            </td>
+                                            <td class="@(transaction.Type == TransactionType.Deposit || transaction.Type == TransactionType.Sale || transaction.Type == TransactionType.Refund ? "text-success" : "text-danger")">
+                                                @((transaction.Type == TransactionType.Deposit || transaction.Type == TransactionType.Sale || transaction.Type == TransactionType.Refund ? "+" : "-") + transaction.Amount.ToString("C"))
+                                            </td>
+                                            <td>@transaction.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>
+                                                <span class="badge @GetTransactionStatusBadgeClass(transaction.Status)">
+                                                    @GetTransactionStatusText(transaction.Status)
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        @if (Model.TotalPages > 1)
+                        {
+                            <div class="d-flex justify-content-center mt-4">
+                                <nav>
+                                    <ul class="pagination">
+                                        @for (int i = 1; i <= Model.TotalPages; i++)
+                                        {
+                                            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                                                <a class="page-link" asp-controller="Wallet" asp-action="Index" asp-route-page="@i">@i</a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </nav>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <p class="text-muted">Không có giao d?ch nào.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

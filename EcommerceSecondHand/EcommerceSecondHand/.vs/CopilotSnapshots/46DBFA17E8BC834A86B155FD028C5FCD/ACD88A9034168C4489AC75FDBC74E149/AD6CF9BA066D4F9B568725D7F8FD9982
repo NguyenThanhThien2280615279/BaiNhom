@@ -1,0 +1,38 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
+    public class MessagesController : ControllerBase
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IMessageRepository _messageRepository;
+
+        public MessagesController(
+            UserManager<ApplicationUser> userManager,
+            IMessageRepository messageRepository)
+        {
+            _userManager = userManager;
+            _messageRepository = messageRepository;
+        }
+
+        [HttpGet("UnreadCount")]
+        public async Task<ActionResult<int>> GetUnreadCount()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            int count = await _messageRepository.GetUnreadMessageCountAsync(user.Id);
+            return Ok(count);
+        }
+    }
+}

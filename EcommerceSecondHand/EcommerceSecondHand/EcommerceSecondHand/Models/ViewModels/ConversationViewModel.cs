@@ -1,0 +1,14 @@
+using EcommerceSecondHand.Models;
+using System.Collections.Generic;
+
+namespace EcommerceSecondHand.Models.ViewModels
+{
+    public class ConversationViewModel
+    {
+        public ApplicationUser? Contact { get; set; }
+        public IEnumerable<Message> Messages { get; set; } = new List<Message>();
+        public string? UserId { get; set; }
+        public string? ContactId { get; set; }
+        public bool IsAdminContact { get; set; }
+    }
+}

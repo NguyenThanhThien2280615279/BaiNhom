@@ -1,0 +1,12 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Repositories.Interfaces
+{
+    public interface IUserStatisticsRepository : IRepository<UserStatistics>
+    {
+        Task<UserStatistics?> GetUserStatisticsAsync(string userId);
+        Task UpdateUserStatisticsAsync(string userId);
+        Task<IEnumerable<UserStatistics>> GetTopSellersAsync(int count);
+        Task<IEnumerable<UserStatistics>> GetTopBuyersAsync(int count);
+    }
+}

@@ -1,0 +1,153 @@
+﻿@page
+@model EcommerceSecondHand.Pages.Admin.WalletManagementModel
+@{
+    ViewData["Title"] = "Wallet Management";
+}
+
+<div class="container mt-4">
+    <h1>Wallet Management</h1>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Add Funds to User Wallet</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-page-handler="AddFunds">
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label">User Email</label>
+                            <input asp-for="Email" class="form-control" placeholder="Enter user email" required />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Amount" class="form-label">Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="Amount" class="form-control" placeholder="Enter amount" required min="1" step="0.01" />
+                            </div>
+                            <span asp-validation-for="Amount" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <input asp-for="Description" class="form-control" placeholder="Enter description (optional)" />
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Add Funds</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Remove Funds from User Wallet</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-page-handler="RemoveFunds">
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label">User Email</label>
+                            <input asp-for="Email" class="form-control" placeholder="Enter user email" required />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Amount" class="form-label">Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="Amount" class="form-control" placeholder="Enter amount" required min="1" step="0.01" />
+                            </div>
+                            <span asp-validation-for="Amount" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Description</label>
+                            <input asp-for="Description" class="form-control" placeholder="Enter description (optional)" />
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-danger">Remove Funds</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Recent Transactions</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentTransactions.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                        <th>Description</th>
+                                        <th>Date</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var transaction in Model.RecentTransactions)
+                                    {
+                                        <tr>
+                                            <td>@transaction.User?.Email</td>
+                                            <td>
+                                                <span class="badge @(transaction.Type == TransactionType.Deposit || transaction.Type == TransactionType.AdminAdjustment ? "bg-success" : "bg-danger")">
+                                                    @transaction.Type.ToString()
+                                                </span>
+                                            </td>
+                                            <td class="@(transaction.Type == TransactionType.Deposit || transaction.Type == TransactionType.AdminAdjustment ? "text-success" : "text-danger")">
+                                                @((transaction.Type == TransactionType.Deposit || transaction.Type == TransactionType.AdminAdjustment ? "+" : "-") + transaction.Amount.ToString("C"))
+                                            </td>
+                                            <td>@transaction.Description</td>
+                                            <td>@transaction.CreatedAt.ToString("g")</td>
+                                            <td>
+                                                @{
+                                                    string badgeClass = transaction.Status switch
+                                                    {
+                                                        TransactionStatus.Completed => "bg-success",
+                                                        TransactionStatus.Pending => "bg-warning",
+                                                        TransactionStatus.Failed => "bg-danger",
+                                                        TransactionStatus.Cancelled => "bg-secondary",
+                                                        _ => "bg-secondary"
+                                                    };
+                                                }
+                                                <span class="badge @badgeClass">@transaction.Status.ToString()</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4">
+                            <p class="text-muted">No recent transactions found.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

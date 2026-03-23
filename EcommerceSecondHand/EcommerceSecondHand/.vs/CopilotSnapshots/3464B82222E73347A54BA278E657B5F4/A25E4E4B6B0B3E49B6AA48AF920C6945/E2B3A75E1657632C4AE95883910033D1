@@ -1,0 +1,10 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Repositories.Interfaces
+{
+    public interface ICategoryRepository : IRepository<Category>
+    {
+        Task<IEnumerable<Category>> GetCategoriesWithProductCountAsync();
+        Task<Category?> GetCategoryWithProductsAsync(int categoryId);
+    }
+}

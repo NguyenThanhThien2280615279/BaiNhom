@@ -1,0 +1,15 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Repositories.Interfaces
+{
+    public interface IPaymentTransactionRepository : IRepository<PaymentTransaction>
+    {
+        Task<IEnumerable<PaymentTransaction>> GetUserTransactionsAsync(string userId);
+        Task<IEnumerable<PaymentTransaction>> GetUserTransactionsByTypeAsync(string userId, TransactionType type);
+        Task<IEnumerable<PaymentTransaction>> GetRecentTransactionsAsync(int count);
+        Task<IEnumerable<PaymentTransaction>> GetTransactionsByStatusAsync(TransactionStatus status);
+        Task<PaymentTransaction?> GetTransactionByReferenceAsync(string reference);
+        Task<decimal> GetTotalRevenueAsync();
+        Task<decimal> GetRevenueForPeriodAsync(DateTime startDate, DateTime endDate);
+    }
+}

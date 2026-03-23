@@ -1,0 +1,104 @@
+﻿using EcommerceSecondHand.Models;
+using EcommerceSecondHand.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace EcommerceSecondHand.Controllers
+{
+    [Authorize]
+    public class OrdersController : Controller
+    {
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IOrderRepository _orderRepository;
+        private readonly INotificationRepository _notificationRepository;
+
+        public OrdersController(
+            UserManager<ApplicationUser> userManager,
+            IOrderRepository orderRepository,
+            INotificationRepository notificationRepository)
+        {
+            _userManager = userManager;
+            _orderRepository = orderRepository;
+            _notificationRepository = notificationRepository;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var orders = await _orderRepository.GetOrdersByUserAsync(user.Id);
+            
+            return View(orders);
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var order = await _orderRepository.GetOrderWithDetailsAsync(id);
+            if (order == null || order.UserId != user.Id)
+            {
+                return NotFound();
+            }
+
+            return View(order);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Cancel(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var order = await _orderRepository.GetByIdAsync(id);
+            if (order == null || order.UserId != user.Id)
+            {
+                return NotFound();
+            }
+
+            // Chỉ có thể hủy đơn hàng ở trạng thái Pending hoặc Processing
+            if (order.Status != OrderStatus.Pending && order.Status != OrderStatus.Processing)
+            {
+                TempData["ErrorMessage"] = "Không thể hủy đơn hàng ở trạng thái hiện tại.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            // Cập nhật trạng thái đơn hàng
+            order.Status = OrderStatus.Cancelled;
+            await _orderRepository.UpdateAsync(order);
+            await _orderRepository.SaveAsync();
+
+            // Tạo thông báo cho người dùng
+            var notification = new Notification
+            {
+                UserId = user.Id,
+                Title = "Đơn hàng đã bị hủy",
+                Message = $"Đơn hàng #{order.Id} của bạn đã bị hủy theo yêu cầu.",
+                Type = NotificationType.Order,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+                RelatedEntityId = order.Id.ToString(),
+                ActionUrl = "/Orders/Details?id=" + order.Id
+            };
+
+            await _notificationRepository.AddAsync(notification);
+            await _notificationRepository.SaveAsync();
+
+            TempData["SuccessMessage"] = "Đơn hàng đã được hủy thành công.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+    }
+}

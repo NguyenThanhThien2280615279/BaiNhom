@@ -1,0 +1,113 @@
+﻿@model IEnumerable<Order>
+@{
+    ViewData["Title"] = "??n hàng c?a tôi";
+}
+
+<div class="container mt-4">
+    <h1>??n hàng c?a tôi</h1>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Danh sách ??n hàng</h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Mã ??n hàng</th>
+                                        <th>Ngày ??t</th>
+                                        <th>T?ng ti?n</th>
+                                        <th>Tr?ng thái</th>
+                                        <th>Ph??ng th?c thanh toán</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in Model.OrderByDescending(o => o.OrderDate))
+                                    {
+                                        <tr>
+                                            <td>@order.OrderNumber</td>
+                                            <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                            <td>@order.TotalAmount.ToString("C")</td>
+                                            <td>
+                                                <span class="badge @GetStatusBadgeClass(order.Status)">
+                                                    @GetStatusText(order.Status)
+                                                </span>
+                                            </td>
+                                            <td>@GetPaymentMethodText(order.PaymentMethod)</td>
+                                            <td>
+                                                <a asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id" class="btn btn-sm btn-outline-primary">
+                                                    Chi ti?t
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <div class="mb-4">
+                                <i class="bi bi-bag text-muted" style="font-size: 4rem;"></i>
+                            </div>
+                            <h3>B?n ch?a có ??n hàng nào</h3>
+                            <p class="text-muted">Hãy b?t ??u mua s?m ?? t?o ??n hàng ??u tiên c?a b?n.</p>
+                            <a asp-controller="Products" asp-action="Index" class="btn btn-primary mt-2">
+                                Mua s?m ngay
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    public string GetStatusBadgeClass(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "bg-warning text-dark",
+            OrderStatus.Processing => "bg-info text-dark",
+            OrderStatus.Shipped => "bg-primary",
+            OrderStatus.Delivered => "bg-success",
+            OrderStatus.Cancelled => "bg-danger",
+            OrderStatus.Refunded => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+    
+    public string GetStatusText(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "Ch? x? lý",
+            OrderStatus.Processing => "?ang x? lý",
+            OrderStatus.Shipped => "?ang v?n chuy?n",
+            OrderStatus.Delivered => "?ã giao hàng",
+            OrderStatus.Cancelled => "?ã h?y",
+            OrderStatus.Refunded => "?ã hoàn ti?n",
+            _ => status.ToString()
+        };
+    }
+    
+    public string GetPaymentMethodText(string paymentMethod)
+    {
+        return paymentMethod switch
+        {
+            "Wallet" => "Ví ?i?n t?",
+            "COD" => "Thanh toán khi nh?n hàng",
+            _ => paymentMethod
+        };
+    }
+}

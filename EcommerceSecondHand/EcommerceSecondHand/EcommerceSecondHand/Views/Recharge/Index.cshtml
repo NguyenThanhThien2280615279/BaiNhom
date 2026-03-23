@@ -1,0 +1,380 @@
+@model EcommerceSecondHand.Models.ViewModels.RechargeViewModel
+@using EcommerceSecondHand.Models
+@using EcommerceSecondHand.Repositories.Interfaces
+@using System.Security.Claims
+@inject IPaymentTransactionRepository PaymentRepo
+
+@{
+    ViewData["Title"] = "Nạp tiền vào ví";
+
+    // Lấy userId
+    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+    // Lấy lịch sử ví (PaymentTransaction)
+    var walletTx = userId == null
+        ? new List<PaymentTransaction>()
+        : PaymentRepo.GetRecentByUserAsync(userId, 30).GetAwaiter().GetResult() // lấy nhiều hơn để "xem thêm"
+            .Where(t => t.Status == TransactionStatus.Completed
+                     && t.Type != TransactionType.AdminAdjustment)
+            .OrderByDescending(t => t.CreatedAt)
+            .ToList();
+
+    // Helper: giao dịch cộng hay trừ
+    Func<PaymentTransaction, bool> IsCredit = tx => tx.Type switch
+    {
+        TransactionType.Deposit => true,
+        TransactionType.Sale => true,
+        TransactionType.Refund => true,
+        _ => false
+    };
+
+    // Helper: nhãn hiển thị
+    Func<PaymentTransaction, string> Label = tx =>
+    {
+        var ord = tx.OrderId.HasValue ? $" đơn #{tx.OrderId}" : "";
+        return tx.Type switch
+        {
+            TransactionType.Deposit => "Nạp ví",
+            TransactionType.Withdrawal => "Rút ví",
+            TransactionType.Withdraw => "Rút ví",
+            TransactionType.Purchase => $"Thanh toán{ord}",
+            TransactionType.Sale => $"Nhận tiền bán{ord}",
+            TransactionType.Refund => $"Hoàn tiền{ord}",
+            _ => "Giao dịch"
+        };
+    };
+}
+
+<div class="container py-4">
+    @* ===== Alerts ===== *@
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i>@TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Warning"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>@TempData["Warning"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-x-circle me-2"></i>@TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <!-- LEFT -->
+        <div class="col-lg-8">
+            <div class="card shp-soft mb-4">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-wallet2 me-2"></i>Nạp tiền vào ví
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-end mb-3">
+                        <a asp-action="Withdraw" class="btn btn-outline-danger">
+                            <i class="bi bi-arrow-down-circle me-1"></i> Rút tiền
+                        </a>
+                    </div>
+
+                    <div class="row">
+                        @foreach (var package in Model.Packages)
+                        {
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="card package-card h-100" data-package-id="@package.Id">
+                                    <div class="card-body text-center d-flex flex-column">
+                                        <h5 class="card-title text-primary">@package.Name</h5>
+
+                                        <div class="mb-2">
+                                            <span class="h4 text-success">@package.Amount.ToString("N0")₫</span>
+                                        </div>
+                                        @if (package.BonusAmount > 0)
+                                        {
+                                            <div class="text-warning">
+                                                <small>+ @package.BonusAmount.ToString("N0")₫</small>
+                                            </div>
+                                        }
+
+                                        <p class="card-text text-muted small flex-grow-1">@package.Description</p>
+
+                                        <button class="btn btn-primary w-100 recharge-btn mt-2"
+                                                data-package-id="@package.Id">
+                                            <i class="bi bi-credit-card me-1"></i> Nạp ngay
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="col-lg-4">
+            <div class="sticky-top" style="top:84px">
+                <!-- Balance -->
+                <div class="card shp-soft mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-wallet me-2"></i>Số dư ví</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="h3 text-success mb-0">@Model.CurrentBalance.ToString("N0")₫</div>
+                        <small class="text-muted">Số dư hiện tại</small>
+                    </div>
+                </div>
+
+                <!-- Recharge transactions -->
+                <div class="card shp-soft mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Giao dịch nạp gần đây</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model.RecentTransactions != null && Model.RecentTransactions.Any())
+                        {
+                            @foreach (var transaction in Model.RecentTransactions)
+                            {
+                                var statusClass = transaction.Status switch
+                                {
+                                    RechargeStatus.Completed => "text-success",
+                                    RechargeStatus.Pending => "text-warning",
+                                    RechargeStatus.Failed => "text-danger",
+                                    RechargeStatus.Canceled => "text-secondary",
+                                    _ => "text-muted"
+                                };
+                                var statusText = transaction.Status switch
+                                {
+                                    RechargeStatus.Completed => "Thành công",
+                                    RechargeStatus.Pending => "Chờ thanh toán",
+                                    RechargeStatus.Failed => "Thất bại",
+                                    RechargeStatus.Canceled => "Đã hủy",
+                                    _ => transaction.Status.ToString()
+                                };
+
+                                <div class="d-flex justify-content-between align-items-center py-1 border-bottom">
+                                    <div class="pe-2">
+                                        <div class="small fw-semibold">@transaction.TransactionCode</div>
+                                        <div class="small @statusClass">@statusText</div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="small text-success">+@transaction.TotalAmount.ToString("N0")₫</div>
+                                        <div class="small text-muted">@transaction.CreatedAt.ToString("dd/MM")</div>
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="text-center mt-3">
+                                <a asp-action="TransactionHistory" class="btn btn-outline-primary btn-sm">
+                                    Xem tất cả
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted">
+                                <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                                <p class="mt-2">Chưa có giao dịch nạp nào</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Wallet history -->
+                <div class="card shp-soft">
+                    <div class="card-header bg-white d-flex align-items-center justify-content-between">
+                        <h5 class="mb-0"><i class="bi bi-journal-text me-2"></i>Lịch sử ví</h5>
+                        @* ĐÃ BỎ nút "Xem tất cả" theo yêu cầu *@
+                    </div>
+                    <div class="card-body p-0">
+                        @if (walletTx.Count == 0)
+                        {
+                            <div class="p-4 text-center text-muted">
+                                <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                                <p class="mt-2 mb-0">Chưa có giao dịch ví nào</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <ul id="walletList" class="list-unstyled m-0">
+                                @{
+                                    var i = 0;
+                                }
+                                @foreach (var tx in walletTx)
+                                {
+                                    var isCredit = IsCredit(tx);
+                                    var hiddenClass = i >= 5 ? "d-none" : "";
+                                    <li class="d-flex justify-content-between align-items-start py-2 border-bottom @hiddenClass">
+                                        <div>
+                                            <div class="fw-semibold">@Label(tx)</div>
+                                            <div class="small text-muted">
+                                                @tx.CreatedAt.ToLocalTime().ToString("dd/MM HH:mm")
+                                                @if (!string.IsNullOrWhiteSpace(tx.TransactionReference))
+                                                {
+                                                    @: · @tx.TransactionReference
+                                                }
+                                            </div>
+                                        </div>
+                                        <div class="fw-semibold @(isCredit ? "text-success" : "text-danger")">
+                                            @(isCredit ? "+" : "-")@tx.Amount.ToString("N0") đ
+                                        </div>
+                                    </li>
+                                    i++;
+                                }
+                            </ul>
+
+                            @if (walletTx.Count > 5)
+                            {
+                                <div class="p-3 text-center">
+                                    <button id="walletMoreBtn" type="button" class="btn btn-light btn-sm border">
+                                        Xem thêm
+                                    </button>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Xác nhận nạp tiền</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <i class="bi bi-credit-card text-primary" style="font-size: 3rem;"></i>
+                    <h4 class="mt-3" id="packageName"></h4>
+                    <div class="mt-3">
+                        <span class="h5 text-success" id="amount"></span>
+                        <span class="text-muted" id="bonusInfo"></span>
+                    </div>
+                    <p class="text-muted mt-3">Bạn sẽ được chuyển đến trang thanh toán VNPay</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="confirmRecharge">
+                    <i class="bi bi-check-circle me-1"></i> Xác nhận
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // ====== Modal nạp ======
+        let selectedPackageId = null;
+        let selectedPackageName = null;
+
+        $('.recharge-btn').on('click', function () {
+            selectedPackageId = $(this).data('package-id');
+            const packageCard = $(this).closest('.package-card');
+            const packageName = packageCard.find('.card-title').text().trim();
+            const amount = packageCard.find('.h4').text().trim();
+            const bonusInfo = packageCard.find('.text-warning').text().trim();
+
+            selectedPackageName = packageName;
+            $('#packageName').text(packageName);
+            $('#amount').text(amount);
+            $('#bonusInfo').text(bonusInfo ? ` (${bonusInfo})` : '');
+
+            $('#confirmModal').modal('show');
+        });
+
+        $('#confirmRecharge').on('click', function () {
+            if (!selectedPackageId) return;
+
+            const $btn = $(this).prop('disabled', true).html('<i class="bi bi-hourglass-split me-1"></i> Đang xử lý...');
+
+            $.post('@Url.Action("CreateTransaction", "Recharge")', { packageId: selectedPackageId })
+                .done(function (res) {
+                    if (res && res.success) {
+                        // tạo form post tới CreatePaymentUrlVnpay
+                        const $form = $('<form/>', { method: 'post', action: '@Url.Action("CreatePaymentUrlVnpay", "Recharge")' });
+                        $form.append($('<input/>', { type: 'hidden', name: 'OrderType', value: 'other' }));
+                        $form.append($('<input/>', { type: 'hidden', name: 'Amount', value: res.amount }));
+                        $form.append($('<input/>', { type: 'hidden', name: 'OrderDescription', value: 'Nạp tiền gói ' + selectedPackageName }));
+                        $form.append($('<input/>', { type: 'hidden', name: 'Name', value: '@(User.Identity?.Name ?? "User")' }));
+                        $form.append($('<input/>', { type: 'hidden', name: 'OrderId', value: res.transactionCode }));
+                        $('body').append($form);
+                        $form.trigger('submit');
+                    } else {
+                        alert('Có lỗi xảy ra: ' + (res?.message ?? 'Không rõ nguyên nhân'));
+                        $('#confirmModal').modal('hide');
+                    }
+                })
+                .fail(function () {
+                    alert('Có lỗi xảy ra khi tạo giao dịch');
+                    $('#confirmModal').modal('hide');
+                })
+                .always(function () {
+                    $btn.prop('disabled', false).html('<i class="bi bi-check-circle me-1"></i> Xác nhận');
+                });
+        });
+
+        // ====== Lịch sử ví: Xem thêm / Thu gọn (5 dòng/lần) ======
+        (function () {
+            const $list = $('#walletList');
+            const $btn  = $('#walletMoreBtn');
+            if (!$list.length || !$btn.length) return;
+
+            const batch = 5;
+            let shown = $list.children('li:not(.d-none)').length;
+            const total = $list.children('li').length;
+
+            function updateBtn() {
+                $btn.text(shown >= total ? 'Thu gọn' : 'Xem thêm');
+            }
+            updateBtn();
+
+            $btn.on('click', function () {
+                if (shown >= total) {
+                    // Thu gọn
+                    $list.children('li').addClass('d-none');
+                    $list.children('li').slice(0, batch).removeClass('d-none');
+                    shown = batch;
+                    updateBtn();
+                    return;
+                }
+                // Mở thêm
+                const next = Math.min(shown + batch, total);
+                $list.children('li').slice(0, next).removeClass('d-none');
+                shown = next;
+                updateBtn();
+            });
+        })();
+    </script>
+}
+
+<style>
+    .package-card {
+        transition: transform .18s ease;
+        cursor: pointer;
+        border: 1px solid rgba(0,0,0,.06);
+    }
+
+        .package-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,.06);
+        }
+
+        .package-card.selected {
+            border-color: var(--bs-primary);
+            background-color: rgba(var(--bs-primary-rgb), .08);
+        }
+</style>

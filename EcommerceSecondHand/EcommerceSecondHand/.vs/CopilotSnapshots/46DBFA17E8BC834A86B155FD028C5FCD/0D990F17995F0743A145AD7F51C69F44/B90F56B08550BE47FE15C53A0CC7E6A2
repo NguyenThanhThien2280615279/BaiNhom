@@ -1,0 +1,13 @@
+﻿using EcommerceSecondHand.Models;
+
+namespace EcommerceSecondHand.Models
+{
+    public class ProductDetailsViewModel
+    {
+        public Product? Product { get; set; }
+        public IEnumerable<Review> Reviews { get; set; } = new List<Review>();
+        public double AverageRating { get; set; }
+        public IEnumerable<Product> RelatedProducts { get; set; } = new List<Product>();
+        public bool HasUserReviewed { get; set; }
+    }
+}

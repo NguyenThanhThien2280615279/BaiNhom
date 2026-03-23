@@ -1,0 +1,432 @@
+@model Order
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+}
+
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Orders" asp-action="Index">Đơn hàng của tôi</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Chi tiết đơn hàng</li>
+        </ol>
+    </nav>
+
+    <h1>Chi tiết đơn hàng</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card shp-soft mb-4">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Thông tin đơn hàng</h5>
+                        <span class="badge @GetStatusBadgeClass(Model.Status)">@GetStatusText(Model.Status)</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p><strong>Mã đơn hàng:</strong> @Model.OrderNumber</p>
+                            <p><strong>Ngày đặt:</strong> @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
+                            <p><strong>Phương thức thanh toán:</strong> @GetPaymentMethodText(Model.PaymentMethod)</p>
+                            <p><strong>Trạng thái thanh toán:</strong> @GetPaymentStatusText(Model.PaymentStatus)</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Địa chỉ giao hàng:</strong> @Model.ShippingAddress</p>
+                            <p><strong>Thành phố:</strong> @Model.ShippingCity</p>
+                            <p><strong>Quốc gia:</strong> @Model.ShippingCountry</p>
+                            <p><strong>Mã bưu điện:</strong> @Model.ShippingPostalCode</p>
+                        </div>
+                    </div>
+
+                    <h6>Sản phẩm</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th>Số lượng</th>
+                                    <th>Đơn giá</th>
+                                    <th>Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OrderItems ?? Enumerable.Empty<OrderItem>())
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                @if (!string.IsNullOrEmpty(item.Product?.ImageUrl))
+                                                {
+                                                    <img src="@item.Product.ImageUrl" alt="@item.Product.Name"
+                                                         class="img-thumbnail me-2"
+                                                         style="width: 50px; height: 50px; object-fit: cover;">
+                                                }
+                                                else
+                                                {
+                                                    <div class="bg-secondary text-white d-flex align-items-center justify-content-center me-2"
+                                                         style="width: 50px; height: 50px;">
+                                                        <i class="bi bi-image"></i>
+                                                    </div>
+                                                }
+                                                <span>@item.Product?.Name</span>
+                                            </div>
+                                        </td>
+                                        <td>@item.Quantity</td>
+                                        <td>@item.Price.ToString("N0") đ</td>
+                                        <td>@((item.Price * item.Quantity).ToString("N0")) đ</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Tổng cộng:</strong></td>
+                                    <td><strong>@Model.TotalAmount.ToString("N0") đ</strong></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    @* Nút Hủy đơn hàng *@
+                    @if (Model.Status == OrderStatus.Pending || Model.Status == OrderStatus.Accepted)
+                    {
+                        <form method="post"
+                              asp-controller="Orders"
+                              asp-action="Cancel"
+                              asp-route-id="@Model.Id"
+                              class="mt-4"
+                              onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-x-circle me-1"></i> Hủy đơn hàng
+                            </button>
+                        </form>
+                    }
+
+                    @* Nút Trả hàng *@
+                    @if (Model.Status == OrderStatus.Accepted)
+                    {
+                        <form method="post"
+                              asp-controller="Orders"
+                              asp-action="RequestReturn"
+                              asp-route-id="@Model.Id"
+                              class="mt-2"
+                              onsubmit="return confirm('Xác nhận yêu cầu trả hàng?');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i> Trả hàng
+                            </button>
+                        </form>
+                    }
+
+                    @* 👇 NÚT XÁC NHẬN ĐÃ NHẬN HÀNG / GIAO THÀNH CÔNG *@
+                    @if (Model.Status == OrderStatus.Accepted || Model.Status == OrderStatus.Pending)
+                    {
+                        <form method="post"
+                              asp-controller="Orders"
+                              asp-action="ConfirmDelivery"
+                              asp-route-id="@Model.Id"
+                              class="mt-3"
+                              onsubmit="return confirm('Bạn đã nhận được hàng và muốn xác nhận hoàn tất đơn?');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle me-1"></i> Xác nhận đã nhận hàng
+                            </button>
+                            <div class="form-text text-muted" style="font-size: 0.8rem;">
+                                Sau khi xác nhận: đơn sẽ chuyển sang trạng thái hoàn tất,
+                                và uy tín on-chain của người bán sẽ được cộng.
+                            </div>
+                        </form>
+                    }
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shp-soft mb-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Trạng thái đơn hàng</h5>
+                </div>
+                <div class="card-body">
+                    <div class="position-relative order-tracking">
+                        <div class="step @(Model.OrderDate != default ? "active" : "")">
+                            <span class="icon"><i class="bi bi-cart-check"></i></span>
+                            <div class="step-info">
+                                <h6>Đặt hàng</h6>
+                                <p>@(Model.OrderDate != default ? Model.OrderDate.ToString("dd/MM/yyyy HH:mm") : "-")</p>
+                            </div>
+                        </div>
+
+                        <div class="step @(Model.Status >= OrderStatus.Accepted ? "active" : "")">
+                            <span class="icon"><i class="bi bi-box-seam"></i></span>
+                            <div class="step-info">
+                                <h6>Chấp nhận</h6>
+                                <p>
+                                    @(Model.UpdatedAt != default && Model.Status >= OrderStatus.Accepted
+                                        ? Model.UpdatedAt.ToString("dd/MM/yyyy HH:mm")
+                                        : "-")
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="step @(Model.Status == OrderStatus.Completed ? "active" : "")">
+                            <span class="icon"><i class="bi bi-check2-circle"></i></span>
+                            <div class="step-info">
+                                <h6>Hoàn tất</h6>
+                                <p>
+                                    @(Model.DeliveredAt.HasValue
+                                        ? Model.DeliveredAt.Value.ToString("dd/MM/yyyy HH:mm")
+                                        : "-")
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.Status == OrderStatus.Canceled)
+            {
+                <div class="card shp-soft bg-danger text-white">
+                    <div class="card-body">
+                        <h5><i class="bi bi-exclamation-triangle me-2"></i> Đơn hàng đã bị hủy</h5>
+                        <p>Đơn hàng này đã bị hủy vào @Model.UpdatedAt.ToString("dd/MM/yyyy HH:mm").</p>
+                    </div>
+                </div>
+            }
+
+            <div class="card shp-soft mt-4">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Hỗ trợ</h5>
+                </div>
+                <div class="card-body">
+                    <p>Nếu bạn có bất kỳ câu hỏi nào về đơn hàng này, vui lòng liên hệ với chúng tôi.</p>
+                    <a href="#" class="btn btn-outline-primary w-100 mb-2">
+                        <i class="bi bi-chat-dots me-1"></i> Nhắn tin với người bán
+                    </a>
+                    <a href="mailto:support@ecommercesecondhand.com" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-envelope me-1"></i> Liên hệ hỗ trợ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* ========== MODAL ĐÁNH GIÁ SAU KHI XÁC NHẬN NHẬN HÀNG ========== *@
+<div class="modal fade" id="ratingModal" tabindex="-1" aria-labelledby="ratingModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-controller="Orders" asp-action="SubmitRating">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="orderId" value="@Model.Id" />
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ratingModalLabel">
+                        Đánh giá người bán cho đơn #@Model.OrderNumber
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p class="mb-2 text-muted" style="font-size: 0.9rem;">
+                        Đánh giá sẽ được dùng để cập nhật uy tín on-chain (chế độ demo) cho người bán.
+                    </p>
+
+                    <div class="mb-3">
+                        <label class="form-label">Chấm sao</label>
+                        <div class="rating d-flex flex-row-reverse justify-content-end">
+                            <input type="radio" id="orderStar5" name="rating" value="5" />
+                            <label for="orderStar5" title="5 sao">★</label>
+
+                            <input type="radio" id="orderStar4" name="rating" value="4" />
+                            <label for="orderStar4" title="4 sao">★</label>
+
+                            <input type="radio" id="orderStar3" name="rating" value="3" />
+                            <label for="orderStar3" title="3 sao">★</label>
+
+                            <input type="radio" id="orderStar2" name="rating" value="2" />
+                            <label for="orderStar2" title="2 sao">★</label>
+
+                            <input type="radio" id="orderStar1" name="rating" value="1" />
+                            <label for="orderStar1" title="1 sao">★</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Nhận xét (tuỳ chọn)</label>
+                        <textarea name="comment"
+                                  class="form-control"
+                                  rows="3"
+                                  placeholder="Nhận xét về người bán / sản phẩm..."></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Để sau</button>
+                    <button type="submit" class="btn btn-primary">Gửi đánh giá</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .order-tracking {
+            padding: 0 1rem;
+        }
+
+            .order-tracking .step {
+                display: flex;
+                position: relative;
+                padding-bottom: 1.5rem;
+            }
+
+                .order-tracking .step:last-child {
+                    padding-bottom: 0;
+                }
+
+                .order-tracking .step::before {
+                    content: '';
+                    position: absolute;
+                    left: 15px;
+                    top: 30px;
+                    height: calc(100% - 30px);
+                    width: 2px;
+                    background-color: #e9ecef;
+                }
+
+                .order-tracking .step:last-child::before {
+                    display: none;
+                }
+
+                .order-tracking .step.active::before {
+                    background-color: #0d6efd;
+                }
+
+                .order-tracking .step .icon {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 50%;
+                    background-color: #e9ecef;
+                    color: #6c757d;
+                    margin-right: 1rem;
+                    z-index: 1;
+                }
+
+                .order-tracking .step.active .icon {
+                    background-color: #0d6efd;
+                    color: white;
+                }
+
+            .order-tracking .step-info {
+                flex: 1;
+            }
+
+                .order-tracking .step-info h6 {
+                    margin-bottom: 0.25rem;
+                }
+
+                .order-tracking .step-info p {
+                    margin-bottom: 0;
+                    font-size: 0.875rem;
+                    color: #6c757d;
+                }
+
+        /* ==== Rating stars cho modal ==== */
+        .rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+
+            .rating input {
+                position: absolute;
+                appearance: none;
+            }
+
+            .rating label {
+                cursor: pointer;
+                font-size: 26px;
+                color: #ccc;
+                margin: 0 2px;
+            }
+
+                .rating input:checked ~ label,
+                .rating label:hover,
+                .rating label:hover ~ label {
+                    color: #ffc700;
+                }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Cờ từ server: nếu vừa bấm ConfirmDelivery xong => mở modal đánh giá
+            var showRating = '@TempData["ShowRatingModal"]' === 'True';
+
+            if (showRating) {
+                var modalElement = document.getElementById('ratingModal');
+                if (modalElement) {
+                    var ratingModal = new bootstrap.Modal(modalElement);
+                    ratingModal.show();
+                }
+            }
+        });
+    </script>
+}
+
+@functions {
+    public string GetStatusBadgeClass(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "bg-warning text-dark",
+            OrderStatus.Accepted => "bg-primary",
+            OrderStatus.Canceled => "bg-danger",
+            OrderStatus.Refunded => "bg-secondary",
+            OrderStatus.Completed => "bg-success",
+            _ => "bg-secondary"
+        };
+    }
+
+    public string GetStatusText(OrderStatus status)
+    {
+        return status switch
+        {
+            OrderStatus.Pending => "Chờ xác nhận",
+            OrderStatus.Accepted => "Đã chấp nhận",
+            OrderStatus.Canceled => "Đã hủy",
+            OrderStatus.Refunded => "Đã hoàn tiền",
+            OrderStatus.Completed => "Hoàn tất",
+            _ => status.ToString()
+        };
+    }
+
+    public string GetPaymentMethodText(string paymentMethod)
+    {
+        return paymentMethod switch
+        {
+            "Wallet" => "Ví điện tử",
+            "COD" => "Thanh toán khi nhận hàng",
+            _ => paymentMethod
+        };
+    }
+
+    public string GetPaymentStatusText(PaymentStatus status)
+    {
+        return status switch
+        {
+            PaymentStatus.Pending => "Chờ thanh toán",
+            PaymentStatus.Paid => "Đã thanh toán",
+            PaymentStatus.Failed => "Thanh toán thất bại",
+            PaymentStatus.Refunded => "Đã hoàn tiền",
+            _ => status.ToString()
+        };
+    }
+}

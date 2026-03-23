@@ -1,0 +1,68 @@
+﻿@{
+    ViewData["Title"] = "Server Socket Console";
+    var count = (ViewBag.ClientCount as int?) ?? 0;
+    var ids = ViewBag.ClientIds as IReadOnlyCollection<string> ?? Array.Empty<string>();
+}
+
+<h2>Server Socket Console</h2>
+<h3>Server Socket Monitor</h3>
+
+<p><b>Clients:</b> @count</p>
+@if (ids.Count > 0)
+{
+    <ul>
+        @foreach (var id in ids)
+        {
+            <li>@id</li>
+        }
+    </ul>
+}
+
+<!-- Form broadcast: AJAX + anti-forgery, KHÔNG reload trang -->
+<form id="broadcastForm" method="post" action="/server-socket/broadcast">
+    @Html.AntiForgeryToken()
+    <input id="msg" name="message" placeholder="Nhập tin nhắn để gửi ALL client..." style="width:360px" required />
+    <button type="submit">Gửi</button>
+</form>
+
+<hr />
+<h3>Luồng log / dữ liệu realtime</h3>
+<pre id="sseLog" style="height:260px; overflow:auto; background:#111; color:#0f0; padding:10px;"></pre>
+
+<script>
+    // --- Mở SSE 1 lần ---
+    const logBox = document.getElementById('sseLog');
+    const es = new EventSource('/server-socket/stream');
+    es.onmessage = (e) => {
+      logBox.textContent += e.data + "\n";
+      logBox.scrollTop = logBox.scrollHeight;
+    };
+    es.onerror = () => { logBox.textContent += "[stream error]\n"; };
+
+    // --- Gửi broadcast bằng AJAX để không reload trang ---
+    document.getElementById('broadcastForm').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+
+      const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+      const msg = document.getElementById('msg').value.trim();
+      if (!msg) return;
+
+      const body = new URLSearchParams();
+      body.set('message', msg);
+
+      const res = await fetch('/server-socket/broadcast', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+          'RequestVerificationToken': token // ASP.NET Core anti-forgery header
+        },
+        body: body.toString()
+      });
+
+      if (res.ok) {
+        document.getElementById('msg').value = '';
+      } else {
+        logBox.textContent += "[broadcast failed]\n";
+      }
+    });
+</script>

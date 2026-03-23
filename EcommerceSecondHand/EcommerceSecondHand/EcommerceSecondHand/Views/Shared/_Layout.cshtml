@@ -1,0 +1,505 @@
+﻿@using EcommerceSecondHand.Models
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - EcommerceSecondHand</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/theme-store.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<!-- Thư viện SignalR -->
+<script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@7/dist/browser/signalr.min.js"></script>
+
+<!-- File kết nối -->
+<script src="~/js/hubs.js"></script>
+
+
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm shp-header mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-bag-heart-fill me-2"></i>
+                    EcommerceSecondHand
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Products" asp-action="Index">Sản phẩm</a>
+                        </li>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="Admin" asp-controller="Admin" asp-action="Index">Quản trị</a>
+                            </li>
+                        }
+                        @if (User.IsInRole("Vendor") && !User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Vendor" asp-action="Index">Kênh người bán</a>
+                            </li>
+                        }
+
+                    </ul>
+                    <div class="d-flex">
+                        <form class="d-flex me-2 shp-search" asp-controller="Products" asp-action="Index" method="get">
+                            <input class="form-control me-0" type="search" name="searchQuery"
+                                placeholder="Tìm kiếm sản phẩm..." aria-label="Search">
+                            <button class="btn" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </form>
+
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <div class="d-flex align-items-center">
+                                <div class="dropdown me-2">
+                                    <a href="#" class="btn btn-outline-secondary position-relative"
+                                        id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-bell"></i>
+                                        <span
+                                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                            id="notification-badge">
+                                            0
+                                        </span>
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-end shadow"
+                                        aria-labelledby="notificationDropdown" style="min-width: 300px; max-width: 400px;">
+                                        <div
+                                            class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+                                            <h6 class="mb-0">Thông báo</h6>
+                                            <a href="#" class="text-decoration-none" id="mark-all-read">Đánh dấu đã đọc</a>
+                                        </div>
+                                        <div id="notification-list" style="max-height: 300px; overflow-y: auto;">
+                                            <div class="text-center py-3">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Đang tải...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <a asp-controller="WebNotifications" asp-action="Index"
+                                            class="dropdown-item text-center border-top py-2">
+                                            Xem tất cả thông báo
+                                        </a>
+                                    </div>
+                                </div>
+
+
+                                <a asp-controller="WebCart" asp-action="Index"
+                                    class="btn btn-outline-secondary position-relative me-2">
+                                    <i class="bi bi-cart"></i>
+                                    <span
+                                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary"
+                                        id="cart-badge">
+                                        0
+                                    </span>
+                                </a>
+
+                                <div class="dropdown">
+                                    @{
+                                        var currentUser = await UserManager.GetUserAsync(User); var profileUrl =
+                                        !string.IsNullOrEmpty(currentUser?.ProfilePicture) ? currentUser.ProfilePicture :
+                                        "/images/avatars/avatar.jpg";
+                                    }
+                                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle"
+                                        id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <img src="@profileUrl" alt="User" width="32" height="32"
+                                            class="rounded-circle me-2">
+                                        <span>@User.Identity.Name</span>
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="userDropdown">
+                                        <li><a class="dropdown-item" asp-controller="Account" asp-action="Profile">Hồ sơ</a>
+                                        </li>
+                                        <li><a class="dropdown-item" asp-controller="Orders" asp-action="Index">Đơn hàng của
+                                                tôi</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Messages" asp-action="Index">Tin
+                                                nhắn</a></li>
+                                        @* Đã bỏ mục Ví điện tử vì đã có chức năng Nạp tiền *@
+                                        <li><a class="dropdown-item" asp-controller="Recharge" asp-action="Index">
+                                                <i class="bi bi-credit-card me-1"></i>Nạp tiền</a></li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li>
+                                            <form asp-controller="Account" asp-action="Logout" method="post"
+                                                class="px-3 py-1">
+                                                <button type="submit" class="dropdown-item">
+                                                    Đăng xuất
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <a class="btn btn-outline-primary me-2" asp-controller="Account" asp-action="Login">Đăng
+                                nhập</a>
+                            <a class="btn btn-primary" asp-controller="Account" asp-action="Register">Đăng ký</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main">
+       
+
+        @RenderBody()
+    </main>
+
+    <footer class="shopee-footer">
+        <div class="container">
+            <!-- Main Footer Content -->
+            <div class="footer-main">
+                <div class="row g-4">
+                    <!-- Company Info -->
+                    <div class="col-lg-4 col-md-6">
+                        <div class="footer-brand">
+                            <div class="brand-logo">
+                                <i class="bi bi-shop"></i>
+                                <span class="brand-name">EcommerceSecondHand</span>
+                            </div>
+                            <p class="brand-description">
+                                Nền tảng mua bán đồ cũ chất lượng hàng đầu Việt Nam.
+                                Kết nối người mua và người bán để tạo ra một cộng đồng trao đổi hàng hóa bền vững.
+                            </p>
+                            <div class="social-links">
+                                <a href="#" class="social-link facebook" title="Facebook">
+                                    <i class="bi bi-facebook"></i>
+                                </a>
+                                <a href="#" class="social-link instagram" title="Instagram">
+                                    <i class="bi bi-instagram"></i>
+                                </a>
+                                <a href="#" class="social-link twitter" title="Twitter">
+                                    <i class="bi bi-twitter-x"></i>
+                                </a>
+                                <a href="#" class="social-link youtube" title="YouTube">
+                                    <i class="bi bi-youtube"></i>
+                                </a>
+                                <a href="#" class="social-link tiktok" title="TikTok">
+                                    <i class="bi bi-tiktok"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Links -->
+                    <div class="col-lg-2 col-md-6">
+                        <div class="footer-section">
+                            <h6 class="footer-title">Về chúng tôi</h6>
+                            <ul class="footer-links">
+                                <li><a asp-controller="Home" asp-action="About">Giới thiệu</a></li>
+                                <li><a asp-controller="Home" asp-action="Contact">Liên hệ</a></li>
+                                <li><a asp-controller="Home" asp-action="Careers">Tuyển dụng</a></li>
+                                <li><a asp-controller="Home" asp-action="News">Tin tức</a></li>
+                                <li><a asp-controller="Home" asp-action="Investor">Nhà đầu tư</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Services -->
+                    <div class="col-lg-2 col-md-6">
+                        <div class="footer-section">
+                            <h6 class="footer-title">Dịch vụ</h6>
+                            <ul class="footer-links">
+                                <li><a asp-controller="Home" asp-action="HowToSell">Cách bán hàng</a></li>
+                                <li><a asp-controller="Home" asp-action="HowToBuy">Cách mua hàng</a></li>
+                                <li><a asp-controller="Home" asp-action="Shipping">Vận chuyển</a></li>
+                                <li><a asp-controller="Home" asp-action="Payments">Thanh toán</a></li>
+                                <li><a asp-controller="Home" asp-action="Support">Hỗ trợ</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Policies -->
+                    <div class="col-lg-2 col-md-6">
+                        <div class="footer-section">
+                            <h6 class="footer-title">Chính sách</h6>
+                            <ul class="footer-links">
+                                <li><a asp-controller="Home" asp-action="Privacy">Bảo mật thông tin</a></li>
+                                <li><a asp-controller="Home" asp-action="Terms">Điều khoản sử dụng</a></li>
+                                <li><a asp-controller="Home" asp-action="ReturnPolicy">Chính sách đổi trả</a></li>
+                                <li><a asp-controller="Home" asp-action="Warranty">Bảo hành</a></li>
+                                <li><a asp-controller="Home" asp-action="Complaint">Khiếu nại</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Contact Info -->
+                    <div class="col-lg-2 col-md-6">
+                        <div class="footer-section">
+                            <h6 class="footer-title">Liên hệ</h6>
+                            <div class="contact-info">
+                                <div class="contact-item">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <span>123 Đường Cách Mạng Tháng 8<br>Quận 3, TP. Hồ Chí Minh</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-telephone"></i>
+                                    <span>(84) 123-456-789</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-envelope"></i>
+                                    <span>info@ecommercesecondhand.com</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="footer-bottom">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="copyright">
+                            <p>&copy; @DateTime.Now.Year EcommerceSecondHand. Design by Thanh Thiện</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="footer-badges">
+                            <div class="badge-item">
+                                <i class="bi bi-shield-check"></i>
+                                <span>Bảo mật</span>
+                            </div>
+                            <div class="badge-item">
+                                <i class="bi bi-truck"></i>
+                                <span>Giao hàng nhanh</span>
+                            </div>
+                            <div class="badge-item">
+                                <i class="bi bi-arrow-clockwise"></i>
+                                <span>Đổi trả dễ dàng</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @if (User.Identity.IsAuthenticated)
+    {
+        <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
+        <script>
+            // Lấy số lượng thông báo chưa đọc
+            function loadUnreadNotificationsCount() {
+                fetch('/api/Notifications/GetUnreadCount', { credentials: 'same-origin' })
+                    .then(response => {
+                        if (!response.ok) { throw new Error('HTTP ' + response.status); }
+                        return response.json();
+                    })
+                    .then(count => {
+                        const badge = document.getElementById('notification-badge');
+                        if (count > 0) {
+                            badge.textContent = count > 99 ? '99+' : count;
+                            badge.style.display = 'block';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
+            // Lấy danh sách thông báo gần đây
+            function loadRecentNotifications() {
+                fetch('/api/Notifications/GetRecent', { credentials: 'same-origin' })
+                    .then(response => {
+                        if (!response.ok) { throw new Error('HTTP ' + response.status); }
+                        return response.json();
+                    })
+                    .then(notifications => {
+                        const notificationList = document.getElementById('notification-list');
+
+                        if (notifications.length === 0) {
+                            notificationList.innerHTML = `
+                                                                                                                                                        <div class="text-center py-3">
+                                                                                                                                                            <p class="text-muted mb-0">Không có thông báo mới</p>
+                                                                                                                                                        </div>
+                                                                                                                                                    `;
+                            return;
+                        }
+
+                        let html = '';
+                        notifications.forEach(notification => {
+                            const date = new Date(notification.createdAt);
+                            const formattedDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes().toString().padStart(2, '0')}`;
+
+                            const iconClass = getNotificationIconClass(notification.type);
+
+                            html += `
+                                                                                                                                                        <a href="${notification.actionUrl || '#'}" class="dropdown-item ${!notification.isRead ? 'bg-light' : ''}" data-id="${notification.id}">
+                                                                                                                                                            <div class="d-flex">
+                                                                                                                                                                <div class="flex-shrink-0 me-2">
+                                                                                                                                                                    <i class="${iconClass} fs-5"></i>
+                                                                                                                                                                </div>
+                                                                                                                                                                <div class="flex-grow-1">
+                                                                                                                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                                                                                                                        <h6 class="mb-0">${notification.title}</h6>
+                                                                                                                                                                        <small class="text-muted">${formattedDate}</small>
+                                                                                                                                                                    </div>
+                                                                                                                                                                    <p class="mb-0 text-muted small">${notification.message}</p>
+                                                                                                                                                                </div>
+                                                                                                                                                            </div>
+                                                                                                                                                        </a>
+                                                                                                                                                    `;
+                        });
+
+                        notificationList.innerHTML = html;
+
+                        // Xử lý sự kiện khi click vào thông báo
+                        const notificationItems = notificationList.querySelectorAll('.dropdown-item');
+                        notificationItems.forEach(item => {
+                            item.addEventListener('click', function (e) {
+                                const id = this.getAttribute('data-id');
+                                if (!this.classList.contains('bg-light')) {
+                                    return;
+                                }
+
+                                fetch(`/api/Notifications/MarkAsRead/${id}`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    }
+                                })
+                                    .then(response => {
+                                        if (response.ok) {
+                                            this.classList.remove('bg-light');
+                                            loadUnreadNotificationsCount();
+                                        }
+                                    })
+                                    .catch(error => console.error('Error:', error));
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        const notificationList = document.getElementById('notification-list');
+                        notificationList.innerHTML = `
+                                                                                                                    <div class="text-center py-3">
+                                                                                                                        <p class="text-muted mb-0">Không thể tải thông báo</p>
+                                                                                                                    </div>`;
+                    });
+            }
+
+            // Đánh dấu tất cả thông báo đã đọc
+            document.getElementById('mark-all-read').addEventListener('click', function (e) {
+                e.preventDefault();
+
+                fetch('/api/Notifications/MarkAllAsRead', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            loadUnreadNotificationsCount();
+                            loadRecentNotifications();
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+
+            // Lấy số lượng sản phẩm trong giỏ hàng
+            function loadCartItemsCount() {
+                fetch('/api/Cart/ItemsCount', { credentials: 'same-origin' })
+                    .then(response => {
+                        if (!response.ok) { throw new Error('HTTP ' + response.status); }
+                        return response.json();
+                    })
+                    .then(count => {
+                        const badge = document.getElementById('cart-badge');
+                        if (count > 0) {
+                            badge.textContent = count > 99 ? '99+' : count;
+                            badge.style.display = 'block';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
+            // Lấy icon class dựa vào loại thông báo
+            function getNotificationIconClass(type) {
+                switch (type) {
+                    case 0: // Information
+                        return 'bi bi-info-circle text-info';
+                    case 1: // Order
+                        return 'bi bi-box text-primary';
+                    case 2: // Payment
+                        return 'bi bi-credit-card text-success';
+                    case 3: // Message
+                        return 'bi bi-chat-dots text-warning';
+                    case 4: // Promotion
+                        return 'bi bi-tag text-danger';
+                    case 5: // Review
+                        return 'bi bi-star text-warning';
+                    default:
+                        return 'bi bi-bell text-secondary';
+                }
+            }
+
+            // Kết nối SignalR nếu thư viện sẵn sàng
+            if (window.signalR) {
+                const connection = new signalR.HubConnectionBuilder()
+                    .withUrl('/notificationHub')
+                    .build();
+
+                connection.on('ReceiveNotification', function () {
+                    loadUnreadNotificationsCount();
+                    loadRecentNotifications();
+                });
+
+                connection.start()
+                    .then(() => {
+                        console.log('Đã kết nối đến notification hub');
+                    })
+                    .catch(err => console.error('Lỗi kết nối đến notification hub:', err));
+            } else {
+                console.warn('SignalR script not loaded; skipping realtime notifications');
+            }
+
+            // Chạy khi DOM sẵn sàng (ổn định trên mọi trang)
+            document.addEventListener('DOMContentLoaded', function () {
+                loadUnreadNotificationsCount();
+                loadRecentNotifications();
+                loadCartItemsCount();
+
+                const dropdown = document.getElementById('notificationDropdown');
+                if (dropdown) {
+                    dropdown.addEventListener('click', function () {
+                        loadRecentNotifications();
+                    });
+                }
+            });
+        </script>
+    }
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>
