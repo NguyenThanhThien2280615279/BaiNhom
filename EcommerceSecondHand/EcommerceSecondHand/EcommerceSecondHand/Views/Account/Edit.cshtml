@@ -3,116 +3,177 @@
     ViewData["Title"] = "Chỉnh sửa hồ sơ";
 }
 
-<div class="container mt-4">
-    <h1>Chỉnh sửa hồ sơ</h1>
+<div class="container py-5">
+    <div class="row g-4">
 
-    <div class="row mt-4">
-        <div class="col-md-8 mx-auto">
-            <div class="card shp-soft">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0">Thông tin cá nhân</h5>
+        <!-- LEFT: PROFILE CARD -->
+        <div class="col-lg-4">
+            <div class="card shadow border-0 rounded-4 text-center p-4">
+
+                <!-- AVATAR -->
+                <div class="position-relative">
+                    @if (!string.IsNullOrEmpty(Model.ProfilePicture))
+                    {
+                        <img src="@Model.ProfilePicture"
+                             class="rounded-circle border shadow"
+                             id="preview-image"
+                             style="width: 150px; height:150px; object-fit:cover;">
+                    }
+                    else
+                    {
+                        <div id="default-image"
+                             class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto"
+                             style="width:150px;height:150px;">
+                            <i class="bi bi-person-fill" style="font-size: 4rem;"></i>
+                        </div>
+
+                        <img id="preview-image"
+                             class="rounded-circle border d-none"
+                             style="width:150px;height:150px;object-fit:cover;">
+                    }
                 </div>
-                <div class="card-body">
-                    <form method="post" asp-controller="Account" asp-action="Edit" enctype="multipart/form-data">
-                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-4 text-center">
-                                @if (!string.IsNullOrEmpty(Model.ProfilePicture))
-                                {
-                                    <img src="@Model.ProfilePicture" class="rounded-circle img-thumbnail mb-3"
-                                        alt="Profile Picture" id="preview-image"
-                                        style="width: 150px; height: 150px; object-fit: cover;">
-                                }
-                                else
-                                {
-                                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto mb-3"
-                                        id="default-image" style="width: 150px; height: 150px;">
-                                        <i class="bi bi-person-fill" style="font-size: 5rem;"></i>
-                                    </div>
-                                    <img src="" class="rounded-circle img-thumbnail mb-3 d-none" alt="Profile Picture"
-                                        id="preview-image" style="width: 150px; height: 150px; object-fit: cover;">
-                                }
+                <!-- NAME -->
+                <h5 class="mt-3 mb-1">
+                    @Model.FirstName @Model.LastName
+                </h5>
+                <small class="text-muted">@Model.Email</small>
 
-                                <div class="mb-3">
-                                    <label asp-for="ProfilePictureFile" class="form-label"></label>
-                                    <input asp-for="ProfilePictureFile" type="file" class="form-control"
-                                        accept="image/*" onchange="previewImage(this)">
-                                    <span asp-validation-for="ProfilePictureFile" class="text-danger"></span>
-                                </div>
-                            </div>
-
-                            <div class="col-md-8">
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label asp-for="FirstName" class="form-label"></label>
-                                        <input asp-for="FirstName" class="form-control" />
-                                        <span asp-validation-for="FirstName" class="text-danger"></span>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label asp-for="LastName" class="form-label"></label>
-                                        <input asp-for="LastName" class="form-control" />
-                                        <span asp-validation-for="LastName" class="text-danger"></span>
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label asp-for="Email" class="form-label"></label>
-                                    <input asp-for="Email" class="form-control" readonly />
-                                </div>
-
-                                <div class="mb-3">
-                                    <label asp-for="PhoneNumber" class="form-label"></label>
-                                    <input asp-for="PhoneNumber" class="form-control" />
-                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <hr class="my-4">
-
-                        <h5>Địa chỉ</h5>
-
-                        <div class="mb-3">
-                            <label asp-for="Address" class="form-label"></label>
-                            <input asp-for="Address" class="form-control" />
-                            <span asp-validation-for="Address" class="text-danger"></span>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <label asp-for="City" class="form-label"></label>
-                                <input asp-for="City" class="form-control" />
-                                <span asp-validation-for="City" class="text-danger"></span>
-                            </div>
-                            <div class="col-md-4">
-                                <label asp-for="Country" class="form-label"></label>
-                                <input asp-for="Country" class="form-control" />
-                                <span asp-validation-for="Country" class="text-danger"></span>
-                            </div>
-                            <div class="col-md-4">
-                                <label asp-for="PostalCode" class="form-label"></label>
-                                <input asp-for="PostalCode" class="form-control" />
-                                <span asp-validation-for="PostalCode" class="text-danger"></span>
-                            </div>
-                        </div>
-
-                        <hr class="my-4">
-
-                        <div class="mb-3">
-                            <label asp-for="Bio" class="form-label"></label>
-                            <textarea asp-for="Bio" class="form-control" rows="4"></textarea>
-                            <span asp-validation-for="Bio" class="text-danger"></span>
-                        </div>
-
-                        <div class="d-flex justify-content-between">
-                            <a asp-controller="Account" asp-action="Profile" class="btn btn-outline-secondary">Hủy</a>
-                            <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
-                        </div>
-                    </form>
+                <!-- UPLOAD -->
+                <div class="mt-3">
+                    <label asp-for="ProfilePictureFile" class="btn btn-outline-primary btn-sm w-100">
+                        <i class="bi bi-upload"></i> Đổi ảnh
+                    </label>
+                    <input asp-for="ProfilePictureFile"
+                           type="file"
+                           class="d-none"
+                           accept="image/*"
+                           onchange="previewImage(this)">
+                    <span asp-validation-for="ProfilePictureFile" class="text-danger small"></span>
                 </div>
             </div>
         </div>
+
+        <!-- RIGHT: FORM -->
+        <div class="col-lg-8">
+            <div class="card shadow border-0 rounded-4">
+                <div class="card-header bg-white border-0">
+                    <h5 class="mb-0">
+                        <i class="bi bi-pencil-square"></i> Cập nhật thông tin
+                    </h5>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <form method="post"
+                          asp-controller="Account"
+                          asp-action="Edit"
+                          enctype="multipart/form-data">
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="alert alert-danger"></div>
+
+                        <!-- PERSONAL -->
+                        <h6 class="fw-bold mb-3 text-primary">Thông tin cá nhân</h6>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="FirstName" class="form-label"></label>
+                                <input asp-for="FirstName" class="form-control" placeholder="Nhập họ..." />
+                                <span asp-validation-for="FirstName" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="LastName" class="form-label"></label>
+                                <input asp-for="LastName" class="form-control" placeholder="Nhập tên..." />
+                                <span asp-validation-for="LastName" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="Email" class="form-label"></label>
+                                <input asp-for="Email" class="form-control bg-light" readonly />
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="PhoneNumber" class="form-label"></label>
+                                <input asp-for="PhoneNumber" class="form-control" placeholder="Số điện thoại..." />
+                                <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- ADDRESS -->
+                        <h6 class="fw-bold mb-3 text-primary">Địa chỉ</h6>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label"></label>
+                            <input asp-for="Address" class="form-control" placeholder="Số nhà, đường..." />
+                            <span asp-validation-for="Address" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label asp-for="City" class="form-label"></label>
+                                <input asp-for="City" class="form-control" />
+                                <span asp-validation-for="City" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="Country" class="form-label"></label>
+                                <input asp-for="Country" class="form-control" />
+                                <span asp-validation-for="Country" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="PostalCode" class="form-label"></label>
+                                <input asp-for="PostalCode" class="form-control" />
+                                <span asp-validation-for="PostalCode" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- BIO -->
+                        <h6 class="fw-bold mb-3 text-primary">Giới thiệu</h6>
+
+                        <div class="mb-3">
+                            <label asp-for="Bio" class="form-label"></label>
+                            <textarea asp-for="Bio"
+                                      class="form-control"
+                                      rows="4"
+                                      maxlength="300"
+                                      oninput="countChars(this)"></textarea>
+
+                            <div class="text-end small text-muted">
+                                <span id="charCount">0</span>/300 ký tự
+                            </div>
+
+                            <span asp-validation-for="Bio" class="text-danger small"></span>
+                        </div>
+
+                        <!-- ACTION -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a asp-controller="Account"
+                               asp-action="Profile"
+                               class="btn btn-outline-secondary">
+                                ← Hủy
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-primary"
+                                    onclick="showLoading(this)">
+                                <span class="btn-text">💾 Lưu thay đổi</span>
+                                <span class="spinner-border spinner-border-sm d-none"></span>
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -122,16 +183,26 @@
     <script>
         function previewImage(input) {
             if (input.files && input.files[0]) {
-                var reader = new FileReader();
+                let reader = new FileReader();
                 reader.onload = function (e) {
-                    document.getElementById('preview-image').src = e.target.result;
-                    document.getElementById('preview-image').classList.remove('d-none');
-                    if (document.getElementById('default-image')) {
-                        document.getElementById('default-image').classList.add('d-none');
-                    }
+                    let img = document.getElementById('preview-image');
+                    img.src = e.target.result;
+                    img.classList.remove('d-none');
+
+                    let def = document.getElementById('default-image');
+                    if (def) def.classList.add('d-none');
                 }
                 reader.readAsDataURL(input.files[0]);
             }
+        }
+
+        function countChars(el) {
+            document.getElementById("charCount").innerText = el.value.length;
+        }
+
+        function showLoading(btn) {
+            btn.querySelector(".btn-text").classList.add("d-none");
+            btn.querySelector(".spinner-border").classList.remove("d-none");
         }
     </script>
 }
